@@ -14,8 +14,10 @@ plugins {
 }
 
 // Every publishable module shares the prefix, which is also how publishing, Dokka and the version
-// report find them. Keep it in sync with the module directories and settings.gradle.kts.
-val publishedPrefix = "__PREFIX__-"
+// report find them. Keep it in sync with the module directories and settings.gradle.kts. The prefix
+// deliberately has no trailing dash: `ktjs-docusaurus-gradle-plugin` is a separate build (see
+// settings.gradle.kts) but still follows the same upstream version.
+val publishedPrefix = "ktjs-docusaurus"
 
 // Dokka aggregates every published module into one API reference. `demo` is not part of the
 // published API surface, so it is excluded by the prefix filter.
@@ -27,14 +29,14 @@ dependencies {
 
 dokka {
     dokkaPublications.html {
-        moduleName.set("__PROJECT__")
+        moduleName.set("ktjs-docusaurus")
         outputDirectory.set(layout.buildDirectory.dir("dokka/html"))
     }
 }
 
 // GitHub-backed namespace; verify it once in the Central Portal. All modules share it.
 // Setting the root `group` alone does not propagate to subprojects.
-val publishedGroup = "io.github.__OWNER__"
+val publishedGroup = "io.github.shijianjs"
 
 // npm package versions live in package.json so that Dependabot can update them.
 // Subprojects read this map to declare npm(...) dependencies and derive their version.
@@ -127,31 +129,31 @@ subprojects {
             name.set(module.name)
             description.set(
                 module.provider {
-                    module.description ?: "Kotlin/JS wrapper for __PROJECT__."
+                    module.description ?: "Kotlin/JS wrapper for ktjs-docusaurus."
                 }
             )
-            url.set("https://github.com/__OWNER__/__REPO__")
-            inceptionYear.set("__YEAR__")
+            url.set("https://github.com/shijianjs/ktjs-docusaurus")
+            inceptionYear.set("2026")
 
             licenses {
                 license {
                     name.set("MIT License")
-                    url.set("https://github.com/__OWNER__/__REPO__/blob/master/LICENSE")
+                    url.set("https://github.com/shijianjs/ktjs-docusaurus/blob/master/LICENSE")
                 }
             }
 
             developers {
                 developer {
-                    id.set("__OWNER__")
-                    name.set("__OWNER__")
-                    url.set("https://github.com/__OWNER__")
+                    id.set("shijianjs")
+                    name.set("shijianjs")
+                    url.set("https://github.com/shijianjs")
                 }
             }
 
             scm {
-                url.set("https://github.com/__OWNER__/__REPO__")
-                connection.set("scm:git:git://github.com/__OWNER__/__REPO__.git")
-                developerConnection.set("scm:git:ssh://git@github.com/__OWNER__/__REPO__.git")
+                url.set("https://github.com/shijianjs/ktjs-docusaurus")
+                connection.set("scm:git:git://github.com/shijianjs/ktjs-docusaurus.git")
+                developerConnection.set("scm:git:ssh://git@github.com/shijianjs/ktjs-docusaurus.git")
             }
         }
     }
@@ -183,11 +185,13 @@ tasks.register("printPublishedVersions") {
     }
 }
 
-// Assembles the GitHub Pages site: the demo at the root and the API reference under /api/.
+// Assembles the GitHub Pages site: the demo Docusaurus build at the root and the API reference
+// under /api/. The site is assembled inside the npm workspace (see the Gradle plugin), which is why
+// the built pages live under `build/js/docusaurus/<module>/build`.
 tasks.register<Sync>("pagesSite") {
-    dependsOn(":demo:jsBrowserDistribution", "dokkaGeneratePublicationHtml")
+    dependsOn(":demo:docusaurusBuild", "dokkaGeneratePublicationHtml")
     into(layout.buildDirectory.dir("pages"))
-    from(project(":demo").layout.buildDirectory.dir("dist/js/productionExecutable"))
+    from(layout.buildDirectory.dir("js/docusaurus/demo/build"))
     from(layout.buildDirectory.dir("dokka/html")) {
         into("api")
     }

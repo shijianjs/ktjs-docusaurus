@@ -14,15 +14,67 @@
 
 ## 项目概况与模块结构
 
-`__PROJECT__` 为 [`__NPM_PACKAGE__`](https://www.npmjs.com/package/__NPM_PACKAGE__) 提供 Kotlin/JS wrapper。
+`ktjs-docusaurus` 用 Kotlin/JS 写 Docusaurus 站点：配置与侧边栏是 Kotlin，页面是 Markdown，构建由
+Gradle 插件驱动。Kotlin/JS 模块名、`wrapper-revisions.properties` 的 key 与目录名三者必须一致。
 
-- `__PREFIX__-__MODULE__`：发布模块，`version = {上游 npm 版本}-kt.{修订号}`。
-- `demo`：GitHub Pages 演示站点，不发布、也不进入 Dokka。
-- `scaffold/module`：新增模块时复制的骨架，不参与构建。
+- `ktjs-docusaurus`：发布模块。Docusaurus 的每个 npm 包在这里只是一个 Kotlin 包（`config`、`theme`、
+  `sidebars`、`presets`、`plugins/contentdocs` …），不按 npm 包拆 Gradle 模块。
+- `ktjs-docusaurus-gradle-plugin`：Gradle 插件 `io.github.shijianjs.docusaurus`，是**独立构建**，由
+  `settings.gradle.kts` 的 `pluginManagement { includeBuild(...) }` 接入，所以 `demo` 能把它当普通插件用。
+  它不在 root 构建的子项目里：`./gradlew build` 不编译它，`includeBuild` 在配置阶段按需编译。
+- `demo`：示例站点（Markdown + Kotlin 配置），不发布、不进 Dokka，是 GitHub Pages 的内容。
+- `scaffold/module`：模板骨架，保留占位符，不参与构建。
 
-按「上游发版节奏」而不是「npm 包数量」划分子模块：上游版本号相同、总是一起发版的包放在同一个 Gradle
-模块里，避免每个包都产生一个 Maven 版本和一次 Central 发布。终端应用打包时本来就会摇树，模块内多出的
-声明不会进入最终产物。
+Docusaurus 全部包 lockstep 发版（`3.10.2` 一次发齐），所以整个生态只产生一个 Maven 版本；这也是不按
+npm 包拆模块的原因。
+
+### 上游版本与版本号
+
+上游版本只写根 `package.json`（`@docusaurus/core`、`@docusaurus/preset-classic`、`@docusaurus/types`、
+`prism-react-renderer`）。wrapper 与插件的版本都由它推导：`{版本}-kt.{修订号}`。插件自己的
+`build.gradle.kts` 直接读 `../package.json` 与 `../wrapper-revisions.properties`，因为它是独立构建，
+拿不到 root 的 `extra[...]`。
+
+本地克隆 `meta/docusaurus` 是 **4.0.0（未发布）**，npm `latest` 是 3.10.2。写声明前以 `npm pack` 取回的
+3.10.2 `.d.ts` 为准，不要把源码树的 4.0 行为写成断言（`NavbarItem` 的类型列表、`future` 的字段名都有
+差异）。
+
+### Gradle 插件与站点组装
+
+- 站点目录固定放在 `<root>/build/js/docusaurus/<模块名>`，**不要**挪到模块自己的 `build/` 下：
+  Docusaurus 从站点目录向上解析 `@docusaurus/*`，而 npm workspace 的 `node_modules` 在
+  `<root>/build/js/`。放在别处就得第二次 `npm install` 或建符号链接。
+- 生成的 `docusaurus.config.mjs` / `sidebars.mjs` 只 import 相对路径的 Kotlin 产物
+  （`./generated/<模块>.mjs`）；Kotlin 运行时与其它 klib 也是相对 import，不依赖 node_modules。
+- 生成的站点 `package.json` **不能**写 `"type": "module"`：Docusaurus 往 `.docusaurus/` 写 CJS bundle 并按
+  CJS 加载，加上它会让 SSR 报 `require.resolveWeak is not a function`。shim 用 `.mjs` 扩展名，本来就是 ESM。
+- `docusaurusSite` 只依赖 `jsProductionLibraryCompileSync`（以及 executable 的对应任务）：只依赖
+  `compileKotlinJs` 拿到的是 klib，没有 `.mjs`；同时依赖 development 链接任务会让 Kotlin 插件报
+  `jsNodeProductionLibraryDistribution` 读了另一个任务的输出。输入目录也只列 `compileSync` 下的产物，
+  不要列 `build/dist/js/...`（那是 `jsNode*Distribution` 的输出）。依赖用 `tasks.matching {}` 挂在注册块里，
+  不要用 `configureEach` 去 configure 另一个任务（Gradle 会报 mutation guard）。
+- 导出函数名可配：`docusaurus.configFunction`（默认 `docusaurusConfig`）与
+  `docusaurus.sidebarsFunction`（默认不生成 `sidebars.mjs`）。Kotlin 侧用 `@JsExport` 导出，返回
+  `Config` / `SidebarsConfig`。
+
+### 已覆盖的范围与明确不做的部分
+
+当前覆盖「写一个文档站需要的配置面」：
+
+- `Config` 全字段（含 `future`、`i18n`、`storage`、`markdown`、`webpack`）；
+- `preset-classic` 的 `ClassicOptions` 与 docs / blog / pages / sitemap / svgr / gtag / gtm /
+  google-analytics / theme-classic 的选项类型；
+- `ThemeConfig`（导航栏、页脚、代码高亮、颜色模式、目录、Algolia、Mermaid）；
+- `SidebarsConfig` 与全部侧边栏条目类型；
+- `prism-react-renderer` 的 `themes`（`PrismThemes`）。
+
+尚未覆盖，需要时按需补：
+
+- `@docusaurus/core` 的运行时导出（`build` / `start` / `serve` / `swizzle` …）：Gradle 插件直接调 CLI，
+  Kotlin 侧暂时用不到；
+- 主题组件与 `@theme/…` 别名（React 组件与 hooks）：这一层要用 kotlin-react，等有实际需求再接；
+- 第三方主题与插件（`@easyops-cn/docusaurus-search-local` 等）的选项类型：各自在自己的 Kotlin 包里加。
+- Gradle 插件的 Maven 发布尚未接进 `release.yml`（它是独立构建，需要单独一条发布命令）。
 
 ### 上游 API 建模约定
 
@@ -89,12 +141,16 @@ wrapper 的目标是让上游 npm 包暴露的公开 API 在 Kotlin/JS 侧都能
 `dynamic` 只留给「上游自己也没写类型、实现也无法推断」的情况；上游写了 `any` / `unknown` 才用 `JsAny`，
 且要在 KDoc 里注明「上游类型是 `unknown`」。退化到这两者之前，先按 TYPE-MAPPING 第 12 节过一遍。
 
-### 新增模块
+### 新增 Kotlin 包或模块
 
-1. 复制 `scaffold/module` 为 `__PREFIX__-<name>`，替换文件里的所有占位符（包名、npm 包名、项目名）。
-2. `settings.gradle.kts` 加 `include(":__PREFIX__-<name>")`。
-3. `package.json` 的 `dependencies` 加 npm 包版本；`wrapper-revisions.properties` 加 `__PREFIX__-<name>=1`。
-4. `demo/build.gradle.kts` 的 `jsMain.dependencies` 加 `implementation(project(":__PREFIX__-<name>"))`，
+上游新增一个 npm 包时，先判断它是否与 Docusaurus lockstep 发版：是就把它作为**新的 Kotlin 包**加进
+`ktjs-docusaurus`（`plugins/<包名>` / `theme` / …），不要新建 Gradle 模块。只有上游出现独立发版节奏的
+依赖时才走下面的模块流程。
+
+1. 复制 `scaffold/module` 为 `ktjs-<name>`，替换文件里的所有占位符（包名、npm 包名、项目名）。
+2. `settings.gradle.kts` 加 `include(":ktjs-<name>")`。
+3. `package.json` 的 `dependencies` 加 npm 包版本；`wrapper-revisions.properties` 加 `ktjs-<name>=1`。
+4. `demo/build.gradle.kts` 的 `jsMain.dependencies` 加 `implementation(project(":ktjs-<name>"))`，
    并在 demo 里实际使用它。
 5. 全局替换时同步检查 `detekt`、Dependabot 分组、README 模块表与 Dokka（Dokka 按前缀自动收集，无需改）。
 
@@ -350,17 +406,15 @@ update(data) { this.replaceChildren(); this.render(data); }   // 禁止
   **不被 push 触发**：能进默认分支的提交已经在 PR 上跑过同一套构建。`pull_request.branches` 同时列了
   `main` 和 `master`，因为生成的项目两者都有；漏掉实际默认分支会让 CI 静默不跑，连带 Dependabot 的
   自动合并永不触发。需要验证默认分支现状时用 `gh workflow run ci.yml`。
-- 模板仓库自己**跑不了构建**：`__PROJECT__` 占位符会让 npm 拒绝 `__PROJECT__-demo` 这个包名，所以
-  `ci.yml` 第一步检查 `settings.gradle.kts` 里还有没有 `__PROJECT__`，没初始化就跳过后面所有步骤
+- 模板仓库自己**跑不了构建**：`ktjs-docusaurus` 占位符会让 npm 拒绝 `ktjs-docusaurus-demo` 这个包名，所以
+  `ci.yml` 第一步检查 `settings.gradle.kts` 里还有没有 `ktjs-docusaurus`，没初始化就跳过后面所有步骤
   （run 仍然算成功，Dependabot 的自动合并才能走完）。生成的项目里占位符已被替换，照常执行。
 - `.github/workflows/dependabot-auto-merge.yml` 在 CI 成功后自动 squash 合并 Dependabot 的 PR。它用
   `workflow_run` 而不是直接由 Dependabot PR 触发，因为后者拿到的 `GITHUB_TOKEN` 只读。下载 CI 产出的
   `npm-lock` artifact 是 `continue-on-error`：模板仓库没有锁文件可刷，缺这个 artifact 不该卡住合并。
 - `.github/dependabot.yml` 覆盖 `gradle`、`npm`（根目录 `package.json`）和 `github-actions` 三个生态。
-  npm 版本由 Dependabot 改 `package.json`，Gradle 自动读取，不再手工改 `npm(...)`。模板仓库自身的
-  `package.json` 里 `dependencies` 是空的：留占位符（`__NPM_PACKAGE__` + `__NPM_VERSION__`）会让
-  Dependabot 的 npm 更新任务每周以 `illformed_requirement` 失败，所以第一个上游包由
-  `scripts/init-wrapper-project.py` 写进去。
+  npm 版本由 Dependabot 改 `package.json`，Gradle 自动读取，不再手工改 `npm(...)`。Docusaurus 的几个包
+  lockstep 发版，升级时它们必须在同一个 PR 里一起动，否则 wrapper 的 npm 依赖会出现版本混搭。
 - Gradle wrapper 固定在 `9.4.1`，并在 Dependabot 里忽略 `gradle-wrapper`：IntelliJ IDEA 2026.2.3
   同步 Gradle 9.8.x 项目时会报 `ExternalSystemPartialResolutionException`（消息为空），回退到 9.4.1
   即恢复正常。等 IDEA 修复后再删除这条 ignore 并升级。
@@ -379,7 +433,7 @@ update(data) { this.replaceChildren(); this.render(data); }   // 禁止
 ## 发布到 Maven Central
 
 发布配置统一在根 `build.gradle.kts` 的 `subprojects {}` 里，使用 `com.vanniktech.maven.publish`，
-group 固定为 `io.github.__OWNER__`。`subprojects` 的 group 必须单独设置，根项目的 `group` 不会自动继承。
+group 固定为 `io.github.shijianjs`。`subprojects` 的 group 必须单独设置，根项目的 `group` 不会自动继承。
 
 发布是两段式，Central 只在第二段被触及：
 
@@ -387,12 +441,12 @@ group 固定为 `io.github.__OWNER__`。`subprojects` 的 group 必须单独设�
    签名 → 发布到模块内的 `build/hub-staging` 文件仓库 → `scripts/hub-release.py` 为**每个 Maven 坐标**
    打一个 `.tar.xz` 并生成注册 → 创建/更新 GitHub Release 并上传归档 → 把注册推到 hub → 触发 hub 的
    `upload=false` dry run 并等待它结束。
-2. hub（`__OWNER__/maven-central-publishing`）手动 dispatch 且勾选 `upload=true`，才真正上传 Central，
+2. hub（`shijianjs/maven-central-publishing`）手动 dispatch 且勾选 `upload=true`，才真正上传 Central，
    并在成功后删除已满足的注册。
 
 ```bash
 gh workflow run release.yml -f release=release-1 \
-  -f modules=__PREFIX__-__MODULE__
+  -f modules=ktjs-docusaurus
 ```
 
 - `release`：`release-<数字>`，tag 由工作流创建；工作流不会移动已有 tag。
@@ -410,7 +464,7 @@ gh workflow run release.yml -f release=release-1 \
 
 ### 一次性准备
 
-1. 在 [Central Portal](https://central.sonatype.com/) 注册账号并验证 `io.github.__OWNER__` namespace
+1. 在 [Central Portal](https://central.sonatype.com/) 注册账号并验证 `io.github.shijianjs` namespace
    （GitHub 方式）。
 2. 生成 GPG 密钥并发布公钥到 `keys.openpgp.org` / `keyserver.ubuntu.com`。
 3. 在本仓库 Settings → Secrets 配置 `MAVEN_CENTRAL_SIGNING_KEY`、`MAVEN_CENTRAL_SIGNING_KEY_PASSWORD`
@@ -426,10 +480,10 @@ gh workflow run release.yml -f release=release-1 \
 ```bash
 ORG_GRADLE_PROJECT_signingInMemoryKey="$(< ~/central-signing-key.txt)" \
 ORG_GRADLE_PROJECT_signingInMemoryKeyPassword=... \
-./gradlew :__PREFIX__-__MODULE__:publishAllPublicationsToHubStagingRepository
+./gradlew :ktjs-docusaurus:publishAllPublicationsToHubStagingRepository
 
-python3 scripts/hub-release.py --project __OWNER__/__REPO__ --release release-1 \
-  --module __PREFIX__-__MODULE__=<version> --repository . \
+python3 scripts/hub-release.py --project shijianjs/ktjs-docusaurus --release release-1 \
+  --module ktjs-docusaurus=<version> --repository . \
   --archives build/hub-release/archives --registrations build/hub-release
 ```
 
@@ -454,26 +508,24 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
 `kotlin-tooling-metadata.json`；POM 的 `url` 或 `scm.url` 是有效的 GitHub 仓库链接。改仓库地址时要同步
 修改根 `build.gradle.kts` 的 POM 配置。
 
-## 演示页面与 GitHub Pages
+## 演示站点与 GitHub Pages
 
 - `demo` 只消费公共 API，不发布、也不进入 Dokka。根 `build.gradle.kts` 的发布与 Dokka 配置按
-  `__PREFIX__-` 前缀过滤子模块，新增非发布模块时沿用该约定。
-- 端到端测试是 `demo` 的 JVM 目标里的 Playwright JUnit 5 套件（`demo/src/jvmTest/kotlin/demo/e2e`）：
-  Playwright 驱动打包后的 `demo/build/dist/js/productionExecutable`，`DemoServer` 用 Hutool 的
-  `SimpleServer` 在测试 JVM 内提供静态文件。运行 `./gradlew :demo:e2eTest`；它不在 `check` 里，CI 在
-  `pagesSite` 之后单独执行。`jvmTest` 本身被禁用，避免 `build` / `check` 依赖浏览器。Playwright 与
-  Chromium 复用第一个 wrapper 模块的 `kotlinInstallPlaywrightBrowsers`，因此
-  `com.microsoft.playwright:playwright` 的版本必须与 KGP 安装的 npm `playwright` 一致（当前都是
-  1.61.0），升级 KGP 后若浏览器版本不匹配，重新跑安装任务。
-- `./gradlew pagesSite` 把 demo 与 `build/dokka/html` 组装到 `build/pages`：演示页在根目录，API 文档在
-  `api/`。演示页内部链接使用相对路径。
-- Dokka 2.2.0 同时应用到根项目和所有 wrapper 子模块；聚合入口是根项目的 `dependencies { dokka(...) }`，
+  `ktjs-docusaurus` 前缀过滤子模块，新增非发布模块时沿用该约定。
+- demo 就是文档站本身：`src/jsMain/resources/{docs,pages,css,static}` 是内容，`site/Config.kt` 是配置。
+  `./gradlew :demo:docusaurusBuild` 把它变成静态站点，产物在 `build/js/docusaurus/demo/build`（站点目录
+  在 npm workspace 里的原因见上面的「Gradle 插件与站点组装」）。
+- 没有浏览器端 e2e 套件：demo 不是 Web 应用，链路的验证方式是「构建成功 + Docusaurus 自己的断链检查」。
+  `onBrokenLinks = 'throw'`（demo 里显式设置）让断链变成构建失败。
+- `./gradlew pagesSite` 把 `build/js/docusaurus/demo/build` 与 `build/dokka/html` 组装到 `build/pages`：
+  站点在根目录，API 文档在 `api/`。
+- Dokka 2.2.0 同时应用到根项目和 wrapper 子模块；聚合入口是根项目的 `dependencies { dokka(...) }`，
   任务为 `dokkaGeneratePublicationHtml`（2.x 已移除旧的 `dokkaHtmlMultiModule`）。
 - `.github/workflows/pages.yml` 只有 `workflow_dispatch`：站点更新在内容值得上线后手动执行
   `gh workflow run pages.yml`（或 Actions 页面点 Run workflow）。它每次都重新跑 `pagesSite`，所以线上
   内容始终对应触发时 `master` 的提交。仓库 Settings → Pages 的 Source 必须选 **GitHub Actions**。
 - 本地预览：执行 `./gradlew pagesSite` 后给 `build/pages` 起任意静态服务器。直接开 `file://` 会因相对
-  路径与 CORS 导致资源加载异常。
+  路径与 CORS 导致资源加载异常。要看 dev server 用 `./gradlew :demo:docusaurusStart`。
 
 ## 文档约定
 
