@@ -293,7 +293,7 @@ external interface VcsConfig {
 sealed external interface VcsPreset
 
 /** Wraps a value coming from JavaScript. Prefer [VcsPresets]. */
-fun VcsPreset(value: String): VcsPreset = unsafeCast<VcsPreset>(value)
+inline fun VcsPreset(value: String): VcsPreset = unsafeCast<VcsPreset>(value)
 
 /** The literals of [VcsPreset]. */
 object VcsPresets {
@@ -320,34 +320,34 @@ object VcsPresets {
 external interface BooleanOrFutureV4Config
 
 /** Wraps a [Boolean] branch. */
-fun BooleanOrFutureV4Config(value: Boolean): BooleanOrFutureV4Config = unsafeCast<BooleanOrFutureV4Config>(value)
+inline fun BooleanOrFutureV4Config(value: Boolean): BooleanOrFutureV4Config = unsafeCast<BooleanOrFutureV4Config>(value)
 
 /** Wraps a [FutureV4Config] branch. */
-fun BooleanOrFutureV4Config(value: FutureV4Config): BooleanOrFutureV4Config =
+inline fun BooleanOrFutureV4Config(value: FutureV4Config): BooleanOrFutureV4Config =
     unsafeCast<BooleanOrFutureV4Config>(value)
 
 /** Upstream `boolean | FasterConfig`. */
 external interface BooleanOrFasterConfig
 
 /** Wraps a [Boolean] branch. */
-fun BooleanOrFasterConfig(value: Boolean): BooleanOrFasterConfig = unsafeCast<BooleanOrFasterConfig>(value)
+inline fun BooleanOrFasterConfig(value: Boolean): BooleanOrFasterConfig = unsafeCast<BooleanOrFasterConfig>(value)
 
 /** Wraps a [FasterConfig] branch. */
-fun BooleanOrFasterConfig(value: FasterConfig): BooleanOrFasterConfig = unsafeCast<BooleanOrFasterConfig>(value)
+inline fun BooleanOrFasterConfig(value: FasterConfig): BooleanOrFasterConfig = unsafeCast<BooleanOrFasterConfig>(value)
 
 /** Upstream `VcsPreset | VcsConfig | boolean`. */
 external interface VcsPresetOrVcsConfigOrBoolean
 
 /** Wraps a [VcsPreset] branch. */
-fun VcsPresetOrVcsConfigOrBoolean(value: VcsPreset): VcsPresetOrVcsConfigOrBoolean =
+inline fun VcsPresetOrVcsConfigOrBoolean(value: VcsPreset): VcsPresetOrVcsConfigOrBoolean =
     unsafeCast<VcsPresetOrVcsConfigOrBoolean>(value)
 
 /** Wraps a [VcsConfig] branch. */
-fun VcsPresetOrVcsConfigOrBoolean(value: VcsConfig): VcsPresetOrVcsConfigOrBoolean =
+inline fun VcsPresetOrVcsConfigOrBoolean(value: VcsConfig): VcsPresetOrVcsConfigOrBoolean =
     unsafeCast<VcsPresetOrVcsConfigOrBoolean>(value)
 
 /** Wraps a [Boolean] branch. */
-fun VcsPresetOrVcsConfigOrBoolean(value: Boolean): VcsPresetOrVcsConfigOrBoolean =
+inline fun VcsPresetOrVcsConfigOrBoolean(value: Boolean): VcsPresetOrVcsConfigOrBoolean =
     unsafeCast<VcsPresetOrVcsConfigOrBoolean>(value)
 
 /** Upstream `WebpackConfig`. */
@@ -360,10 +360,10 @@ external interface WebpackConfig {
 external interface JsLoader
 
 /** Wraps the `'babel'` branch. */
-fun JsLoader(value: String): JsLoader = unsafeCast<JsLoader>(value)
+inline fun JsLoader(value: String): JsLoader = unsafeCast<JsLoader>(value)
 
 /** Wraps the custom-rule branch. The upstream return value is a webpack `RuleSetRule`. */
-fun JsLoader(value: (isServer: Boolean) -> JsAny): JsLoader = unsafeCast<JsLoader>(value)
+inline fun JsLoader(noinline value: (isServer: Boolean) -> JsAny): JsLoader = unsafeCast<JsLoader>(value)
 
 /**
  * Upstream `{attributes?: {[key: string]: string | boolean}; tagName: string; innerHTML?: string;
@@ -387,10 +387,10 @@ external interface HtmlTagObject {
 external interface ScriptOrString
 
 /** Wraps the URL branch. */
-fun ScriptOrString(value: String): ScriptOrString = unsafeCast<ScriptOrString>(value)
+inline fun ScriptOrString(value: String): ScriptOrString = unsafeCast<ScriptOrString>(value)
 
 /** Wraps the object branch. */
-fun ScriptOrString(value: ScriptConfig): ScriptOrString = unsafeCast<ScriptOrString>(value)
+inline fun ScriptOrString(value: ScriptConfig): ScriptOrString = unsafeCast<ScriptOrString>(value)
 
 /** The object form of an entry in [Config.scripts]. */
 external interface ScriptConfig {
@@ -420,10 +420,10 @@ external interface ScriptConfig {
 external interface StylesheetOrString
 
 /** Wraps the URL branch. */
-fun StylesheetOrString(value: String): StylesheetOrString = unsafeCast<StylesheetOrString>(value)
+inline fun StylesheetOrString(value: String): StylesheetOrString = unsafeCast<StylesheetOrString>(value)
 
 /** Wraps the object branch. */
-fun StylesheetOrString(value: StylesheetConfig): StylesheetOrString = unsafeCast<StylesheetOrString>(value)
+inline fun StylesheetOrString(value: StylesheetConfig): StylesheetOrString = unsafeCast<StylesheetOrString>(value)
 
 /** The object form of an entry in [Config.stylesheets]. */
 external interface StylesheetConfig {

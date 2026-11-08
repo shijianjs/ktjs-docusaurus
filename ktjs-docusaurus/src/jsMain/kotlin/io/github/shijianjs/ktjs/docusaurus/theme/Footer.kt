@@ -20,16 +20,16 @@ import js.reflect.unsafeCast
 external interface Footer
 
 /** Wraps the multi-column branch. */
-fun Footer(value: MultiColumnFooter): Footer = unsafeCast<Footer>(value)
+inline fun Footer(value: MultiColumnFooter): Footer = unsafeCast<Footer>(value)
 
 /** Wraps the single-row branch. */
-fun Footer(value: SimpleFooter): Footer = unsafeCast<Footer>(value)
+inline fun Footer(value: SimpleFooter): Footer = unsafeCast<Footer>(value)
 
 /** Upstream `'light' | 'dark'`. */
 sealed external interface FooterStyle
 
 /** Wraps a value coming from JavaScript. Prefer [FooterStyles]. */
-fun FooterStyle(value: String): FooterStyle = unsafeCast<FooterStyle>(value)
+inline fun FooterStyle(value: String): FooterStyle = unsafeCast<FooterStyle>(value)
 
 /** The literals of [FooterStyle]. */
 object FooterStyles {

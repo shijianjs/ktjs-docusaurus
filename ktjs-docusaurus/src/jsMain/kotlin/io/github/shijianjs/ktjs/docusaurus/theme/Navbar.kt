@@ -30,7 +30,7 @@ external interface Navbar {
 sealed external interface NavbarStyle
 
 /** Wraps a value coming from JavaScript. Prefer [NavbarStyles]. */
-fun NavbarStyle(value: String): NavbarStyle = unsafeCast<NavbarStyle>(value)
+inline fun NavbarStyle(value: String): NavbarStyle = unsafeCast<NavbarStyle>(value)
 
 /** The literals of [NavbarStyle]. */
 object NavbarStyles {
@@ -75,7 +75,7 @@ external interface NavbarLogo {
 sealed external interface NavbarItemPosition
 
 /** Wraps a value coming from JavaScript. Prefer [NavbarItemPositions]. */
-fun NavbarItemPosition(value: String): NavbarItemPosition = unsafeCast<NavbarItemPosition>(value)
+inline fun NavbarItemPosition(value: String): NavbarItemPosition = unsafeCast<NavbarItemPosition>(value)
 
 /** The literals of [NavbarItemPosition]. */
 object NavbarItemPositions {
@@ -158,7 +158,7 @@ external interface NavbarItem {
 sealed external interface NavbarItemType
 
 /** Wraps a value coming from JavaScript, e.g. a custom item's module path. */
-fun NavbarItemType(value: String): NavbarItemType = unsafeCast<NavbarItemType>(value)
+inline fun NavbarItemType(value: String): NavbarItemType = unsafeCast<NavbarItemType>(value)
 
 /**
  * The built-in navbar item types.

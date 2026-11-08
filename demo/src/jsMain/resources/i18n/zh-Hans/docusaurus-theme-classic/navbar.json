@@ -1,0 +1,18 @@
+{
+  "title": {
+    "message": "ktjs-docusaurus",
+    "description": "The title in the navbar"
+  },
+  "item.label.User guide": {
+    "message": "用户指南",
+    "description": "Navbar item with label User guide"
+  },
+  "item.label.Docs kit": {
+    "message": "文档工具箱",
+    "description": "Navbar item with label Docs kit"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "Navbar item with label GitHub"
+  }
+}

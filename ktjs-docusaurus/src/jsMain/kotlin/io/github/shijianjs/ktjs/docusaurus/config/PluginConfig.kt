@@ -31,15 +31,15 @@ external interface PluginOptions {
 external interface PluginConfig
 
 /** A bare package name, with the plugin's default options. */
-fun PluginConfig(name: String): PluginConfig =
+inline fun PluginConfig(name: String): PluginConfig =
     unsafeCast<PluginConfig>(arrayOf<JsAny>(unsafeCast<JsAny>(name)))
 
 /** A package name (or a `@site/...` module path) with its options. */
-fun PluginConfig(name: String, options: PluginOptions): PluginConfig =
+inline fun PluginConfig(name: String, options: PluginOptions): PluginConfig =
     unsafeCast<PluginConfig>(arrayOf<JsAny>(unsafeCast<JsAny>(name), unsafeCast<JsAny>(options)))
 
 /** A plugin module imported from JavaScript, with its options. */
-fun PluginConfig(module: JsAny, options: PluginOptions): PluginConfig =
+inline fun PluginConfig(module: JsAny, options: PluginOptions): PluginConfig =
     unsafeCast<PluginConfig>(arrayOf<JsAny>(module, unsafeCast<JsAny>(options)))
 
 /**
@@ -47,7 +47,7 @@ fun PluginConfig(module: JsAny, options: PluginOptions): PluginConfig =
  *
  * Only `false` makes sense here; passing `true` is a configuration error in Docusaurus.
  */
-fun PluginConfig(enabled: Boolean): PluginConfig = unsafeCast<PluginConfig>(enabled)
+inline fun PluginConfig(enabled: Boolean): PluginConfig = unsafeCast<PluginConfig>(enabled)
 
 /**
  * Upstream `string | [string, opts] | false | null`.
@@ -58,12 +58,12 @@ fun PluginConfig(enabled: Boolean): PluginConfig = unsafeCast<PluginConfig>(enab
 external interface PresetConfig
 
 /** A bare preset package name, with the preset's default options. */
-fun PresetConfig(name: String): PresetConfig =
+inline fun PresetConfig(name: String): PresetConfig =
     unsafeCast<PresetConfig>(arrayOf<JsAny>(unsafeCast<JsAny>(name)))
 
 /** A preset package name with its options. */
-fun PresetConfig(name: String, options: JsAny): PresetConfig =
+inline fun PresetConfig(name: String, options: JsAny): PresetConfig =
     unsafeCast<PresetConfig>(arrayOf<JsAny>(unsafeCast<JsAny>(name), options))
 
 /** Upstream `false`: disables a preset a parent preset registered. */
-fun PresetConfig(enabled: Boolean): PresetConfig = unsafeCast<PresetConfig>(enabled)
+inline fun PresetConfig(enabled: Boolean): PresetConfig = unsafeCast<PresetConfig>(enabled)

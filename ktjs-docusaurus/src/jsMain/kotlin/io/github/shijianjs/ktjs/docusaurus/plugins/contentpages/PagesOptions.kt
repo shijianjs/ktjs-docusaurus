@@ -54,10 +54,10 @@ external interface PagesAdmonitionOptions {
 external interface BooleanOrPagesAdmonitionOptions
 
 /** Wraps the [Boolean] branch. */
-fun BooleanOrPagesAdmonitionOptions(value: Boolean): BooleanOrPagesAdmonitionOptions =
+inline fun BooleanOrPagesAdmonitionOptions(value: Boolean): BooleanOrPagesAdmonitionOptions =
     unsafeCast<BooleanOrPagesAdmonitionOptions>(value)
 
 /** Wraps the options branch. */
-fun BooleanOrPagesAdmonitionOptions(
+inline fun BooleanOrPagesAdmonitionOptions(
     value: PagesAdmonitionOptions,
 ): BooleanOrPagesAdmonitionOptions = unsafeCast<BooleanOrPagesAdmonitionOptions>(value)

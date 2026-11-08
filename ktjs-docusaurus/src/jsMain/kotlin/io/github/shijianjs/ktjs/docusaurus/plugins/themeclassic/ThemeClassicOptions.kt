@@ -17,7 +17,7 @@ external interface ThemeClassicOptions : PluginOptions {
 external interface StringOrStringArray
 
 /** Wraps the single-value branch. */
-fun StringOrStringArray(value: String): StringOrStringArray = unsafeCast<StringOrStringArray>(value)
+inline fun StringOrStringArray(value: String): StringOrStringArray = unsafeCast<StringOrStringArray>(value)
 
 /** Wraps the list branch. */
-fun StringOrStringArray(value: Array<String>): StringOrStringArray = unsafeCast<StringOrStringArray>(value)
+inline fun StringOrStringArray(value: Array<String>): StringOrStringArray = unsafeCast<StringOrStringArray>(value)

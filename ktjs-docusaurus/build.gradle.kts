@@ -39,6 +39,13 @@ kotlin {
             // module; the old standalone `kotlin-js-plain-objects` artifact stops at Kotlin 2.2.
             api("org.jetbrains.kotlin-wrappers:kotlin-js:2026.11.0")
 
+            // Client APIs and theme components are React: a site that swizzles a component or writes a
+            // page uses the official Kotlin binding instead of a hand-written createElement surface.
+            api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.0")
+            api("org.jetbrains.kotlin-wrappers:kotlin-react:2026.11.0-19.3.1")
+            implementation(npm("react", npmVersions.getValue("react")))
+            implementation(npm("react-dom", npmVersions.getValue("react-dom")))
+
             // Declared here so the npm workspace installs them next to the wrapper: the generated
             // configuration imports them at runtime and the demo site consumes them through it.
             implementation(npm("@docusaurus/core", docusaurusVersion))

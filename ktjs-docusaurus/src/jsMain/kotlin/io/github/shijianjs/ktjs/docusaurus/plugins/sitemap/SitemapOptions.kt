@@ -33,7 +33,7 @@ external interface SitemapOptions : PluginOptions {
 sealed external interface SitemapChangefreq
 
 /** Wraps a value coming from JavaScript. Prefer [SitemapChangefreqs]. */
-fun SitemapChangefreq(value: String): SitemapChangefreq = unsafeCast<SitemapChangefreq>(value)
+inline fun SitemapChangefreq(value: String): SitemapChangefreq = unsafeCast<SitemapChangefreq>(value)
 
 /** The literals of [SitemapChangefreq]. */
 object SitemapChangefreqs {

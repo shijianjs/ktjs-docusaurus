@@ -4,6 +4,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
@@ -67,13 +68,47 @@ abstract class DocusaurusSiteTask @Inject constructor(
     @get:Optional
     abstract val sidebarsFunction: Property<String>
 
+    /**
+     * Exported Kotlin function Docusaurus should call after every route change, or empty when the
+     * site has no client module.
+     *
+     * The generated `client-module.mjs` re-exports it; pass the file to `clientModules` in the site
+     * configuration as `./client-module.mjs`.
+     */
+    @get:Input
+    @get:Optional
+    abstract val clientModuleFunction: Property<String>
+
+    /**
+     * Page file name (without extension) to exported Kotlin React component, for example
+     * `index` to `homePage`.
+     *
+     * A `src/pages/<name>.jsx` shim is generated for every entry; it re-exports the component as
+     * the module's default export, which is what the pages plugin expects.
+     */
+    @get:Input
+    abstract val pageFunctions: MapProperty<String, String>
+
+    /** Bundle the page components live in; empty means the main bundle. */
+    @get:Input
+    @get:Optional
+    abstract val pageBundle: Property<String>
+
+    /**
+     * Extra compiled Kotlin/JS output copied into `<site>/generated` next to the main bundle — the
+     * page-components module, whose imports only resolve inside Docusaurus' webpack build.
+     */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val additionalJs: ConfigurableFileCollection
+
     @TaskAction
     fun generate() {
         val site = siteDir.get().asFile
         val content = contentDir.orNull?.asFile
 
         site.mkdirs()
-        listOf("docs", "blog", "src", "static", "generated").forEach { name ->
+        listOf("docs", "blog", "src", "static", "i18n", "generated").forEach { name ->
             fs.delete { it.delete(File(site, name)) }
         }
 
@@ -83,6 +118,8 @@ abstract class DocusaurusSiteTask @Inject constructor(
 
         val bundle = copyCompiledKotlin(site)
         writeConfigShim(site, bundle)
+        writePageShims(site, bundle)
+        writeClientModuleShim(site, bundle)
         writePackageJson(site)
     }
 
@@ -93,6 +130,7 @@ abstract class DocusaurusSiteTask @Inject constructor(
             "pages" to "src/pages",
             "css" to "src/css",
             "static" to "static",
+            "i18n" to "i18n",
         )
         mapping.forEach { (from, to) ->
             val source = File(content, from)
@@ -111,26 +149,36 @@ abstract class DocusaurusSiteTask @Inject constructor(
      */
     private fun copyCompiledKotlin(site: File): String {
         val generated = File(site, "generated").apply { mkdirs() }
+        // The entry point is chosen from the main module's own output, not from everything that
+        // ends up in `generated`: the page-components bundle (additionalJs) imports `@theme/…`,
+        // which only resolves inside webpack, and picking it here would break the config load.
+        val mainOutput = mutableSetOf<String>()
         compiledJs.files
             .filter { it.isDirectory }
             .forEach { directory ->
+                mainOutput += directory.listFiles().orEmpty().map { it.name }
                 fs.copy { spec ->
                     spec.from(directory)
                     spec.into(generated)
                 }
             }
 
+        additionalJs.files.filter { it.isDirectory }.forEach { directory ->
+            fs.copy { spec ->
+                spec.from(directory)
+                spec.into(generated)
+            }
+        }
+
         val runtimePrefixes = listOf("kotlin-", "kotlin_", "kotlinx-", "seskar-")
-        val entry = generated.listFiles()
-            .orEmpty()
-            .filter { it.isFile && it.name.endsWith(".mjs") }
-            .filterNot { file -> runtimePrefixes.any { file.name.startsWith(it) } }
-            .minByOrNull { it.name }
+        return mainOutput
+            .filter { it.endsWith(".mjs") }
+            .filterNot { name -> runtimePrefixes.any { name.startsWith(it) } }
+            .minOrNull()
             ?: error(
-                "No Kotlin/JS module output found in $generated. " +
+                "No Kotlin/JS module output found for ${site.name}. " +
                     "The module must declare a `js` target and be compiled before this task runs.",
             )
-        return entry.name
     }
 
     private fun writeConfigShim(site: File, bundle: String) {
@@ -154,6 +202,29 @@ abstract class DocusaurusSiteTask @Inject constructor(
                 """.trimIndent() + "\n",
             )
         }
+    }
+
+    private fun writePageShims(site: File, bundle: String) {
+        val pages = File(site, "src/pages").apply { mkdirs() }
+        val pageSource = pageBundle.orNull?.takeIf { it.isNotBlank() } ?: bundle
+        pageFunctions.get().forEach { (name, function) ->
+            File(pages, "$name.jsx").writeText(
+                """
+                // Generated by the ktjs-docusaurus Gradle plugin. Do not edit.
+                export { $function as default } from '../../generated/$pageSource';
+                """.trimIndent() + "\n",
+            )
+        }
+    }
+
+    private fun writeClientModuleShim(site: File, bundle: String) {
+        val function = clientModuleFunction.orNull?.takeIf { it.isNotBlank() } ?: return
+        File(site, "client-module.mjs").writeText(
+            """
+            // Generated by the ktjs-docusaurus Gradle plugin. Do not edit.
+            export { $function } from './generated/$bundle';
+            """.trimIndent() + "\n",
+        )
     }
 
     private fun writePackageJson(site: File) {

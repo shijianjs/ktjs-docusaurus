@@ -1,6 +1,9 @@
-package site
+package io.github.shijianjs.ktjs.docusaurus.demo
 
 import io.github.shijianjs.ktjs.docusaurus.config.Config
+import io.github.shijianjs.ktjs.docusaurus.config.Directions
+import io.github.shijianjs.ktjs.docusaurus.config.I18nConfig
+import io.github.shijianjs.ktjs.docusaurus.config.I18nLocaleConfig
 import io.github.shijianjs.ktjs.docusaurus.config.PresetConfig
 import io.github.shijianjs.ktjs.docusaurus.config.ReportingSeverities
 import io.github.shijianjs.ktjs.docusaurus.config.StringOrFalse
@@ -22,9 +25,14 @@ import io.github.shijianjs.ktjs.docusaurus.theme.NavbarItemTypes
 import io.github.shijianjs.ktjs.docusaurus.theme.PrismThemes
 import io.github.shijianjs.ktjs.docusaurus.theme.SimpleFooter
 import io.github.shijianjs.ktjs.docusaurus.theme.ThemeConfig
-import js.objects.buildRecord
+import js.objects.Record
 import js.objects.unsafeJso
+import kotlin.js.JsAny
 import kotlin.js.JsExport
+import kotlin.js.JsName
+import kotlin.js.unsafeCast
+
+private const val REPOSITORY = "https://github.com/shijianjs/ktjs-docusaurus"
 
 /**
  * The site configuration, imported by the generated `docusaurus.config.mjs`.
@@ -41,6 +49,26 @@ fun docusaurusConfig(): Config = unsafeJso {
     favicon = "img/favicon.svg"
     trailingSlash = true
     onBrokenLinks = ReportingSeverities.`throw`
+
+    // English is the source language; every page under `docs/` has a translation under
+    // `i18n/zh-Hans/`. The home page's copy is resolved with `translate()` in Kotlin, so it lives in
+    // `i18n/zh-Hans/code.json` like any other message.
+    i18n = unsafeJso<I18nConfig> {
+        defaultLocale = "en"
+        locales = arrayOf("en", "zh-Hans")
+        localeConfigs = unsafeJso<DemoLocaleConfigs> {
+            en = unsafeJso<I18nLocaleConfig> {
+                label = "English"
+                direction = Directions.ltr
+                htmlLang = "en"
+            }
+            zhHans = unsafeJso<I18nLocaleConfig> {
+                label = "简体中文"
+                direction = Directions.ltr
+                htmlLang = "zh-Hans"
+            }
+        }.unsafeCast<Record<JsAny, I18nLocaleConfig>>()
+    }
 
     presets = arrayOf<PresetConfig?>(
         classicPreset(
@@ -69,14 +97,26 @@ fun docusaurusConfig(): Config = unsafeJso {
                 unsafeJso<NavbarItem> {
                     type = NavbarItemTypes.docSidebar
                     sidebarId = "userGuide"
-                    label = "Guide"
+                    label = "User guide"
                     position = NavbarItemPositions.left
+                },
+                // The kit gets its own top-level entry, the same shape the duckfn docs use for their
+                // docs-kit section: it is a separate product with its own guide.
+                unsafeJso<NavbarItem> {
+                    type = NavbarItemTypes.docSidebar
+                    sidebarId = "docsKit"
+                    label = "Docs kit"
+                    position = NavbarItemPositions.left
+                },
+                unsafeJso<NavbarItem> {
+                    type = NavbarItemTypes.localeDropdown
+                    position = NavbarItemPositions.right
                 },
                 // A plain link has no `type`: Docusaurus validates a missing type as the default
                 // item and rejects an explicit "default" or "link".
                 unsafeJso<NavbarItem> {
                     label = "GitHub"
-                    href = "https://github.com/shijianjs/ktjs-docusaurus"
+                    href = REPOSITORY
                     position = NavbarItemPositions.right
                 },
             )
@@ -99,7 +139,7 @@ fun docusaurusConfig(): Config = unsafeJso {
                 links = arrayOf(
                     unsafeJso {
                         label = "GitHub"
-                        href = "https://github.com/shijianjs/ktjs-docusaurus"
+                        href = REPOSITORY
                     },
                 )
                 copyright = "Built with Docusaurus from a Kotlin/JS project."
@@ -109,15 +149,13 @@ fun docusaurusConfig(): Config = unsafeJso {
 }
 
 /**
- * The sidebar of the demo site, imported by the generated `sidebars.mjs`.
+ * The sidebars, imported by the generated `sidebars.mjs`.
  *
- * Every key is a sidebar id; the navbar above links to `userGuide`.
+ * Two id-matched sidebars: the user guide and the kit. The navbar links to both.
  */
 @JsExport
-fun sidebars(): SidebarsConfig = buildRecord {
-    set(
-        "userGuide",
-        arrayOf<SidebarItem>(
+fun sidebars(): SidebarsConfig = unsafeJso<DemoSidebars> {
+        userGuide = arrayOf<SidebarItem>(
             unsafeJso {
                 type = SidebarItemTypes.doc
                 id = "intro"
@@ -133,8 +171,56 @@ fun sidebars(): SidebarsConfig = buildRecord {
                         id = "guide/getting-started"
                         label = "Getting started"
                     },
+                    unsafeJso {
+                        type = SidebarItemTypes.doc
+                        id = "guide/content"
+                        label = "Content and i18n"
+                    },
                 )
             },
-        ),
+        )
+        docsKit = arrayOf<SidebarItem>(
+            unsafeJso {
+                type = SidebarItemTypes.doc
+                id = "kit/overview"
+                label = "Overview"
+            },
+            unsafeJso {
+                type = SidebarItemTypes.category
+                label = "Building blocks"
+                collapsed = false
+                items = arrayOf(
+                    unsafeJso {
+                        type = SidebarItemTypes.doc
+                        id = "kit/home-sections"
+                        label = "Home sections"
+                    },
+                    unsafeJso {
+                        type = SidebarItemTypes.doc
+                        id = "kit/toc-toggle"
+                        label = "TOC toggle"
+                    },
+                )
+            },
+        unsafeJso {
+            type = SidebarItemTypes.doc
+            id = "kit/gradle-plugin"
+            label = "Gradle plugin"
+        },
     )
+}.unsafeCast<SidebarsConfig>()
+
+/** The locale record the site declares; keys must match the ids in `Config.i18n.locales`. */
+private external interface DemoLocaleConfigs {
+    var en: I18nLocaleConfig?
+
+    @JsName("zh-Hans")
+    var zhHans: I18nLocaleConfig?
+}
+
+/** The sidebar record: one property per sidebar id. */
+private external interface DemoSidebars {
+    var userGuide: Array<SidebarItem>?
+
+    var docsKit: Array<SidebarItem>?
 }

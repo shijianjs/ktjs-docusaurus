@@ -14,7 +14,9 @@ package io.github.shijianjs.ktjs.docusaurus.gradle
  * <module>/src/jsMain/resources/static    -> <site>/static
  * ```
  */
-open class DocusaurusExtension {
+open class DocusaurusExtension @javax.inject.Inject constructor(
+    objects: org.gradle.api.model.ObjectFactory,
+) {
     /**
      * Directory holding the Markdown content and the static assets, relative to the module.
      */
@@ -33,6 +35,43 @@ open class DocusaurusExtension {
      * no sidebars. When set, a `sidebars.mjs` is generated next to the config.
      */
     var sidebarsFunction: String? = null
+
+    /**
+     * Name of the exported Kotlin function Docusaurus calls after every route change, or `null`.
+     *
+     * When set, `<site>/client-module.mjs` re-exports it; list `./client-module.mjs` in the site's
+     * `clientModules`. This is how browser-only behaviour (the TOC toggle) reaches a site whose
+     * configuration and content are Kotlin and Markdown.
+     */
+    var clientModuleFunction: String? = null
+
+    /**
+     * Page file name (without extension) to exported Kotlin React component, for example
+     * `mapOf("index" to "homePage")`.
+     *
+     * Each entry becomes `<site>/src/pages/<name>.jsx`, re-exporting the component as the default
+     * export the pages plugin expects. The component itself is written in Kotlin (kotlin-react), so
+     * a page never has to be hand-written JSX.
+     */
+    var pageFunctions: Map<String, String> = emptyMap()
+
+    /**
+     * File name of the bundle the page components live in, relative to the generated directory.
+     *
+     * Page components import `@theme/…`, which only exists inside Docusaurus' webpack build, so
+     * they cannot live in the same bundle as the configuration: the configuration is loaded by
+     * Node, where those aliases do not resolve. Keep the pages in a second Kotlin/JS module, add
+     * its compiled output through [additionalJs] and name its bundle here.
+     */
+    var pageBundle: String? = null
+
+    /**
+     * Extra Kotlin/JS output copied into `<site>/generated` next to the main bundle.
+     *
+     * Use it for the page-components module; the caller is responsible for a task dependency on
+     * that module's link task, because a file collection cannot carry one across projects.
+     */
+    val additionalJs: org.gradle.api.file.ConfigurableFileCollection = objects.fileCollection()
 
     /**
      * Directory the site is assembled into. Defaults to `<root>/build/js/docusaurus/<module>`.

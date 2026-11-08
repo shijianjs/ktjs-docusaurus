@@ -17,62 +17,62 @@ package io.github.shijianjs.ktjs.docusaurus.theme
  */
 object PrismThemes {
     /** The Dracula theme. */
-    val dracula: PrismTheme get() = themes.dracula
+    inline val dracula: PrismTheme get() = themes.dracula
 
     /** The Duotone Dark theme. */
-    val duotoneDark: PrismTheme get() = themes.duotoneDark
+    inline val duotoneDark: PrismTheme get() = themes.duotoneDark
 
     /** The Duotone Light theme. */
-    val duotoneLight: PrismTheme get() = themes.duotoneLight
+    inline val duotoneLight: PrismTheme get() = themes.duotoneLight
 
     /** GitHub's light theme. */
-    val github: PrismTheme get() = themes.github
+    inline val github: PrismTheme get() = themes.github
 
     /** The Gruvbox Material dark theme. */
-    val gruvboxMaterialDark: PrismTheme get() = themes.gruvboxMaterialDark
+    inline val gruvboxMaterialDark: PrismTheme get() = themes.gruvboxMaterialDark
 
     /** The Gruvbox Material light theme. */
-    val gruvboxMaterialLight: PrismTheme get() = themes.gruvboxMaterialLight
+    inline val gruvboxMaterialLight: PrismTheme get() = themes.gruvboxMaterialLight
 
     /** The Jettwave dark theme. */
-    val jettwaveDark: PrismTheme get() = themes.jettwaveDark
+    inline val jettwaveDark: PrismTheme get() = themes.jettwaveDark
 
     /** The Jettwave light theme. */
-    val jettwaveLight: PrismTheme get() = themes.jettwaveLight
+    inline val jettwaveLight: PrismTheme get() = themes.jettwaveLight
 
     /** The Night Owl theme. */
-    val nightOwl: PrismTheme get() = themes.nightOwl
+    inline val nightOwl: PrismTheme get() = themes.nightOwl
 
     /** The Night Owl light theme. */
-    val nightOwlLight: PrismTheme get() = themes.nightOwlLight
+    inline val nightOwlLight: PrismTheme get() = themes.nightOwlLight
 
     /** The Oceanic Next theme. */
-    val oceanicNext: PrismTheme get() = themes.oceanicNext
+    inline val oceanicNext: PrismTheme get() = themes.oceanicNext
 
     /** The Okaidia theme. */
-    val okaidia: PrismTheme get() = themes.okaidia
+    inline val okaidia: PrismTheme get() = themes.okaidia
 
     /** The One Dark theme. */
-    val oneDark: PrismTheme get() = themes.oneDark
+    inline val oneDark: PrismTheme get() = themes.oneDark
 
     /** The One Light theme. */
-    val oneLight: PrismTheme get() = themes.oneLight
+    inline val oneLight: PrismTheme get() = themes.oneLight
 
     /** The Palenight theme. */
-    val palenight: PrismTheme get() = themes.palenight
+    inline val palenight: PrismTheme get() = themes.palenight
 
     /** The Shades of Purple theme. */
-    val shadesOfPurple: PrismTheme get() = themes.shadesOfPurple
+    inline val shadesOfPurple: PrismTheme get() = themes.shadesOfPurple
 
     /** The Synthwave '84 theme. */
-    val synthwave84: PrismTheme get() = themes.synthwave84
+    inline val synthwave84: PrismTheme get() = themes.synthwave84
 
     /** The Ultramin theme. */
-    val ultramin: PrismTheme get() = themes.ultramin
+    inline val ultramin: PrismTheme get() = themes.ultramin
 
     /** Visual Studio dark. */
-    val vsDark: PrismTheme get() = themes.vsDark
+    inline val vsDark: PrismTheme get() = themes.vsDark
 
     /** Visual Studio light. */
-    val vsLight: PrismTheme get() = themes.vsLight
+    inline val vsLight: PrismTheme get() = themes.vsLight
 }

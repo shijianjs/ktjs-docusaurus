@@ -19,6 +19,10 @@ plugins {
 // settings.gradle.kts) but still follows the same upstream version.
 val publishedPrefix = "ktjs-docusaurus"
 
+// Only the wrapper follows an upstream npm version. The kit is original code with its own semantic
+// version, so it is not looked up in wrapper-revisions.properties.
+val wrapperModules = setOf("ktjs-docusaurus")
+
 // Dokka aggregates every published module into one API reference. `demo` is not part of the
 // published API surface, so it is excluded by the prefix filter.
 dependencies {
@@ -95,8 +99,10 @@ subprojects {
 subprojects {
     if (!name.startsWith(publishedPrefix)) return@subprojects
 
-    check(wrapperRevisions.containsKey(name)) {
-        "Missing '$name' in wrapper-revisions.properties"
+    if (name in wrapperModules) {
+        check(wrapperRevisions.containsKey(name)) {
+            "Missing '$name' in wrapper-revisions.properties"
+        }
     }
 
     val module = this

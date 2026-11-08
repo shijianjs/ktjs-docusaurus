@@ -132,21 +132,21 @@ external interface BlogOptions : PluginOptions {
 external interface DoubleOrAll
 
 /** Wraps the number branch. */
-fun DoubleOrAll(value: Double): DoubleOrAll = unsafeCast<DoubleOrAll>(value)
+inline fun DoubleOrAll(value: Double): DoubleOrAll = unsafeCast<DoubleOrAll>(value)
 
 /** Wraps the `'ALL'` branch. */
-fun DoubleOrAll(value: String): DoubleOrAll = unsafeCast<DoubleOrAll>(value)
+inline fun DoubleOrAll(value: String): DoubleOrAll = unsafeCast<DoubleOrAll>(value)
 
 /** Upstream `number | ReadingTimeFunction`. */
 external interface DoubleOrReadingTimeFunction
 
 /** Wraps the number branch. */
-fun DoubleOrReadingTimeFunction(value: Double): DoubleOrReadingTimeFunction =
+inline fun DoubleOrReadingTimeFunction(value: Double): DoubleOrReadingTimeFunction =
     unsafeCast<DoubleOrReadingTimeFunction>(value)
 
 /** Wraps the callback branch. */
-fun DoubleOrReadingTimeFunction(
-    value: (BlogReadingTimeParams) -> Double,
+inline fun DoubleOrReadingTimeFunction(
+    noinline value: (BlogReadingTimeParams) -> Double,
 ): DoubleOrReadingTimeFunction = unsafeCast<DoubleOrReadingTimeFunction>(value)
 
 /** The argument object of `ReadingTimeFunction`. */
@@ -162,7 +162,7 @@ external interface BlogReadingTimeParams {
 sealed external interface BlogSortOrder
 
 /** Wraps a value coming from JavaScript. Prefer [BlogSortOrders]. */
-fun BlogSortOrder(value: String): BlogSortOrder = unsafeCast<BlogSortOrder>(value)
+inline fun BlogSortOrder(value: String): BlogSortOrder = unsafeCast<BlogSortOrder>(value)
 
 /** The literals of [BlogSortOrder]. */
 object BlogSortOrders {
@@ -183,11 +183,11 @@ external interface BlogAdmonitionOptions {
 external interface BooleanOrBlogAdmonitionOptions
 
 /** Wraps the [Boolean] branch. */
-fun BooleanOrBlogAdmonitionOptions(value: Boolean): BooleanOrBlogAdmonitionOptions =
+inline fun BooleanOrBlogAdmonitionOptions(value: Boolean): BooleanOrBlogAdmonitionOptions =
     unsafeCast<BooleanOrBlogAdmonitionOptions>(value)
 
 /** Wraps the options branch. */
-fun BooleanOrBlogAdmonitionOptions(
+inline fun BooleanOrBlogAdmonitionOptions(
     value: BlogAdmonitionOptions,
 ): BooleanOrBlogAdmonitionOptions = unsafeCast<BooleanOrBlogAdmonitionOptions>(value)
 
@@ -195,12 +195,12 @@ fun BooleanOrBlogAdmonitionOptions(
 external interface StringOrBlogEditUrlFunction
 
 /** Wraps the [String] branch. */
-fun StringOrBlogEditUrlFunction(value: String): StringOrBlogEditUrlFunction =
+inline fun StringOrBlogEditUrlFunction(value: String): StringOrBlogEditUrlFunction =
     unsafeCast<StringOrBlogEditUrlFunction>(value)
 
 /** Wraps the callback branch. */
-fun StringOrBlogEditUrlFunction(
-    value: (BlogEditUrlParams) -> String?,
+inline fun StringOrBlogEditUrlFunction(
+    noinline value: (BlogEditUrlParams) -> String?,
 ): StringOrBlogEditUrlFunction = unsafeCast<StringOrBlogEditUrlFunction>(value)
 
 /** The argument object of the blog `EditUrlFunction`. */
@@ -252,7 +252,7 @@ external interface BlogFeedOptions {
 external interface StringOrStringArray
 
 /** Wraps the single-value branch. */
-fun StringOrStringArray(value: String): StringOrStringArray = unsafeCast<StringOrStringArray>(value)
+inline fun StringOrStringArray(value: String): StringOrStringArray = unsafeCast<StringOrStringArray>(value)
 
 /** Wraps the list branch. */
-fun StringOrStringArray(value: Array<String>): StringOrStringArray = unsafeCast<StringOrStringArray>(value)
+inline fun StringOrStringArray(value: Array<String>): StringOrStringArray = unsafeCast<StringOrStringArray>(value)

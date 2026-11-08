@@ -24,7 +24,7 @@ typealias SidebarsConfig = Record<JsAny, Array<SidebarItem>>
 sealed external interface SidebarItemType
 
 /** Wraps a value coming from JavaScript. Prefer [SidebarItemTypes]. */
-fun SidebarItemType(value: String): SidebarItemType = unsafeCast<SidebarItemType>(value)
+inline fun SidebarItemType(value: String): SidebarItemType = unsafeCast<SidebarItemType>(value)
 
 /** The literals of [SidebarItemType]. */
 object SidebarItemTypes {
@@ -131,7 +131,7 @@ external interface SidebarCategoryLink {
 sealed external interface SidebarCategoryLinkType
 
 /** Wraps a value coming from JavaScript. Prefer [SidebarCategoryLinkTypes]. */
-fun SidebarCategoryLinkType(value: String): SidebarCategoryLinkType = unsafeCast<SidebarCategoryLinkType>(value)
+inline fun SidebarCategoryLinkType(value: String): SidebarCategoryLinkType = unsafeCast<SidebarCategoryLinkType>(value)
 
 /** The literals of [SidebarCategoryLinkType]. */
 object SidebarCategoryLinkTypes {

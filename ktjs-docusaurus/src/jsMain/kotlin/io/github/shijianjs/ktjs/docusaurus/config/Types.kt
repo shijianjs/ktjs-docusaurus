@@ -11,7 +11,7 @@ import js.reflect.unsafeCast
 sealed external interface ReportingSeverity
 
 /** Wraps a value coming from JavaScript. Prefer [ReportingSeverities]. */
-fun ReportingSeverity(value: String): ReportingSeverity = unsafeCast<ReportingSeverity>(value)
+inline fun ReportingSeverity(value: String): ReportingSeverity = unsafeCast<ReportingSeverity>(value)
 
 /** The literals of [ReportingSeverity]. */
 object ReportingSeverities {
@@ -32,7 +32,7 @@ object ReportingSeverities {
 sealed external interface RouterType
 
 /** Wraps a value coming from JavaScript. Prefer [RouterTypes]. */
-fun RouterType(value: String): RouterType = unsafeCast<RouterType>(value)
+inline fun RouterType(value: String): RouterType = unsafeCast<RouterType>(value)
 
 /** The literals of [RouterType]. */
 object RouterTypes {
@@ -47,7 +47,7 @@ object RouterTypes {
 sealed external interface Direction
 
 /** Wraps a value coming from JavaScript. Prefer [Directions]. */
-fun Direction(value: String): Direction = unsafeCast<Direction>(value)
+inline fun Direction(value: String): Direction = unsafeCast<Direction>(value)
 
 /** The literals of [Direction]. */
 object Directions {
@@ -62,7 +62,7 @@ object Directions {
 sealed external interface SiteStorageType
 
 /** Wraps a value coming from JavaScript. Prefer [SiteStorageTypes]. */
-fun SiteStorageType(value: String): SiteStorageType = unsafeCast<SiteStorageType>(value)
+inline fun SiteStorageType(value: String): SiteStorageType = unsafeCast<SiteStorageType>(value)
 
 /** The literals of [SiteStorageType]. */
 object SiteStorageTypes {
@@ -81,7 +81,7 @@ object SiteStorageTypes {
 sealed external interface MarkdownFormat
 
 /** Wraps a value coming from JavaScript. Prefer [MarkdownFormats]. */
-fun MarkdownFormat(value: String): MarkdownFormat = unsafeCast<MarkdownFormat>(value)
+inline fun MarkdownFormat(value: String): MarkdownFormat = unsafeCast<MarkdownFormat>(value)
 
 /** The literals of [MarkdownFormat]. */
 object MarkdownFormats {
@@ -99,25 +99,25 @@ object MarkdownFormats {
 external interface BooleanOrString
 
 /** Wraps a [Boolean] branch. */
-fun BooleanOrString(value: Boolean): BooleanOrString = unsafeCast<BooleanOrString>(value)
+inline fun BooleanOrString(value: Boolean): BooleanOrString = unsafeCast<BooleanOrString>(value)
 
 /** Wraps a [String] branch. */
-fun BooleanOrString(value: String): BooleanOrString = unsafeCast<BooleanOrString>(value)
+inline fun BooleanOrString(value: String): BooleanOrString = unsafeCast<BooleanOrString>(value)
 
 /** Upstream `string | false`, as used by `docs.sidebarPath`. */
 external interface StringOrFalse
 
 /** Wraps the [String] branch. */
-fun StringOrFalse(value: String): StringOrFalse = unsafeCast<StringOrFalse>(value)
+inline fun StringOrFalse(value: String): StringOrFalse = unsafeCast<StringOrFalse>(value)
 
 /** Wraps the `false` branch. */
-fun StringOrFalse(value: Boolean): StringOrFalse = unsafeCast<StringOrFalse>(value)
+inline fun StringOrFalse(value: Boolean): StringOrFalse = unsafeCast<StringOrFalse>(value)
 
 /** Upstream `string | number`, as used by the logo `width` / `height`. */
 external interface StringOrDouble
 
 /** Wraps a [String] branch, e.g. `"100%"`. */
-fun StringOrDouble(value: String): StringOrDouble = unsafeCast<StringOrDouble>(value)
+inline fun StringOrDouble(value: String): StringOrDouble = unsafeCast<StringOrDouble>(value)
 
 /** Wraps a [Double] branch, e.g. `32.0`. */
-fun StringOrDouble(value: Double): StringOrDouble = unsafeCast<StringOrDouble>(value)
+inline fun StringOrDouble(value: Double): StringOrDouble = unsafeCast<StringOrDouble>(value)

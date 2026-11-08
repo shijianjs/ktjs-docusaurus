@@ -66,7 +66,7 @@ external interface DocsThemeConfig {
 sealed external interface DocsVersionPersistence
 
 /** Wraps a value coming from JavaScript. Prefer [DocsVersionPersistences]. */
-fun DocsVersionPersistence(value: String): DocsVersionPersistence = unsafeCast<DocsVersionPersistence>(value)
+inline fun DocsVersionPersistence(value: String): DocsVersionPersistence = unsafeCast<DocsVersionPersistence>(value)
 
 /** The literals of [DocsVersionPersistence]. */
 object DocsVersionPersistences {
@@ -114,7 +114,7 @@ external interface ColorModeConfig {
 sealed external interface ColorMode
 
 /** Wraps a value coming from JavaScript. Prefer [ColorModes]. */
-fun ColorMode(value: String): ColorMode = unsafeCast<ColorMode>(value)
+inline fun ColorMode(value: String): ColorMode = unsafeCast<ColorMode>(value)
 
 /** The literals of [ColorMode]. */
 object ColorModes {
@@ -235,10 +235,10 @@ external interface AlgoliaConfig {
 external interface StringOrAskAiConfig
 
 /** Wraps the short string form. */
-fun StringOrAskAiConfig(value: String): StringOrAskAiConfig = unsafeCast<StringOrAskAiConfig>(value)
+inline fun StringOrAskAiConfig(value: String): StringOrAskAiConfig = unsafeCast<StringOrAskAiConfig>(value)
 
 /** Wraps the object form. */
-fun StringOrAskAiConfig(value: AskAiConfig): StringOrAskAiConfig = unsafeCast<StringOrAskAiConfig>(value)
+inline fun StringOrAskAiConfig(value: AskAiConfig): StringOrAskAiConfig = unsafeCast<StringOrAskAiConfig>(value)
 
 /** Upstream `AskAiConfig`. */
 external interface AskAiConfig {
@@ -271,10 +271,10 @@ external interface ReplaceSearchResultPathname {
 external interface StringOrFalseOrNull
 
 /** Wraps the string branch. */
-fun StringOrFalseOrNull(value: String): StringOrFalseOrNull = unsafeCast<StringOrFalseOrNull>(value)
+inline fun StringOrFalseOrNull(value: String): StringOrFalseOrNull = unsafeCast<StringOrFalseOrNull>(value)
 
 /** Wraps the `false` branch. */
-fun StringOrFalseOrNull(value: Boolean): StringOrFalseOrNull = unsafeCast<StringOrFalseOrNull>(value)
+inline fun StringOrFalseOrNull(value: Boolean): StringOrFalseOrNull = unsafeCast<StringOrFalseOrNull>(value)
 
 /** Upstream `ThemeConfig['mermaid']` from `@docusaurus/theme-mermaid`. */
 external interface MermaidThemeConfig {
@@ -298,7 +298,7 @@ external interface MermaidThemeByColorMode {
 sealed external interface MermaidTheme
 
 /** Wraps a value coming from JavaScript. Prefer [MermaidThemes]. */
-fun MermaidTheme(value: String): MermaidTheme = unsafeCast<MermaidTheme>(value)
+inline fun MermaidTheme(value: String): MermaidTheme = unsafeCast<MermaidTheme>(value)
 
 /** The literals of [MermaidTheme]. */
 object MermaidThemes {

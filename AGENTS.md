@@ -76,6 +76,25 @@ npm 包拆模块的原因。
 - 第三方主题与插件（`@easyops-cn/docusaurus-search-local` 等）的选项类型：各自在自己的 Kotlin 包里加。
 - Gradle 插件的 Maven 发布尚未接进 `release.yml`（它是独立构建，需要单独一条发布命令）。
 
+### 跨模块代码与 Kotlin/JS 的 DCE
+
+wrapper 是「纯声明」：工厂函数与字面量常量全部 `inline`，模块本身没有运行时代码。这不是风格偏好，
+而是硬约束——Kotlin/JS 的 library 二进制在没有 `@JsExport` 入口时会被 DCE 成空文件
+（`ktjs-docusaurus-*.mjs` 只有一百多字节），其他模块对它的任何运行时引用都会拿到 `undefined`
+（症状：`Cannot read properties of undefined`、`... is not a function`、webpack 报
+`'X…' is not exported from ...`）。
+
+推论：
+
+- wrapper 里不能有非 inline 的 `object` / 函数；`PrismThemes` 的每个 getter 都是 `inline val`，
+  `themes` 声明为 `@PublishedApi internal`，内联后直接落到消费方的 import。
+- kit 的类（`TocToggle`、`HomeHero`…）有真实逻辑，无法内联，因此**不能**被另一个 library 模块直接
+  引用——它的链接产物同样会被 DCE。要用 kit，消费方得是 `binaries.executable()`（webpack 把依赖模块
+  打进同一个包），或者 kit 用 `@JsExport` 暴露入口。
+- 插件已经支持接线（`clientModuleFunction`、`pageFunctions`、`pageBundle`、`additionalJs`），但 demo
+  目前只用了纯配置部分；首页与目录折叠的接线是下一步的工作。接线时注意：页面组件 import 的
+  `@theme/…` 只在 webpack 里可解析，所以它们必须待在另一个模块/包里，不能进 config bundle。
+
 ### 上游 API 建模约定
 
 wrapper 的目标是让上游 npm 包暴露的公开 API 在 Kotlin/JS 侧都能用，而不是只覆盖几个常用组件。动手前先

@@ -36,3 +36,8 @@ include(":ktjs-docusaurus")
 
 // Example documentation site: a Kotlin/JS project whose Markdown lives in `src/jsMain/resources`.
 include(":demo")
+
+
+// Reusable Kotlin/JS building blocks (home sections, TOC toggle). Deliberately a separate module
+// from the wrapper: the wrapper only maps npm packages, the kit contains logic of its own.
+include(":ktjs-docusaurus-kit")

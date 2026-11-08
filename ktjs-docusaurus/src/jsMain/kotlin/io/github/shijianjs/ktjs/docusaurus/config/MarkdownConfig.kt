@@ -128,26 +128,26 @@ external interface ParseFrontMatterResult {
 external interface ReportingSeverityOrOnBrokenMarkdownLinks
 
 /** Wraps the [ReportingSeverity] branch. */
-fun ReportingSeverityOrOnBrokenMarkdownLinks(
+inline fun ReportingSeverityOrOnBrokenMarkdownLinks(
     value: ReportingSeverity,
 ): ReportingSeverityOrOnBrokenMarkdownLinks = unsafeCast<ReportingSeverityOrOnBrokenMarkdownLinks>(value)
 
 /** Wraps the callback branch. */
-fun ReportingSeverityOrOnBrokenMarkdownLinks(
-    value: (OnBrokenMarkdownLinkParams) -> String,
+inline fun ReportingSeverityOrOnBrokenMarkdownLinks(
+    noinline value: (OnBrokenMarkdownLinkParams) -> String,
 ): ReportingSeverityOrOnBrokenMarkdownLinks = unsafeCast<ReportingSeverityOrOnBrokenMarkdownLinks>(value)
 
 /** Upstream `ReportingSeverity | OnBrokenMarkdownImagesFunction`. */
 external interface ReportingSeverityOrOnBrokenMarkdownImages
 
 /** Wraps the [ReportingSeverity] branch. */
-fun ReportingSeverityOrOnBrokenMarkdownImages(
+inline fun ReportingSeverityOrOnBrokenMarkdownImages(
     value: ReportingSeverity,
 ): ReportingSeverityOrOnBrokenMarkdownImages = unsafeCast<ReportingSeverityOrOnBrokenMarkdownImages>(value)
 
 /** Wraps the callback branch. */
-fun ReportingSeverityOrOnBrokenMarkdownImages(
-    value: (OnBrokenMarkdownImageParams) -> String,
+inline fun ReportingSeverityOrOnBrokenMarkdownImages(
+    noinline value: (OnBrokenMarkdownImageParams) -> String,
 ): ReportingSeverityOrOnBrokenMarkdownImages = unsafeCast<ReportingSeverityOrOnBrokenMarkdownImages>(value)
 
 /** The argument object of `OnBrokenMarkdownLinksFunction`. */

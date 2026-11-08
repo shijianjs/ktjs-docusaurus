@@ -63,49 +63,49 @@ external interface ClassicOptions {
  * }))
  * ```
  */
-fun classicPreset(options: ClassicOptions): PresetConfig = PresetConfig("classic", options)
+inline fun classicPreset(options: ClassicOptions): PresetConfig = PresetConfig("classic", options)
 
 /** Upstream `false | DocsOptions`. */
 external interface DocsOptionsOrFalse
 
 /** Wraps the [DocsOptions] branch. */
-fun DocsOptionsOrFalse(value: DocsOptions): DocsOptionsOrFalse = unsafeCast<DocsOptionsOrFalse>(value)
+inline fun DocsOptionsOrFalse(value: DocsOptions): DocsOptionsOrFalse = unsafeCast<DocsOptionsOrFalse>(value)
 
 /** Wraps the `false` branch. */
-fun DocsOptionsOrFalse(value: Boolean): DocsOptionsOrFalse = unsafeCast<DocsOptionsOrFalse>(value)
+inline fun DocsOptionsOrFalse(value: Boolean): DocsOptionsOrFalse = unsafeCast<DocsOptionsOrFalse>(value)
 
 /** Upstream `false | BlogOptions`. */
 external interface BlogOptionsOrFalse
 
 /** Wraps the [BlogOptions] branch. */
-fun BlogOptionsOrFalse(value: BlogOptions): BlogOptionsOrFalse = unsafeCast<BlogOptionsOrFalse>(value)
+inline fun BlogOptionsOrFalse(value: BlogOptions): BlogOptionsOrFalse = unsafeCast<BlogOptionsOrFalse>(value)
 
 /** Wraps the `false` branch. */
-fun BlogOptionsOrFalse(value: Boolean): BlogOptionsOrFalse = unsafeCast<BlogOptionsOrFalse>(value)
+inline fun BlogOptionsOrFalse(value: Boolean): BlogOptionsOrFalse = unsafeCast<BlogOptionsOrFalse>(value)
 
 /** Upstream `false | PagesOptions`. */
 external interface PagesOptionsOrFalse
 
 /** Wraps the [PagesOptions] branch. */
-fun PagesOptionsOrFalse(value: PagesOptions): PagesOptionsOrFalse = unsafeCast<PagesOptionsOrFalse>(value)
+inline fun PagesOptionsOrFalse(value: PagesOptions): PagesOptionsOrFalse = unsafeCast<PagesOptionsOrFalse>(value)
 
 /** Wraps the `false` branch. */
-fun PagesOptionsOrFalse(value: Boolean): PagesOptionsOrFalse = unsafeCast<PagesOptionsOrFalse>(value)
+inline fun PagesOptionsOrFalse(value: Boolean): PagesOptionsOrFalse = unsafeCast<PagesOptionsOrFalse>(value)
 
 /** Upstream `false | SitemapOptions`. */
 external interface SitemapOptionsOrFalse
 
 /** Wraps the [SitemapOptions] branch. */
-fun SitemapOptionsOrFalse(value: SitemapOptions): SitemapOptionsOrFalse = unsafeCast<SitemapOptionsOrFalse>(value)
+inline fun SitemapOptionsOrFalse(value: SitemapOptions): SitemapOptionsOrFalse = unsafeCast<SitemapOptionsOrFalse>(value)
 
 /** Wraps the `false` branch. */
-fun SitemapOptionsOrFalse(value: Boolean): SitemapOptionsOrFalse = unsafeCast<SitemapOptionsOrFalse>(value)
+inline fun SitemapOptionsOrFalse(value: Boolean): SitemapOptionsOrFalse = unsafeCast<SitemapOptionsOrFalse>(value)
 
 /** Upstream `false | SvgrOptions`. */
 external interface SvgrOptionsOrFalse
 
 /** Wraps the [SvgrOptions] branch. */
-fun SvgrOptionsOrFalse(value: SvgrOptions): SvgrOptionsOrFalse = unsafeCast<SvgrOptionsOrFalse>(value)
+inline fun SvgrOptionsOrFalse(value: SvgrOptions): SvgrOptionsOrFalse = unsafeCast<SvgrOptionsOrFalse>(value)
 
 /** Wraps the `false` branch. */
-fun SvgrOptionsOrFalse(value: Boolean): SvgrOptionsOrFalse = unsafeCast<SvgrOptionsOrFalse>(value)
+inline fun SvgrOptionsOrFalse(value: Boolean): SvgrOptionsOrFalse = unsafeCast<SvgrOptionsOrFalse>(value)

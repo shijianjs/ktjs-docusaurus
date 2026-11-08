@@ -8,7 +8,7 @@ description: Documentation sites as Kotlin/JS projects
 
 Write Docusaurus sites as Kotlin/JS projects.
 
-- The site configuration is Kotlin: `src/jsMain/kotlin/site/Config.kt`.
+- The site configuration is Kotlin: `src/jsMain/kotlin`.
 - The pages are Markdown in `src/jsMain/resources`.
 - Gradle assembles the site and runs Docusaurus on it.
 

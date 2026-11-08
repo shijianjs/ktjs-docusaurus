@@ -125,23 +125,23 @@ external interface DocsAdmonitionOptions {
 external interface NumberPrefixParserOrBoolean
 
 /** Wraps the [Boolean] branch. */
-fun NumberPrefixParserOrBoolean(value: Boolean): NumberPrefixParserOrBoolean =
+inline fun NumberPrefixParserOrBoolean(value: Boolean): NumberPrefixParserOrBoolean =
     unsafeCast<NumberPrefixParserOrBoolean>(value)
 
 /** Wraps the callback branch. */
-fun NumberPrefixParserOrBoolean(
-    value: (String) -> DocsNumberPrefix,
+inline fun NumberPrefixParserOrBoolean(
+    noinline value: (String) -> DocsNumberPrefix,
 ): NumberPrefixParserOrBoolean = unsafeCast<NumberPrefixParserOrBoolean>(value)
 
 /** Upstream `boolean | Partial<AdmonitionOptions>`. */
 external interface BooleanOrDocsAdmonitionOptions
 
 /** Wraps the [Boolean] branch. */
-fun BooleanOrDocsAdmonitionOptions(value: Boolean): BooleanOrDocsAdmonitionOptions =
+inline fun BooleanOrDocsAdmonitionOptions(value: Boolean): BooleanOrDocsAdmonitionOptions =
     unsafeCast<BooleanOrDocsAdmonitionOptions>(value)
 
 /** Wraps the options branch. */
-fun BooleanOrDocsAdmonitionOptions(
+inline fun BooleanOrDocsAdmonitionOptions(
     value: DocsAdmonitionOptions,
 ): BooleanOrDocsAdmonitionOptions = unsafeCast<BooleanOrDocsAdmonitionOptions>(value)
 
@@ -149,12 +149,12 @@ fun BooleanOrDocsAdmonitionOptions(
 external interface StringOrDocsEditUrlFunction
 
 /** Wraps the [String] branch. */
-fun StringOrDocsEditUrlFunction(value: String): StringOrDocsEditUrlFunction =
+inline fun StringOrDocsEditUrlFunction(value: String): StringOrDocsEditUrlFunction =
     unsafeCast<StringOrDocsEditUrlFunction>(value)
 
 /** Wraps the callback branch. */
-fun StringOrDocsEditUrlFunction(
-    value: (DocsEditUrlParams) -> String?,
+inline fun StringOrDocsEditUrlFunction(
+    noinline value: (DocsEditUrlParams) -> String?,
 ): StringOrDocsEditUrlFunction = unsafeCast<StringOrDocsEditUrlFunction>(value)
 
 /** The argument object of `EditUrlFunction`. */

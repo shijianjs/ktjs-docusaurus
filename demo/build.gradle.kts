@@ -17,8 +17,7 @@ kotlin {
         nodejs()
 
         // A library binary: the plugin copies the linked module next to the site and the generated
-        // `docusaurus.config.mjs` imports the exported configuration from it. No webpack bundle is
-        // involved, so the configuration stays a normal Kotlin/JS module.
+        // `docusaurus.config.mjs` imports the exported configuration from it.
         binaries.library()
     }
 
@@ -29,7 +28,6 @@ kotlin {
     sourceSets {
         jsMain.dependencies {
             implementation(project(":ktjs-docusaurus"))
-            implementation("org.jetbrains.kotlin:kotlin-js-plain-objects:2.4.21")
         }
     }
 }

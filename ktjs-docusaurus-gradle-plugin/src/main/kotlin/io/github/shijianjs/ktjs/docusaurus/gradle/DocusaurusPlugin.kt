@@ -58,6 +58,10 @@ class DocusaurusPlugin : Plugin<Project> {
         val compiledJs = project.files(
             project.layout.buildDirectory.dir("compileSync/js/main/productionLibrary/kotlin"),
             project.layout.buildDirectory.dir("compileSync/js/main/productionExecutable/kotlin"),
+            // Webpack output of an `executable` binary: one file that already contains the
+            // dependency modules. A `library` binary is not usable here — its output is
+            // dead-code-eliminated down to nothing when the module has no `@JsExport` entry point.
+            project.layout.buildDirectory.dir("dist/js/productionExecutable"),
         )
 
         val siteTask = project.tasks.register("docusaurusSite", DocusaurusSiteTask::class.java) {
@@ -69,6 +73,10 @@ class DocusaurusPlugin : Plugin<Project> {
             it.siteDir.set(siteDirectory)
             it.configFunction.set(project.provider { extension.configFunction })
             it.sidebarsFunction.set(project.provider { extension.sidebarsFunction ?: "" })
+            it.clientModuleFunction.set(project.provider { extension.clientModuleFunction ?: "" })
+            it.pageFunctions.set(project.provider { extension.pageFunctions })
+            it.pageBundle.set(project.provider { extension.pageBundle ?: "" })
+            it.additionalJs.from(extension.additionalJs)
 
             // `jsProductionLibraryCompileSync` is the task that links the js target's main library
             // into `.mjs` files; `compileKotlinJs` alone only produces the klib. A live collection

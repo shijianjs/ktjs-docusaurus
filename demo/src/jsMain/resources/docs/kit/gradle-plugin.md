@@ -1,0 +1,75 @@
+---
+sidebar_position: 3
+---
+
+# Gradle plugin
+
+`io.github.shijianjs.ktjs.docusaurus` assembles a Docusaurus site from a Kotlin/JS module and runs
+the CLI on it.
+
+```kotlin
+plugins {
+    kotlin("multiplatform")
+    id("io.github.shijianjs.ktjs.docusaurus")
+}
+
+docusaurus {
+    sidebarsFunction = "sidebars"
+    clientModuleFunction = "onRouteDidUpdate"
+    pageFunctions = mapOf("index" to "homePage")
+}
+```
+
+## What it generates
+
+| Output | From |
+| --- | --- |
+| `docusaurus.config.mjs` | the exported `configFunction` |
+| `sidebars.mjs` | the exported `sidebarsFunction` |
+| `client-module.mjs` | the exported `clientModuleFunction` |
+| `src/pages/<name>.jsx` | the exported component named in `pageFunctions` |
+| `docs/`, `blog/`, `src/`, `static/`, `i18n/` | the module's resources |
+| `generated/` | the compiled Kotlin/JS output |
+
+## Tasks
+
+| Task | Effect |
+| --- | --- |
+| `docusaurusSite` | assembles the site directory |
+| `docusaurusBuild` | writes the static site under `<site>/build` |
+| `docusaurusStart` | dev server, watching the site directory |
+| `docusaurusServe` | serves the last build |
+| `docusaurusClear` | drops the Docusaurus caches |
+
+## Where the site lives
+
+`<root>/build/js/docusaurus/<module>`. It has to sit inside the Kotlin/JS npm workspace: that is
+what Node walks up to when it resolves `@docusaurus/core`, so there is no second `npm install` and
+no symlink.
+
+Two consequences worth knowing:
+
+- the generated `package.json` has **no** `"type": "module"` — Docusaurus writes CommonJS bundles
+  and loads them as CJS; the `.mjs` shims are ES modules on their own;
+- the site task is not a Gradle output (it is declared `@Internal`), because everything under
+  `build/js` belongs to the npm workspace.
+
+## Pages need a second module
+
+A page component imports `@theme/Layout`, and those aliases only exist inside Docusaurus' webpack
+build. The configuration is loaded by Node, so a page component in the same bundle would break the
+build while the config loads. Keep the pages in their own Kotlin/JS module and point at it:
+
+```kotlin
+docusaurus {
+    pageFunctions = mapOf("index" to "homePage")
+    pageBundle = "ktjs-docusaurus-demo-ui.mjs"
+    additionalJs.from(
+        project(":demo-ui").layout.buildDirectory.dir("compileSync/js/main/productionLibrary/kotlin"),
+    )
+}
+
+tasks.named("docusaurusSite") {
+    dependsOn(":demo-ui:jsProductionLibraryCompileSync")
+}
+```
