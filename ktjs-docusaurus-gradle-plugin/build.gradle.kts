@@ -35,7 +35,7 @@ gradlePlugin {
     plugins {
         create("docusaurus") {
             id = "io.github.shijianjs.docusaurus"
-            implementationClass = "io.github.shijianjs.docusaurus.gradle.DocusaurusPlugin"
+            implementationClass = "io.github.shijianjs.ktjs.docusaurus.gradle.DocusaurusPlugin"
             displayName = "ktjs-docusaurus"
             description = "Generates and builds a Docusaurus site from a Kotlin/JS project."
         }
