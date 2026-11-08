@@ -31,7 +31,7 @@ TypeScript。这个项目把前两层换成 Kotlin/JS：
 | 部分 | 作用 |
 | --- | --- |
 | `ktjs-docusaurus` | Kotlin/JS wrapper：站点配置、主题配置、侧边栏、preset 与插件选项的类型声明 |
-| `ktjs-docusaurus-gradle-plugin` | Gradle 插件 `io.github.shijianjs.docusaurus`：把 Kotlin/JS 模块组装成 Docusaurus 站点并运行它 |
+| `ktjs-docusaurus-gradle-plugin` | Gradle 插件 `io.github.shijianjs.ktjs.docusaurus`：把 Kotlin/JS 模块组装成 Docusaurus 站点并运行它 |
 | `demo` | 示例站点：`src/jsMain/resources` 下的 Markdown + `src/jsMain/kotlin/site/Config.kt` |
 
 ## 用法
@@ -39,7 +39,7 @@ TypeScript。这个项目把前两层换成 Kotlin/JS：
 ```kotlin
 plugins {
     kotlin("multiplatform")
-    id("io.github.shijianjs.docusaurus")
+    id("io.github.shijianjs.ktjs.docusaurus")
 }
 
 kotlin {

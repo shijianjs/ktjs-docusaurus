@@ -13,7 +13,7 @@ import java.io.File
  * ```kotlin
  * plugins {
  *     kotlin("multiplatform")
- *     id("io.github.shijianjs.docusaurus")
+ *     id("io.github.shijianjs.ktjs.docusaurus")
  * }
  *
  * docusaurus {

@@ -19,7 +19,7 @@ Gradle 插件驱动。Kotlin/JS 模块名、`wrapper-revisions.properties` 的 k
 
 - `ktjs-docusaurus`：发布模块。Docusaurus 的每个 npm 包在这里只是一个 Kotlin 包（`config`、`theme`、
   `sidebars`、`presets`、`plugins/contentdocs` …），不按 npm 包拆 Gradle 模块。
-- `ktjs-docusaurus-gradle-plugin`：Gradle 插件 `io.github.shijianjs.docusaurus`，是**独立构建**，由
+- `ktjs-docusaurus-gradle-plugin`：Gradle 插件 `io.github.shijianjs.ktjs.docusaurus`，是**独立构建**，由
   `settings.gradle.kts` 的 `pluginManagement { includeBuild(...) }` 接入，所以 `demo` 能把它当普通插件用。
   它不在 root 构建的子项目里：`./gradlew build` 不编译它，`includeBuild` 在配置阶段按需编译。
 - `demo`：示例站点（Markdown + Kotlin 配置），不发布、不进 Dokka，是 GitHub Pages 的内容。
