@@ -10,7 +10,7 @@ Write Docusaurus sites as Kotlin/JS projects.
 
 - The site configuration is Kotlin: `src/jsMain/kotlin`.
 - The pages are Markdown in `src/jsMain/resources`.
-- Gradle assembles the site and runs Docusaurus on it.
+- The table of contents gets a collapse control, wired from Kotlin through a client module.
 
 ```bash
 ./gradlew :demo:docusaurusBuild

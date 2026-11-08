@@ -70,6 +70,10 @@ fun docusaurusConfig(): Config = unsafeJso {
         }.unsafeCast<Record<JsAny, I18nLocaleConfig>>()
     }
 
+    // The TOC toggle is Kotlin: the generated shim re-exports `onRouteDidUpdate` from the compiled
+    // module, and Docusaurus calls it after every route change.
+    clientModules = arrayOf("./client-module.mjs")
+
     presets = arrayOf<PresetConfig?>(
         classicPreset(
             unsafeJso {

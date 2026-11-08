@@ -9,7 +9,6 @@ package io.github.shijianjs.ktjs.docusaurus.theme
  * would compile to `import { Something } from ...` and the package has no such export. Read it
  * through [PrismThemes].
  */
-@PublishedApi
 internal external val themes: PrismThemeCollection
 
 /** The members of `prism-react-renderer`'s `themes` export. */

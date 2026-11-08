@@ -19,6 +19,10 @@ kotlin {
     }
 
     compilerOptions {
+        // The library output must keep every public declaration: the Kotlin/JS linker
+        // dead-code-eliminates a library down to its @JsExport roots by default, which would leave
+        // this module's classes missing from the bundle a consumer imports. See AGENTS.md.
+        freeCompilerArgs.add("-Xir-dce=false")
         optIn.add("kotlin.js.ExperimentalWasmJsInterop")
     }
 

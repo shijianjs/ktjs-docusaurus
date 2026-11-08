@@ -75,6 +75,21 @@ plugins.withType<NodeJsRootPlugin> {
 // The public API must use kotlin-browser's web.* types. Kotlin/JS's own org.w3c.dom.* and
 // kotlinx.browser.* compile and run against the same objects, but the compiler treats them as
 // unrelated types, which breaks callers that use kotlin-browser. detekt.yml forbids the imports.
+// Kotlin/JS links every library module with IR dead-code elimination on by default, keeping only
+// what is reachable from that module's own `@JsExport` roots. A wrapper module has no such roots, so
+// its `.mjs` output would be empty and any cross-module reference would resolve to `undefined`.
+// Turning it off keeps the public API of each module in its output. It is applied to every KMP
+// module — including the demo — because each module is linked separately.
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
+            compilerOptions {
+                freeCompilerArgs.add("-Xir-dce=false")
+            }
+        }
+    }
+}
+
 subprojects {
     apply(plugin = "dev.detekt")
 

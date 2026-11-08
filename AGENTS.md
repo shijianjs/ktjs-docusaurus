@@ -76,24 +76,33 @@ npm 包拆模块的原因。
 - 第三方主题与插件（`@easyops-cn/docusaurus-search-local` 等）的选项类型：各自在自己的 Kotlin 包里加。
 - Gradle 插件的 Maven 发布尚未接进 `release.yml`（它是独立构建，需要单独一条发布命令）。
 
-### 跨模块代码与 Kotlin/JS 的 DCE
+### Kotlin/JS 的 DCE 与跨模块代码
 
-wrapper 是「纯声明」：工厂函数与字面量常量全部 `inline`，模块本身没有运行时代码。这不是风格偏好，
-而是硬约束——Kotlin/JS 的 library 二进制在没有 `@JsExport` 入口时会被 DCE 成空文件
-（`ktjs-docusaurus-*.mjs` 只有一百多字节），其他模块对它的任何运行时引用都会拿到 `undefined`
-（症状：`Cannot read properties of undefined`、`... is not a function`、webpack 报
-`'X…' is not exported from ...`）。
+Kotlin/JS 的 library 链接**默认开 IR DCE，入口只有该模块自己的 `@JsExport`**。没有任何 `@JsExport` 的
+模块（wrapper 正是这种）产出的 `.mjs` 会被削成一百多字节，别的模块对它的任何引用在运行时都是
+`undefined`（症状：`... is not a function`、`Cannot read properties of undefined`、webpack 报
+`'X…' is not exported from …`）。
 
-推论：
+实测（临时探针函数 `dceProbe`）：
 
-- wrapper 里不能有非 inline 的 `object` / 函数；`PrismThemes` 的每个 getter 都是 `inline val`，
-  `themes` 声明为 `@PublishedApi internal`，内联后直接落到消费方的 import。
-- kit 的类（`TocToggle`、`HomeHero`…）有真实逻辑，无法内联，因此**不能**被另一个 library 模块直接
-  引用——它的链接产物同样会被 DCE。要用 kit，消费方得是 `binaries.executable()`（webpack 把依赖模块
-  打进同一个包），或者 kit 用 `@JsExport` 暴露入口。
-- 插件已经支持接线（`clientModuleFunction`、`pageFunctions`、`pageBundle`、`additionalJs`），但 demo
-  目前只用了纯配置部分；首页与目录折叠的接线是下一步的工作。接线时注意：页面组件 import 的
-  `@theme/…` 只在 webpack 里可解析，所以它们必须待在另一个模块/包里，不能进 config bundle。
+| 场景 | 产物大小 | 探针是否保留 |
+| --- | --- | --- |
+| 无 `@JsExport` | 106 B | 否 |
+| 有 `@JsExport fun x() = dceProbe(...)` | 303 B | 是（被导出根引用到） |
+| `-Xir-dce=false` | 45,725 B | 是 |
+
+所以根构建给**每个 KMP 子模块**统一加 `freeCompilerArgs.add("-Xir-dce=false")`。必须逐个模块加：每个模块
+独立链接，只给 wrapper 加而 demo 不加，demo 自己的 public 声明仍会被削掉。
+
+两个连带约束：
+
+- 依赖模块的 `.mjs` 由它自己的链接任务产出，站点组装前必须先链接它们。`docusaurusSite` 只依赖本模块的
+  链接任务，跨项目的依赖要显式
+  `dependsOn(":ktjs-docusaurus:jsProductionLibraryCompileSync", ":ktjs-docusaurus-kit:jsProductionLibraryCompileSync")`，
+  否则站点目录里会拷到上一次的空产物。
+- 页面组件 import 的 `@theme/…` 只在 webpack 里可解析，所以它们必须待在另一个模块里，不能进 config
+  bundle（`docusaurus.config.mjs` 由 Node 加载）。插件的 `clientModuleFunction` / `pageFunctions` /
+  `pageBundle` / `additionalJs` 就是给这种「第二个 bundle」准备的。
 
 ### 上游 API 建模约定
 
