@@ -79,4 +79,5 @@ Gradle 插件与配置一起发布，版本跟随上游 Docusaurus（`{上游版
 ## 文档
 
 - `AGENTS.md`：构建约定、模块结构、上游 API 建模规则与已知取舍。
-- `TYPE-MAPPING.md`：上游 TypeScript 到 Kotlin 类型的对照与写法。
+- `.agents/skills/ktjs-type-mapping/`：上游 TypeScript 到 Kotlin 类型的对照与写法，由
+  [`shijianjs/dev-agent-skills`](https://github.com/shijianjs/dev-agent-skills) 分发。
