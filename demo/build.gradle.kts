@@ -29,7 +29,7 @@ kotlin {
     sourceSets {
         jsMain.dependencies {
             implementation(project(":ktjs-docusaurus"))
-            implementation("org.jetbrains.kotlin:kotlin-js-plain-objects:2.2.0")
+            implementation("org.jetbrains.kotlin:kotlin-js-plain-objects:2.4.21")
         }
     }
 }
