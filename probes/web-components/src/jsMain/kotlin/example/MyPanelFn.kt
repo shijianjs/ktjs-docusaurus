@@ -46,9 +46,12 @@ class MyPanelFn : HTMLElement() {
     @JsName("connectedCallback")
     fun onConnected() {
         console.log("MyPanelFn connected!")
-        // Call the parent implementation directly, bypassing the forwarders on `this`' prototype.
+        // Two pairs of calls: `super.*` starts at the native DOM prototype, `this.*` starts at the
+        // generated forwarders. `getAttribute` works either way; `querySelectorAll` overflows on `this`.
         console.log("MyPanelFn data-x=" + super.getAttribute("data-x"))
         console.log("MyPanelFn spans=" + super.querySelectorAll("span").length)
+        console.log("MyPanelFn data-x=" + getAttribute("data-x"))
+        console.log("MyPanelFn spans=" + querySelectorAll("span").length)
     }
 
     companion object : CustomElementReference<MyPanelFn>(MyPanelFn::class.js) {
