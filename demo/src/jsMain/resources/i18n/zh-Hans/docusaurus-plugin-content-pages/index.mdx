@@ -1,0 +1,38 @@
+---
+title: ktjs-docusaurus
+description: 用 Kotlin/JS 写 Docusaurus 站点
+hide_table_of_contents: true
+---
+
+{/* `<ktjs-…>` 标签由站点的客户端模块升级成工具箱里的分区；`href` 写成相对路径，中英文两种
+    locale 前缀下都能解析。 */}
+
+<ktjs-hero logo-src="img/favicon.svg" title="ktjs-docusaurus" tagline="用 Kotlin/JS 写 Docusaurus 站点">
+
+<ktjs-action kind="primary" href="docs/intro">开始阅读</ktjs-action>
+
+<ktjs-action kind="secondary" href="https://github.com/shijianjs/ktjs-docusaurus" icon="simple-icons:github">GitHub</ktjs-action>
+
+</ktjs-hero>
+
+<ktjs-features section-title="为什么用它" tinted>
+
+<ktjs-feature icon="lucide:file-code-2" title="配置就是 Kotlin">站点配置、主题配置、侧边栏都是带类型的 Kotlin 值；字段拼错是编译错误，不是构建期的校验提示。</ktjs-feature>
+
+<ktjs-feature icon="lucide:package" title="没有要维护的 npm 工程">版本集中在一个 package.json 里交给 Dependabot，node_modules 由 Kotlin/JS 工作区安装，Docusaurus CLI 由 Gradle 调用。</ktjs-feature>
+
+<ktjs-feature icon="lucide:folder-tree" title="Markdown 还是 Markdown">页面放在 src/jsMain/resources 下，和编译产物一起拷进站点；正文不需要组件树。</ktjs-feature>
+
+<ktjs-feature icon="lucide:blocks" title="其余的交给工具箱">首页分区和目录折叠都直接对着 DOM 写，纯 Markdown 站点也能用，不拖一套组件运行时进来。</ktjs-feature>
+
+</ktjs-features>
+
+<ktjs-next-steps section-title="接下来">
+
+<ktjs-step href="docs/intro" title="简介">这个项目是什么，一个站点怎么组织。</ktjs-step>
+
+<ktjs-step href="docs/kit/overview" title="工具箱">首页分区与目录折叠，以及它们的 API。</ktjs-step>
+
+<ktjs-step href="docs/kit/gradle-plugin" title="Gradle 插件">站点目录怎么组装，有哪些任务。</ktjs-step>
+
+</ktjs-next-steps>

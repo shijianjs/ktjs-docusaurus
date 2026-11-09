@@ -18,12 +18,13 @@ It exists because a documentation site needs three things that no npm package pr
 
 ## Why DOM and not components
 
-The sections are mounted by a React page, but React only owns the shell: three empty `<div>`s. The
-sections build their own subtree once and mutate only the nodes they own afterwards, so a re-render
-never rebuilds a card and the page has nothing to reconcile.
+A landing page is mostly static, and MDX carries the little dynamic part the sections need: the page
+writes `<ktjs-hero>` / `<ktjs-features>` / `<ktjs-next-steps>` tags, and the client module upgrades
+them once. No `.tsx` file, no React page, nothing to reconcile.
 
-That also keeps the kit usable from a site with no React page at all — a Markdown page plus a client
-module is enough.
+The sections build their own subtree once and mutate only the nodes they own afterwards, so a
+re-render (or a second upgrade pass) never rebuilds a card. That also keeps the kit usable from a
+site that has no React at all — a Markdown page plus a client module is enough.
 
 ## Icons
 

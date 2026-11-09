@@ -1,0 +1,39 @@
+---
+title: ktjs-docusaurus
+description: Documentation sites as Kotlin/JS projects
+hide_table_of_contents: true
+---
+
+{/* The `<ktjs-…>` tags are turned into the kit's sections by the site's client module, which runs
+    after every route change. `href`s stay relative so the same page works under both locale
+    prefixes (`/ktjs-docusaurus/` and `/ktjs-docusaurus/zh-Hans/`). */}
+
+<ktjs-hero logo-src="img/favicon.svg" title="ktjs-docusaurus" tagline="Documentation sites as Kotlin/JS projects">
+
+<ktjs-action kind="primary" href="docs/intro">Get started</ktjs-action>
+
+<ktjs-action kind="secondary" href="https://github.com/shijianjs/ktjs-docusaurus" icon="simple-icons:github">GitHub</ktjs-action>
+
+</ktjs-hero>
+
+<ktjs-features section-title="Why this project" tinted>
+
+<ktjs-feature icon="lucide:file-code-2" title="Configuration is Kotlin">The site config, the theme config and the sidebars are typed Kotlin values; a misspelt field is a compile error, not a validation message at build time.</ktjs-feature>
+
+<ktjs-feature icon="lucide:package" title="No npm project to maintain">Versions live in one package.json for Dependabot, node_modules is installed by the Kotlin/JS workspace, and the Docusaurus CLI is invoked by Gradle.</ktjs-feature>
+
+<ktjs-feature icon="lucide:folder-tree" title="Markdown stays Markdown">Pages live under src/jsMain/resources and are copied next to the compiled Kotlin. Prose does not need a component tree.</ktjs-feature>
+
+<ktjs-feature icon="lucide:blocks" title="A kit for the rest">Home sections and the TOC toggle are written against the DOM, so they work in a Markdown-only site and drag no component runtime along.</ktjs-feature>
+
+</ktjs-features>
+
+<ktjs-next-steps section-title="Where to go next">
+
+<ktjs-step href="docs/intro" title="Introduction">What the project is and how a site is laid out.</ktjs-step>
+
+<ktjs-step href="docs/kit/overview" title="The kit">Home sections and the TOC toggle, with their API.</ktjs-step>
+
+<ktjs-step href="docs/kit/gradle-plugin" title="Gradle plugin">How the site directory is assembled and which tasks exist.</ktjs-step>
+
+</ktjs-next-steps>

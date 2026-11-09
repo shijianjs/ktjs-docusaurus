@@ -72,9 +72,27 @@ npm 包拆模块的原因。
 
 - `@docusaurus/core` 的运行时导出（`build` / `start` / `serve` / `swizzle` …）：Gradle 插件直接调 CLI，
   Kotlin 侧暂时用不到；
-- 主题组件与 `@theme/…` 别名（React 组件与 hooks）：这一层要用 kotlin-react，等有实际需求再接；
+- 主题组件与 `@theme/…` 别名（React 组件与 hooks）：wrapper 的 `client` 包已经把 `Layout`、`Heading`、
+  `Link`、`Translate`、`useDocusaurusContext` 等声明好了（kotlin-react），但**站点默认不写 tsx 页面**。
+  首页这类「静态为主 + 少量动态」的页面用 MDX：页面里写 `<ktjs-…>` 标签，由 client module 升级成
+  kit 的分区（见下文「页面用 MDX」）。`client` 包留给确实需要组件树的人；
 - 第三方主题与插件（`@easyops-cn/docusaurus-search-local` 等）的选项类型：各自在自己的 Kotlin 包里加。
 - Gradle 插件的 Maven 发布尚未接进 `release.yml`（它是独立构建，需要单独一条发布命令）。
+
+### 页面用 MDX，不用 tsx
+
+首页这类「静态为主 + 少量动态」的页面用 `src/jsMain/resources/pages/index.mdx`：里面写
+`<ktjs-hero>` / `<ktjs-features>` / `<ktjs-next-steps>` 标签，client module 在 `onRouteDidUpdate` 里
+调用 `upgradeHomeElements()` 把它们升级成 kit 的分区。做法与 duckfn 站点一致，区别只是那边每个分区是一个
+自定义元素类，这里是「未知标签 + 一次性升级」。
+
+- `href` 写**相对页面**的路径（`docs/intro`），中英文 locale 前缀都能解析；不要写 `/docs/intro`，那会把
+  baseUrl 写死，中文页会 404。
+- 升级过的元素带 `data-ktjs-upgraded`，重复调用无副作用（StrictMode、客户端导航都会再调一次）。
+- 文案在 MDX 里，翻译放 `i18n/<locale>/docusaurus-plugin-content-pages/index.mdx`；不要为了 i18n 把
+  文案塞回 Kotlin。
+- 确实需要组件树时（交互复杂、props 要计算），再引入第二个模块 + `pageFunctions`。`clientModuleFunction`
+  与 `pageFunctions` 两条接线插件都支持，但默认不该走那条路。
 
 ### Kotlin/JS 的 DCE 与跨模块代码
 
