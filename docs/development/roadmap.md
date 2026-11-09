@@ -14,9 +14,9 @@
 | 状态 | 数量 |
 | --- | ---: |
 | 总计 | 44 |
-| 已完成 | 27 |
+| 已完成 | 29 |
 | 明确不做 | 4 |
-| 待完成 | 13 |
+| 待完成 | 11 |
 
 ## 1. 项目形态（6 项，全部完成）
 
@@ -70,15 +70,15 @@
 | colormath 颜色计算 | 组件只读 `--ktjs-*` 自定义属性，不参与颜色运算 |
 | Playwright 相关 | kit 不需要浏览器测试；duckfn 那套已有 JVM 实现 |
 
-## 5. demo 文档站（7 项：3 完成 / 4 待完成）
+## 5. demo 文档站（7 项：5 完成 / 2 待完成）
 
 - 5.1 首页 MDX + 自定义元素（`ktjs-hero` / `ktjs-features` / `ktjs-next-steps`）
 - 5.2 双语 i18n 配置（en / zh-Hans）
 - 5.3 英文文档页（`intro`、`guide/*`、`kit/*`）
 - 5.4 中文翻译：`guide/content`、`kit/home-sections`、`kit/toc-toggle`、`kit/gradle-plugin` —— **待完成**
 - 5.5 导航栏两个大分类（User guide / Docs kit）
-- 5.6 TOC 在客户端导航后重新挂载 —— **待完成**；现在只在页面加载时 `install()` + `refresh()`
-- 5.7 首页与 kit 的运行时验收（浏览器里实际点开确认） —— **待完成**；目前只验证了构建与产物形态
+- 5.6 TOC 在客户端导航后重新挂载（`onRouteDidUpdate` 每次路由变化都 `refresh()`）
+- 5.7 首页与 kit 的运行时验收（headless Chrome：hero 1 / 卡片 4 / 步骤 3，console 无错误）
 
 ## 6. 跨仓库构建约定（5 项：2 完成 / 3 待完成）
 
