@@ -1,5 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit
 
+import js.reflect.unsafeCast
 import web.dom.Element
 import web.html.HTMLElement
 
@@ -8,20 +9,32 @@ import web.html.HTMLElement
  *
  * The declarative spelling — `<ktjs-hero title="…"><ktjs-action kind="primary" href="…">Get started</ktjs-action>`
  * — belongs to the kit, not to the site: every site that uses these sections would otherwise repeat
- * the same attribute names, child tags and cleanup. A site only supplies the element classes and the
- * tag names (see the demo's `HomeElements.kt`).
+ * the same attribute names, child tags and cleanup. A site only supplies the tag names and the binding
+ * (see the demo's `HomeElements.kt`).
  *
- * Each `bind*` is idempotent: the section is created on the first call and kept in a map keyed by the
- * host, so re-connecting the element (StrictMode, client-side navigation) does not build a second one.
- * The declarative children are consumed once and removed, guarded by [READ_ATTRIBUTE].
+ * **The section lives on the element it renders into.** `connectedCallback` runs more than once for
+ * the same host (StrictMode, re-mount, client-side navigation), and each run must find the section it
+ * built the first time instead of appending a second one. That state is stored as a property on the
+ * element itself — see [HomeHostState] — so it is released together with the element. An external map
+ * keyed by host would keep every host alive for the lifetime of the page.
+ *
+ * The attributes are re-read on every call (the copy stays authoritative); the child tags are consumed
+ * once, guarded by [READ_ATTRIBUTE].
  */
-private val heroes = mutableMapOf<HTMLElement, HomeHero>()
-private val featureSections = mutableMapOf<HTMLElement, FeatureSection>()
-private val nextStepSections = mutableMapOf<HTMLElement, NextStepSection>()
+private external interface HomeHostState {
+    var ktjsHero: HomeHero?
+
+    var ktjsFeatures: FeatureSection?
+
+    var ktjsNextSteps: NextStepSection?
+}
+
+private fun HTMLElement.state(): HomeHostState = unsafeCast(this)
 
 /** Fills a `<ktjs-hero>` element from its attributes and `<ktjs-action>` / `<ktjs-badge>` children. */
 fun bindHomeHero(host: HTMLElement): HomeHero {
-    val component = heroes.getOrPut(host) { HomeHero(host) }
+    val state = host.state()
+    val component = state.ktjsHero ?: HomeHero(host).also { state.ktjsHero = it }
 
     host.getAttribute("logo-src")?.let(component::setLogo)
     component.setTitle(host.getAttribute("title").orEmpty())
@@ -61,9 +74,9 @@ fun bindHomeHero(host: HTMLElement): HomeHero {
 
 /** Fills a `<ktjs-features>` element from its attributes and `<ktjs-feature>` children. */
 fun bindFeatureSection(host: HTMLElement): FeatureSection {
-    val component = featureSections.getOrPut(host) {
-        FeatureSection(host, tinted = host.hasAttribute("tinted"))
-    }
+    val state = host.state()
+    val component = state.ktjsFeatures ?: FeatureSection(host, tinted = host.hasAttribute("tinted"))
+        .also { state.ktjsFeatures = it }
 
     host.getAttribute("section-title")?.let(component::setSectionTitle)
 
@@ -85,7 +98,8 @@ fun bindFeatureSection(host: HTMLElement): FeatureSection {
 
 /** Fills a `<ktjs-next-steps>` element from its attributes and `<ktjs-step>` children. */
 fun bindNextStepSection(host: HTMLElement): NextStepSection {
-    val component = nextStepSections.getOrPut(host) { NextStepSection(host) }
+    val state = host.state()
+    val component = state.ktjsNextSteps ?: NextStepSection(host).also { state.ktjsNextSteps = it }
 
     host.getAttribute("section-title")?.let(component::setSectionTitle)
 

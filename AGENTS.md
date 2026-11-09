@@ -436,6 +436,15 @@ update(data) { this.replaceChildren(); this.render(data); }   // 禁止
   `matchMedia` 等外部对象上的，必须在 `disconnectedCallback()` 里移除，注册用幂等标志
   （元素移动或框架重挂载会再次触发 `connectedCallback()`）。
 
+### 状态挂在宿主元素上，不用外部容器
+
+「跟着某个 DOM 元素走」的状态（分区实例、一次性消费标记）直接存在元素自身：一个 `external
+interface` 声明私有字段，`unsafeCast` 过去读写，元素被移除时状态随之释放。
+
+外部 `MutableMap<HTMLElement, …>` 会把每个宿主都强引用住——文档站每次进首页都新建一批元素，导航几次
+就攒下一堆永不回收的实例。`connectedCallback` 需要「找到自己上次建的那个分区」时，用元素上的字段而不是
+全局索引（见 `HomeBindings.kt` 的 `HomeHostState`）。
+
 ### 组件用 class，但不建通用组件基类
 
 一个组件一个类，自带字段、构造时组装、自己的 setter；不做 `create()` / `apply()` 之类的模板方法抽象，
