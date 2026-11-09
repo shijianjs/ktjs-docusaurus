@@ -141,15 +141,40 @@ class DocusaurusPlugin : Plugin<Project> {
     }
 
     /**
-     * The Node runtime Kotlin/JS downloads, falling back to whatever `node` is on `PATH`.
+     * The Node runtime Kotlin/JS installed, falling back to whatever `node` is on `PATH`.
+     *
+     * Older KGP releases unpacked Node under the npm workspace (`build/js/node`); current ones keep
+     * it in the Gradle user home (`nodejs/node-v<version>-<platform>`), so both are checked before
+     * giving up on `PATH`.
      */
     private fun detectNode(npmWorkspace: File): String {
-        val nodeDir = npmWorkspace.resolve("node")
-        return listOf(
-            nodeDir.resolve("node.exe"),
-            nodeDir.resolve("bin/node"),
-            nodeDir.resolve("node"),
-        ).firstOrNull { it.isFile }?.path ?: "node"
+        val inWorkspace = npmWorkspace.resolve("node")
+        listOf(
+            inWorkspace.resolve("node.exe"),
+            inWorkspace.resolve("bin/node"),
+            inWorkspace.resolve("node"),
+        ).firstOrNull { it.isFile }?.let { return it.path }
+
+        val gradleUserHome = System.getProperty("gradle.user.home")
+            ?.let(::File)
+            ?: File(System.getProperty("user.home"), ".gradle")
+        File(gradleUserHome, "nodejs")
+            .listFiles()
+            .orEmpty()
+            .filter { it.isDirectory }
+            .sortedByDescending { it.name }
+            .map { directory ->
+                listOf(
+                    File(directory, "node.exe"),
+                    File(directory, "bin/node"),
+                    File(directory, "node"),
+                )
+            }
+            .flatten()
+            .firstOrNull { it.isFile }
+            ?.let { return it.path }
+
+        return "node"
     }
 
     private companion object {
