@@ -46,6 +46,32 @@ open class DocusaurusExtension @javax.inject.Inject constructor(
     var clientModuleFunction: String? = null
 
     /**
+     * File name of the bundle the client module lives in, relative to the generated directory.
+     *
+     * A client module that registers custom elements (`class X : HTMLElement()`) cannot share the
+     * configuration's bundle: the generated class reads `HTMLElement` at module load, and Node — which
+     * loads the configuration — has none. Keep those classes in a second Kotlin/JS module, add its
+     * output through [additionalJs] and name its bundle here.
+     */
+    var clientModuleBundle: String? = null
+
+    /**
+     * File name of a browser-only bundle to publish under `<site>/static/ktjs-client/`, or `null`.
+     *
+     * Docusaurus puts `clientModules` into the server bundle as well, and a module that defines
+     * custom elements (`class X : HTMLElement()`) reads `HTMLElement` when it loads — Node would crash
+     * before the site is even built. Such a bundle has to be loaded by the browser alone, so it is
+     * copied into `static/` and referenced with a `<script type="module">` tag in `headTags`.
+     */
+    var browserBundle: String? = null
+
+    /**
+     * Exported function the generated `static/ktjs-client/index.mjs` calls after importing
+     * [browserBundle]. Required when [browserBundle] is set.
+     */
+    var browserBundleEntry: String? = null
+
+    /**
      * Page file name (without extension) to exported Kotlin React component, for example
      * `mapOf("index" to "homePage")`.
      *

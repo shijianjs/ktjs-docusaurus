@@ -81,18 +81,32 @@ npm 包拆模块的原因。
 
 ### 页面用 MDX，不用 tsx
 
-首页这类「静态为主 + 少量动态」的页面用 `src/jsMain/resources/pages/index.mdx`：里面写
-`<ktjs-hero>` / `<ktjs-features>` / `<ktjs-next-steps>` 标签，client module 在 `onRouteDidUpdate` 里
-调用 `upgradeHomeElements()` 把它们升级成 kit 的分区。做法与 duckfn 站点一致，区别只是那边每个分区是一个
-自定义元素类，这里是「未知标签 + 一次性升级」。
+首页这类「静态为主 + 少量动态」的页面用 `src/jsMain/resources/pages/index.mdx`，标签是**真正的自定义
+元素**：`<ktjs-hero>` / `<ktjs-features>` / `<ktjs-next-steps>`，类在 `:demo-client` 里，
+`connectedCallback` 读属性与子标签、建一次分区、丢掉声明式子节点（`data-ktjs-read` 防重）。做法与
+duckfn 站点一致。
 
-- `href` 写**相对页面**的路径（`docs/intro`），中英文 locale 前缀都能解析；不要写 `/docs/intro`，那会把
-  baseUrl 写死，中文页会 404。
-- 升级过的元素带 `data-ktjs-upgraded`，重复调用无副作用（StrictMode、客户端导航都会再调一次）。
+元素类必须待在**浏览器专属模块**。`class X : HTMLElement()` 在模块加载时就求值 `HTMLElement`，而
+`clientModules` 也会被打进 server bundle、由 Node 求值——放在配置的依赖图里，`docusaurus build` 在加载
+config 时就会崩（`ReferenceError: HTMLElement is not defined`，栈里是 webpack 的
+`initMetadataForClass`，很容易误判成 SSR 数据问题）。
+
+插件因此有两条独立通道：
+
+| 通道 | 生成 | 谁加载 | 能放什么 |
+| --- | --- | --- | --- |
+| `clientModuleFunction` | `client-module.mjs` | `clientModules`（浏览器 + Node prerender） | 不继承 DOM 的代码 |
+| `browserBundle` + `browserBundleEntry` | `static/ktjs-client/index.mjs` | `headTags` 里的 `<script type="module">` | 自定义元素等浏览器专属代码 |
+
+- 两条通道的产物都来自 `additionalJs`；`docusaurusSite` 必须显式
+  `dependsOn(":依赖模块:jsProductionLibraryCompileSync")`，否则站点目录里会拷到上一次的空产物，症状是
+  webpack 报 `'X…' is not exported from …`。
+- `browserBundle` 的 `<script src>` 要写**带 baseUrl 的绝对路径**（`/my-site/ktjs-client/index.mjs`），
+  相对路径在深页面上会解析到 `.../docs/intro/ktjs-client/...`。
+- `href` 写**相对页面**的路径（`docs/intro`），中英文 locale 前缀都能解析；不要写 `/docs/intro`。
 - 文案在 MDX 里，翻译放 `i18n/<locale>/docusaurus-plugin-content-pages/index.mdx`；不要为了 i18n 把
   文案塞回 Kotlin。
-- 确实需要组件树时（交互复杂、props 要计算），再引入第二个模块 + `pageFunctions`。`clientModuleFunction`
-  与 `pageFunctions` 两条接线插件都支持，但默认不该走那条路。
+- 确实需要组件树时（交互复杂、props 要计算），再引入第二个模块 + `pageFunctions`。
 
 ### Kotlin/JS 的 DCE 与跨模块代码
 

@@ -1,7 +1,9 @@
 package io.github.shijianjs.ktjs.docusaurus.demo
 
+import io.github.shijianjs.ktjs.docusaurus.config.BooleanOrString
 import io.github.shijianjs.ktjs.docusaurus.config.Config
 import io.github.shijianjs.ktjs.docusaurus.config.Directions
+import io.github.shijianjs.ktjs.docusaurus.config.HtmlTagObject
 import io.github.shijianjs.ktjs.docusaurus.config.I18nConfig
 import io.github.shijianjs.ktjs.docusaurus.config.I18nLocaleConfig
 import io.github.shijianjs.ktjs.docusaurus.config.PresetConfig
@@ -34,6 +36,8 @@ import kotlin.js.unsafeCast
 
 private const val REPOSITORY = "https://github.com/shijianjs/ktjs-docusaurus"
 
+private const val BASE_URL = "/ktjs-docusaurus/"
+
 /**
  * The site configuration, imported by the generated `docusaurus.config.mjs`.
  *
@@ -45,7 +49,7 @@ fun docusaurusConfig(): Config = unsafeJso {
     title = "ktjs-docusaurus"
     tagline = "Documentation sites as Kotlin/JS projects"
     url = "https://shijianjs.github.io"
-    baseUrl = "/ktjs-docusaurus/"
+    baseUrl = BASE_URL
     favicon = "img/favicon.svg"
     trailingSlash = true
     onBrokenLinks = ReportingSeverities.`throw`
@@ -70,9 +74,20 @@ fun docusaurusConfig(): Config = unsafeJso {
         }.unsafeCast<Record<JsAny, I18nLocaleConfig>>()
     }
 
-    // The TOC toggle is Kotlin: the generated shim re-exports `onRouteDidUpdate` from the compiled
-    // module, and Docusaurus calls it after every route change.
-    clientModules = arrayOf("./client-module.mjs")
+    // The landing page's custom elements and the TOC toggle are one browser-only bundle
+    // (`docusaurus.browserBundle` in the build script): the element classes read `HTMLElement` when
+    // they load, and `clientModules` also ends up in the server bundle Node evaluates. `static/` is
+    // copied verbatim, so this is a site-level asset rather than a per-page relative one — hence the
+    // absolute `baseUrl` prefix.
+    headTags = arrayOf(
+        unsafeJso<HtmlTagObject> {
+            tagName = "script"
+            attributes = unsafeJso<ModuleScriptAttributes> {
+                type = "module"
+                src = "${BASE_URL}ktjs-client/index.mjs"
+            }.unsafeCast<Record<JsAny, BooleanOrString>>()
+        },
+    )
 
     presets = arrayOf<PresetConfig?>(
         classicPreset(
@@ -227,4 +242,11 @@ private external interface DemoSidebars {
     var userGuide: Array<SidebarItem>?
 
     var docsKit: Array<SidebarItem>?
+}
+
+/** Attributes of the generated `<script type="module">` that loads the browser bundle. */
+private external interface ModuleScriptAttributes {
+    var type: String?
+
+    var src: String?
 }

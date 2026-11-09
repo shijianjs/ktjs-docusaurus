@@ -32,19 +32,32 @@ site's client module turns them into the kit's sections. No React page and no `.
 
 ## Wiring
 
-The site's client module upgrades the tags after every route change:
+Each tag is a real custom element. The classes live in a **browser-only** Kotlin/JS module — a class
+that extends `HTMLElement` reads it when the module loads, and the configuration's bundle is loaded by
+Node, which has none. The Gradle plugin publishes that bundle under `static/` and the site loads it
+with a `<script type="module">` tag:
 
 ```kotlin
-@JsExport
-fun onRouteDidUpdate() {
-    upgradeHomeElements()
-    tocToggle.install()
-    tocToggle.refresh()
+// build.gradle.kts
+docusaurus {
+    browserBundle = "ktjs-docusaurus-demo-client.mjs"
+    browserBundleEntry = "start"
+    additionalJs.from(project(":demo-client").layout.buildDirectory.dir("compileSync/js/main/productionLibrary/kotlin"))
 }
 ```
 
-`upgradeHomeElements()` reads the tags once, builds the section into the same element and marks it
-`data-ktjs-upgraded`, so the second call (StrictMode, client-side navigation) does nothing.
+```kotlin
+// demo-client, the browser module
+@JsExport
+fun start() {
+    registerKtjsElements()   // defines <ktjs-hero>, <ktjs-features>, <ktjs-next-steps>
+}
+```
+
+The browser upgrades the tags as soon as the registry knows the classes — including tags that arrive
+with a client-side navigation. `connectedCallback` reads the attributes and child tags once, builds the
+section into the element itself and drops the declarative children (`data-ktjs-read` guards the second
+call).
 
 ## Links
 
