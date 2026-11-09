@@ -40,6 +40,10 @@ include(":demo")
 // The demo's browser half: custom elements and the TOC toggle (never loaded by Node).
 include(":demo-client")
 
+// Runnable copy of kotlin-wrappers' web-components example (verification only, not published).
+include(":probes-web-components")
+project(":probes-web-components").projectDir = file("probes/web-components")
+
 
 
 // Reusable Kotlin/JS building blocks (home sections, TOC toggle). Deliberately a separate module
