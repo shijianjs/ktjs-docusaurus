@@ -50,9 +50,9 @@ fun docusaurusConfig(): Config = unsafeJso {
     trailingSlash = true
     onBrokenLinks = ReportingSeverities.`throw`
 
-    // English is the source language; every page under `docs/` has a translation under
-    // `i18n/zh-Hans/`. The home page's copy is resolved with `translate()` in Kotlin, so it lives in
-    // `i18n/zh-Hans/code.json` like any other message.
+    // English is the source language; every page — `docs/` and `pages/` alike — has a translation
+    // under `i18n/zh-Hans/`, in that plugin's own directory (`docusaurus-plugin-content-docs` and
+    // `docusaurus-plugin-content-pages`). `code.json` there is only for strings a component owns.
     i18n = unsafeJso<I18nConfig> {
         defaultLocale = "en"
         locales = arrayOf("en", "zh-Hans")
