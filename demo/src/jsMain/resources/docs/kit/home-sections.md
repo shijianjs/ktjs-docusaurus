@@ -42,7 +42,7 @@ The kit is split by runtime into two shared packages:
 | Package | Loaded by | Contents |
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | browser + Node | the section classes and setters |
-| `ktjs-docusaurus-elements` | browser only | `CustomElementAdapter`, the three element classes, tag parsing, registration |
+| `ktjs-docusaurus-kit-elements` | browser only | `CustomElementAdapter`, the three element classes, tag parsing, registration |
 
 The elements package uses the official custom-element API: `class KtjsHero : CustomElementAdapter()`
 (which extends `HTMLElement`) plus a `CustomElementReference` companion and `customElements.define`.
@@ -60,7 +60,7 @@ inserts its `<script type="module">` **after hydration**:
 // build.gradle.kts
 docusaurus {
     clientModuleFunction = "onRouteDidUpdate"
-    browserBundle = "ktjs-docusaurus-ktjs-docusaurus-elements.mjs"
+    browserBundle = "ktjs-docusaurus-ktjs-docusaurus-kit-elements.mjs"
     browserBundleEntry = "registerHomeElements"
     browserBundleFiles.from(/* the elements module's productionLibrary/kotlin output */)
 }

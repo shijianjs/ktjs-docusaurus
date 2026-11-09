@@ -1,4 +1,4 @@
-package io.github.shijianjs.ktjs.docusaurus.elements
+package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import web.dom.Element
 

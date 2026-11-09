@@ -50,4 +50,4 @@ include(":ktjs-docusaurus-kit")
 
 // Browser-only half of the docs kit: custom elements built on the official HTMLElement API.
 // Published as a package too, but its bundle is loaded by the browser alone (never by Node).
-include(":ktjs-docusaurus-elements")
+include(":ktjs-docusaurus-kit-elements")

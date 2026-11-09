@@ -1,6 +1,7 @@
-package io.github.shijianjs.ktjs.docusaurus.elements
+package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import js.array.ReadonlyArray
+import kotlin.js.JsAny
 import kotlin.js.JsName
 import web.animations.Animation
 import web.animations.GetAnimationsOptions
@@ -19,9 +20,15 @@ import web.html.HTMLElement
  *
  * Besides extending the official [HTMLElement], it does two things a site should not have to repeat:
  *
- * 1. Declares the browser's lifecycle hook once, under its native name — element classes just
- *    `override fun connectedCallback()`. (`CustomElement`'s `val connectedCallback` compiles to a
- *    getter the browser never calls, so it cannot be used.)
+ * 1. Declares **all** of `web.components.CustomElement`'s lifecycle hooks as overridable methods under
+ *    their native names: `connectedCallback`, `connectedMoveCallback`, `disconnectedCallback`,
+ *    `adoptedCallback`, `attributeChangedCallback`. The official interface spells these as `val`s,
+ *    which Kotlin compiles to getters the browser never calls, so the interface is deliberately not
+ *    implemented here. Element classes just `override fun connectedCallback()` and friends.
+ *
+ *    `attributeChangedCallback` only fires for attributes listed in the constructor's static
+ *    `observedAttributes`; declaring that is up to the element class.
+ *
  * 2. Provides safe entry points for every DOM method Kotlin/JS shadows on such a class. The compiler
  *    emits one self-recursive bridge for each member declared with `= definedExternally` on an
  *    external interface (`ParentNode`, `ChildNode`, `Animatable`, `HTMLOrSVGOrMathMLElement`,
@@ -41,12 +48,20 @@ import web.html.HTMLElement
  */
 open class CustomElementAdapter : HTMLElement() {
 
-    /**
-     * The browser calls this when the element is connected. Override it in the element class; the
-     * annotation keeps the emitted method name exactly `connectedCallback` for every subclass.
-     */
     @JsName("connectedCallback")
     open fun connectedCallback() {}
+
+    @JsName("connectedMoveCallback")
+    open fun connectedMoveCallback() {}
+
+    @JsName("disconnectedCallback")
+    open fun disconnectedCallback() {}
+
+    @JsName("adoptedCallback")
+    open fun adoptedCallback() {}
+
+    @JsName("attributeChangedCallback")
+    open fun attributeChangedCallback(name: String, oldValue: JsAny?, newValue: JsAny?) {}
 
     // EventTargetLike
 

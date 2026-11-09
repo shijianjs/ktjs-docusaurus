@@ -109,7 +109,7 @@ duckfn 站点一致。
      `@JsName("connectedCallback") fun` 后才会触发上面那条栈溢出。两种失败都在
      `probes/web-components` 里可复现（`<my-panel>` 与 `<my-panel-fn>`）。
 
-   **本仓库的解法**：`ktjs-docusaurus-elements` 里 `CustomElementAdapter : HTMLElement()` 用官方写法，
+   **本仓库的解法**：`ktjs-docusaurus-kit-elements` 里 `CustomElementAdapter : HTMLElement()` 用官方写法，
    把被编译器占住的成员用不同名 `…Super` 方法转发 `super.foo(...)`（能覆盖的直接 override），并在
    基类里把生命周期钩子声明成 `connectedCallback()`——元素类只写 `override fun connectedCallback()`，
    不要再起 `onConnected` 之类的别名，也不必每个类带 `@JsName`。注册用 `CustomElementReference` +
@@ -120,7 +120,7 @@ duckfn 站点一致。
 
    - `ktjs-docusaurus-kit`：纯组件库——`HomeHero(mountPoint)` / `FeatureSection` /
      `NextStepSection` 加 `set*` setter，不知道 MDX、标签名、属性或自定义元素，Node 加载安全。
-   - `ktjs-docusaurus-elements`：浏览器专属——`CustomElementAdapter` + 三个元素类 + 标签解析与注册。
+   - `ktjs-docusaurus-kit-elements`：浏览器专属——`CustomElementAdapter` + 三个元素类 + 标签解析与注册。
      顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进 demo 的依赖图。
 
    不要往 kit 里加 `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。
@@ -142,7 +142,7 @@ duckfn 站点一致。
 
 - `browserBundleFiles` 必须与 `additionalJs` 分开：后者也会拷进 `generated/`，若浏览器包里带了共享模块
   的副本，会覆盖 config bundle 的那份，webpack 报 `'X…' is not exported from …`。
-- `docusaurusSite` 必须显式 `dependsOn(":ktjs-docusaurus-elements:jsProductionLibraryCompileSync")`。
+- `docusaurusSite` 必须显式 `dependsOn(":ktjs-docusaurus-kit-elements:jsProductionLibraryCompileSync")`。
 - 浏览器入口的 `<script src>` 要写**带 baseUrl 的绝对路径**（`/my-site/ktjs-client/index.mjs`），
   相对路径在深页面上会解析到 `.../docs/intro/ktjs-client/...`。
 - `href` 写**相对页面**的路径（`docs/intro`），中英文 locale 前缀都能解析；不要写 `/docs/intro`。
@@ -456,7 +456,7 @@ interface` 声明私有字段，`unsafeCast` 过去读写，元素被移除时�
 
 外部 `MutableMap<HTMLElement, …>` 会把每个宿主都强引用住——文档站每次进首页都新建一批元素，导航几次
 就攒下一堆永不回收的实例。`connectedCallback` 需要「找到自己上次建的那个分区」时，用元素上的字段而不是
-全局索引（见 `ktjs-docusaurus-elements/.../HomeElements.kt` 的 `HomeHostState`）。
+全局索引（见 `ktjs-docusaurus-kit-elements/.../HomeElementRegistry.kt` 的 `HomeHostState`）。
 
 ### 组件用 class，但不建通用组件基类
 
