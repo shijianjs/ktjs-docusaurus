@@ -27,5 +27,9 @@
 <h3>5. Bridge superclass carrying the official interfaces</h3>
 <my-panel-rich></my-panel-rich>
 <p>Same as 3, but `querySelectorAll` / `setAttribute` / `innerHTML` are called on `this` with no cast.</p>
+<h3>6. Interface bundle without Element</h3>
+<my-panel-mixed></my-panel-mixed>
+<p>Empty superclass + `ElementCSSInlineStyle`/`ElementContentEditable`/`GlobalEventHandlers`/
+    `HTMLOrSVGOrMathMLElement`. Reads `style` through the interface, the rest through `html`.</p>
 </body>
 </html>
