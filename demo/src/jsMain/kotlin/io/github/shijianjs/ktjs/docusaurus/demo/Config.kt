@@ -74,20 +74,10 @@ fun docusaurusConfig(): Config = unsafeJso {
         }.unsafeCast<Record<JsAny, I18nLocaleConfig>>()
     }
 
-    // The landing page's custom elements and the TOC toggle are one browser-only bundle
-    // (`docusaurus.browserBundle` in the build script): the element classes read `HTMLElement` when
-    // they load, and `clientModules` also ends up in the server bundle Node evaluates. `static/` is
-    // copied verbatim, so this is a site-level asset rather than a per-page relative one — hence the
-    // absolute `baseUrl` prefix.
-    headTags = arrayOf(
-        unsafeJso<HtmlTagObject> {
-            tagName = "script"
-            attributes = unsafeJso<ModuleScriptAttributes> {
-                type = "module"
-                src = "${BASE_URL}ktjs-client/index.mjs"
-            }.unsafeCast<Record<JsAny, BooleanOrString>>()
-        },
-    )
+    // The landing-page elements and the TOC toggle are registered by `onRouteDidUpdate` in the
+    // generated `client-module.mjs`. That runs after hydration, so the custom elements are upgraded
+    // once React is done with the page.
+    clientModules = arrayOf("./client-module.mjs")
 
     presets = arrayOf<PresetConfig?>(
         classicPreset(
@@ -244,9 +234,3 @@ private external interface DemoSidebars {
     var docsKit: Array<SidebarItem>?
 }
 
-/** Attributes of the generated `<script type="module">` that loads the browser bundle. */
-private external interface ModuleScriptAttributes {
-    var type: String?
-
-    var src: String?
-}

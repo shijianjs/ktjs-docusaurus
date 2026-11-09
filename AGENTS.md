@@ -86,28 +86,41 @@ npm 包拆模块的原因。
 `connectedCallback` 读属性与子标签、建一次分区、丢掉声明式子节点（`data-ktjs-read` 防重）。做法与
 duckfn 站点一致。
 
-两条硬约束决定了元素必须独立、且类语法只能来自 JS：
+现在的实现是「JS 桥接 + client module 注册」，两条硬约束都有实测依据：
 
-1. **js target 必须编译到 ES2015 以上**：默认 ES5 target 下 `class X : HTMLElement()` 会被编译成
-   `function X() { HTMLElement.call(this); }`，而 DOM 构造函数只接受 `new`，浏览器直接抛
-   `Please use the 'new' operator`。根构建已经给所有 js target 统一设了
-   `compilerOptions { target = "es2015" }`。
+1. **Kotlin 类不能继承 `HTMLElement`，两级都会炸**：
 
-   两个坑：这个设置有且只有一种写法有效——`js { compilerOptions { target = "es2015" } }`（字符串）；
-   用 `freeCompilerArgs.addAll("-target", "es2015")` 放在 multiplatform extension 上是**无效**的，
-   产物不会变。`-Xir-generate-es-classes-and-functions` 也不改变任何东西。
-   自查方式：`grep 'HTMLElement.call' <bundle>.mjs` 应为 0，`grep 'class <Name>'` 应命中。
-2. **元素必须待在浏览器专属模块**：`clientModules` 也会被打进 server bundle、由 Node 求值，而
-   `HTMLElement` 在 Node 里不存在——放在配置的依赖图里，`docusaurus build` 在加载 config 时就崩
-   （`ReferenceError: HTMLElement is not defined`，栈里是 webpack 的 `initMetadataForClass`，
-   很容易误判成 SSR 数据问题）。
+   - 默认 ES5 target 下编译成 `function X() { HTMLElement.call(this); }`，DOM 构造函数只接受 `new`，
+     浏览器抛 `Please use the 'new' operator`。根构建已给所有 js target 设了
+     `compilerOptions { target = "es2015" }`（只有 `js { compilerOptions { target = "es2015" } }` 这种
+     写法有效；`freeCompilerArgs.addAll("-target", "es2015")` 放 extension 上无效）。
+   - 到 es2015 类是真的了，但 Kotlin 会给**继承来的 external 成员生成自递归转发方法**：
 
-插件因此有两条独立通道：
+     ```js
+     querySelector(selectors) { return this.querySelector(selectors); }
+     ```
+
+     `connectedCallback` 里第一次调 DOM 就 `Maximum call stack size exceeded`，元素永远渲染不出来
+     （2026-11 在 Kotlin 2.4.21 + es2015 上实测；`kotlin-wrappers/examples/web-components` 同样中招，
+     `probes/web-components` 是它的可运行副本）。
+
+   所以元素类由 `demo/client/ElementRegistry.kt` 里 6 行 JS 提供
+   （`class extends globalThis.HTMLElement`，`connectedCallback` 回调 Kotlin），其余逻辑全在 Kotlin。
+   es2015 仍要保留，否则先炸第 1 条。
+
+   自查：`grep 'HTMLElement.call' <bundle>.mjs` 应为 0；`grep 'querySelector(selectors) {' <bundle>`
+   不应出现。
+
+2. **注册放在 `onRouteDidUpdate`，不要用 `<script>` 提前注册**：脚本早于 hydration，元素先升级、
+   React 随后发现 DOM 对不上，控制台出现 hydration error #418。`onRouteDidUpdate` 在 hydration 之后，
+   React 先正常渲染标签，再升级。
+
+插件保留两条通道，当前只用第一条：
 
 | 通道 | 生成 | 谁加载 | 能放什么 |
 | --- | --- | --- | --- |
-| `clientModuleFunction` | `client-module.mjs` | `clientModules`（浏览器 + Node prerender） | 不继承 DOM 的代码 |
-| `browserBundle` + `browserBundleEntry` | `static/ktjs-client/index.mjs` | `headTags` 里的 `<script type="module">` | 自定义元素等浏览器专属代码 |
+| `clientModuleFunction` | `client-module.mjs` | `clientModules`（浏览器 + Node prerender） | 不继承 DOM 的代码（当前用这条） |
+| `browserBundle` + `browserBundleEntry` | `static/ktjs-client/index.mjs` | `headTags` 里的 `<script type="module">` | 必须在 hydration 前就注册的元素 |
 
 - 两条通道的产物都来自 `additionalJs`；`docusaurusSite` 必须显式
   `dependsOn(":依赖模块:jsProductionLibraryCompileSync")`，否则站点目录里会拷到上一次的空产物，症状是

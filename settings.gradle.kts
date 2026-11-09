@@ -37,8 +37,6 @@ include(":ktjs-docusaurus")
 // Example documentation site: a Kotlin/JS project whose Markdown lives in `src/jsMain/resources`.
 include(":demo")
 
-// The demo's browser half: custom elements and the TOC toggle (never loaded by Node).
-include(":demo-client")
 
 // Runnable copy of kotlin-wrappers' web-components example (verification only, not published).
 include(":probes-web-components")
