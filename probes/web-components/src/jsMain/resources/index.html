@@ -7,6 +7,14 @@
 <body>
 <script src="probes-web-components.js"></script>
 
+<h3>1. The published example (override val connectedCallback)</h3>
 <my-panel></my-panel>
+<p>Renders “MyPanel test content!” — but <code>connectedCallback</code> never runs, so
+    “MyPanel connected!” is missing from the console.</p>
+
+<h3>2. The same, with @JsName("connectedCallback") fun</h3>
+<my-panel-fn data-x="42"></my-panel-fn>
+<p>This one is called and then throws
+    <code>RangeError: Maximum call stack size exceeded</code> on its first DOM access.</p>
 </body>
 </html>

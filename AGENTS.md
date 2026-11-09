@@ -100,9 +100,14 @@ duckfn 站点一致。
      querySelector(selectors) { return this.querySelector(selectors); }
      ```
 
-     `connectedCallback` 里第一次调 DOM 就 `Maximum call stack size exceeded`，元素永远渲染不出来
-     （2026-11 在 Kotlin 2.4.21 + es2015 上实测；`kotlin-wrappers/examples/web-components` 同样中招，
-     `probes/web-components` 是它的可运行副本）。
+     `connectedCallback` 里调 `querySelector` / `querySelectorAll` 就 `Maximum call stack size exceeded`
+     （`getAttribute` 之类没被覆盖，所以症状取决于回调里第一句调的是什么）。2026-11 在 Kotlin 2.4.21 +
+     es2015 上实测。
+
+     官方示例原样（`override val connectedCallback`）其实连回调都不会被调用——Kotlin 把它编译成
+     `get connectedCallback()` 访问器，浏览器只认方法，于是元素渲染出来但回调静默不执行。改成
+     `@JsName("connectedCallback") fun` 后才会触发上面那条栈溢出。两种失败都在
+     `probes/web-components` 里可复现（`<my-panel>` 与 `<my-panel-fn>`）。
 
    所以元素类由 `demo/client/ElementRegistry.kt` 里 6 行 JS 提供
    （`class extends globalThis.HTMLElement`，`connectedCallback` 回调 Kotlin），其余逻辑全在 Kotlin。
