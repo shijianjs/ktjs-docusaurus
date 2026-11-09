@@ -109,7 +109,7 @@ duckfn 站点一致。
      `@JsName("connectedCallback") fun` 后才会触发上面那条栈溢出。两种失败都在
      `probes/web-components` 里可复现（`<my-panel>` 与 `<my-panel-fn>`）。
 
-   所以元素类由 `demo/client/ElementRegistry.kt` 里 6 行 JS 提供
+   所以元素类由 `ktjs-docusaurus-kit/.../ElementRegistry.kt` 里 6 行 JS 提供
    （`class extends globalThis.HTMLElement`，`connectedCallback` 回调 Kotlin），其余逻辑全在 Kotlin。
    es2015 仍要保留，否则先炸第 1 条。
 

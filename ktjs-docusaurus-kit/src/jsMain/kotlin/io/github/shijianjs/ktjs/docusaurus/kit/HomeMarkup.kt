@@ -12,6 +12,11 @@ internal object HomeMarkup {
     /** Marks a host whose declarative children were already consumed. */
     const val READ: String = "data-ktjs-read"
 
+    /** The landing-page tags the kit registers. */
+    const val HERO: String = "ktjs-hero"
+    const val FEATURES: String = "ktjs-features"
+    const val NEXT_STEPS: String = "ktjs-next-steps"
+
     const val ACTION: String = "ktjs-action"
     const val BADGE: String = "ktjs-badge"
     const val FEATURE: String = "ktjs-feature"

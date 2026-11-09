@@ -32,37 +32,40 @@ site's client module turns them into the kit's sections. No React page and no `.
 
 ## Wiring
 
-Each tag is a real custom element. The classes live in a **browser-only** Kotlin/JS module — a class
-that extends `HTMLElement` reads it when the module loads, and the configuration's bundle is loaded by
-Node, which has none. The Gradle plugin publishes that bundle under `static/` and the site loads it
-with a `<script type="module">` tag:
+The kit owns the whole element contract — tag names, class syntax, attribute parsing and the three
+sections. A site only calls `registerHomeElements()` from its client module:
 
 ```kotlin
 // build.gradle.kts
 docusaurus {
-    browserBundle = "ktjs-docusaurus-demo-client.mjs"
-    browserBundleEntry = "start"
-    additionalJs.from(project(":demo-client").layout.buildDirectory.dir("compileSync/js/main/productionLibrary/kotlin"))
+    clientModuleFunction = "onRouteDidUpdate"
 }
 ```
 
 ```kotlin
-// demo-client, the browser module
+// the site's client module
 @JsExport
-fun start() {
-    registerKtjsElements()   // defines <ktjs-hero>, <ktjs-features>, <ktjs-next-steps>
+fun onRouteDidUpdate() {
+    if (!isBrowser) return
+    registerHomeElements()
+    tocToggle.install()
+    tocToggle.refresh()
 }
 ```
 
-The browser upgrades the tags as soon as the registry knows the classes — including tags that arrive
-with a client-side navigation. `connectedCallback` reads the attributes and child tags once, builds the
+`registerHomeElements()` is idempotent and safe on every route change, so tags that arrive with a
+client-side navigation are upgraded too. Each tag is a real custom element: `connectedCallback` hands
+the host to the matching `bind*` function, which reads attributes and child tags once, builds the
 section into the element itself and drops the declarative children (`data-ktjs-read` guards the second
-call).
+connect). The section instance is stored on the element, so it is released together with it.
 
-The module has to compile at ES2015 or later (`js { compilerOptions { target = "es2015" } }`, already
-set for every module in the root build). At the default ES5 target Kotlin turns the class into
-`function X() { HTMLElement.call(this) }`, and a DOM constructor may only be invoked with `new` — the
-browser throws `Please use the 'new' operator` the first time an element is constructed.
+The element classes come from a six-line JavaScript bridge in the kit's `ElementRegistry.kt` — a Kotlin
+class that extends `HTMLElement` is not usable here (see `AGENTS.md`). That bridge is a function
+expression, not module-level code, so the kit stays loadable by Node: no separate browser bundle and no
+`<script>` tag are needed, and registration happens after hydration, so React sees no mismatch.
+
+The js targets still compile at ES2015 (set once in the root build). Kotlin/JS 2.4 accepts only
+`es5` / `es2015`; `es2020` arrives with 2.5.
 
 ## Links
 
