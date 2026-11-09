@@ -77,6 +77,7 @@ class DocusaurusPlugin : Plugin<Project> {
             it.clientModuleBundle.set(project.provider { extension.clientModuleBundle ?: "" })
             it.browserBundle.set(project.provider { extension.browserBundle ?: "" })
             it.browserBundleEntry.set(project.provider { extension.browserBundleEntry ?: "" })
+            it.browserBundleFiles.from(extension.browserBundleFiles)
             it.pageFunctions.set(project.provider { extension.pageFunctions })
             it.pageBundle.set(project.provider { extension.pageBundle ?: "" })
             it.additionalJs.from(extension.additionalJs)

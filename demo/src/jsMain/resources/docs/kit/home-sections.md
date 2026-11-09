@@ -37,14 +37,30 @@ and `NextStepSection(mountPoint)` build a subtree and expose named setters (`set
 `setSteps`, …). It knows nothing about MDX, tag names, attributes or custom elements — the table above
 describes the *site's* markup, not the kit's API.
 
-That declarative layer lives in a separate package (`demo/.../demo/elements`): it registers the tags,
-reads each host's attributes and child tags once, and drives the kit's setters. A site wires it from
-its client module:
+The kit is split by runtime into two shared packages:
+
+| Package | Loaded by | Contents |
+| --- | --- | --- |
+| `ktjs-docusaurus-kit` | browser + Node | the section classes and setters |
+| `ktjs-docusaurus-elements` | browser only | `DomAdapter`, the three element classes, tag parsing, registration |
+
+The elements package uses the official custom-element API: `class KtjsHero : DomAdapter()` (which
+extends `HTMLElement`) plus a `CustomElementReference` companion and `customElements.define`. The hook
+is a `@JsName("connectedCallback") fun` — the interface's `override val` compiles to a getter the
+browser never calls. DOM calls on the host go through `DomAdapter`'s `…Super` methods, which forward to
+`super.foo(...)` and bypass the self-recursive bridges Kotlin/JS generates (see `AGENTS.md`).
+
+Because those classes evaluate `HTMLElement` at module load, the elements bundle must never be imported
+by the Node side. The Gradle plugin publishes it under `static/ktjs-client/` and the client module
+inserts its `<script type="module">` **after hydration**:
 
 ```kotlin
 // build.gradle.kts
 docusaurus {
     clientModuleFunction = "onRouteDidUpdate"
+    browserBundle = "ktjs-docusaurus-ktjs-docusaurus-elements.mjs"
+    browserBundleEntry = "registerHomeElements"
+    browserBundleFiles.from(/* the elements module's productionLibrary/kotlin output */)
 }
 ```
 
@@ -53,20 +69,15 @@ docusaurus {
 @JsExport
 fun onRouteDidUpdate() {
     if (!isBrowser) return
-    registerHomeElements()
+    loadBrowserBundle(SITE_BASE_URL + "ktjs-client/index.mjs")
     tocToggle.install()
     tocToggle.refresh()
 }
 ```
 
-`registerHomeElements()` is idempotent and safe on every route change, so tags that arrive with a
-client-side navigation are upgraded too. Each element owns the section it renders into — one field on
-the element — so the section is released with it; `data-ktjs-read` guards a second connect.
-
-The element classes come from a short JavaScript bridge in that package — a Kotlin class extending
-`HTMLElement` is not usable here (see `AGENTS.md`). The bridge is a function expression, not
-module-level code, so the bundle stays loadable by Node: no separate browser bundle or `<script>` tag
-is needed, and registering after hydration means React sees no mismatch.
+Loading after hydration means React has already rendered the tags, so there is no hydration mismatch.
+Each element owns the section it renders into — one field on the element — so the section is released
+with it; `data-ktjs-read` guards a second connect.
 
 The js targets still compile at ES2015 (set once in the root build). Kotlin/JS 2.4 accepts only
 `es5` / `es2015`; `es2020` arrives with 2.5.

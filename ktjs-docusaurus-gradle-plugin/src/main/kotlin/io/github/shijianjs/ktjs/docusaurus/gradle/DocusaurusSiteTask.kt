@@ -94,6 +94,11 @@ abstract class DocusaurusSiteTask @Inject constructor(
     @get:Optional
     abstract val browserBundleEntry: Property<String>
 
+    /** Linked output published under `static/ktjs-client/`; kept separate from [additionalJs]. */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val browserBundleFiles: ConfigurableFileCollection
+
     /**
      * Page file name (without extension) to exported Kotlin React component, for example
      * `index` to `homePage`.
@@ -152,7 +157,7 @@ abstract class DocusaurusSiteTask @Inject constructor(
             ?: error("docusaurus.browserBundleEntry is required when docusaurus.browserBundle is set.")
 
         val target = File(site, "static/ktjs-client").apply { mkdirs() }
-        additionalJs.files
+        browserBundleFiles.files
             .filter { it.isDirectory }
             .forEach { directory ->
                 fs.copy { spec ->

@@ -72,6 +72,15 @@ open class DocusaurusExtension @javax.inject.Inject constructor(
     var browserBundleEntry: String? = null
 
     /**
+     * Linked Kotlin/JS output to publish under `static/ktjs-client/` for [browserBundle].
+     *
+     * Deliberately separate from [additionalJs]: those files are also copied into `generated/`, so a
+     * browser bundle that contains its own copy of a shared module would overwrite the configuration's
+     * copy there and the two bundles would disagree on mangled symbol names.
+     */
+    val browserBundleFiles: org.gradle.api.file.ConfigurableFileCollection = objects.fileCollection()
+
+    /**
      * Page file name (without extension) to exported Kotlin React component, for example
      * `mapOf("index" to "homePage")`.
      *

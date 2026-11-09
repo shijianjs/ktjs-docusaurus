@@ -47,3 +47,7 @@ project(":probes-web-components").projectDir = file("probes/web-components")
 // Reusable Kotlin/JS building blocks (home sections, TOC toggle). Deliberately a separate module
 // from the wrapper: the wrapper only maps npm packages, the kit contains logic of its own.
 include(":ktjs-docusaurus-kit")
+
+// Browser-only half of the docs kit: custom elements built on the official HTMLElement API.
+// Published as a package too, but its bundle is loaded by the browser alone (never by Node).
+include(":ktjs-docusaurus-elements")

@@ -36,7 +36,7 @@ import kotlin.js.unsafeCast
 
 private const val REPOSITORY = "https://github.com/shijianjs/ktjs-docusaurus"
 
-private const val BASE_URL = "/ktjs-docusaurus/"
+internal const val SITE_BASE_URL = "/ktjs-docusaurus/"
 
 /**
  * The site configuration, imported by the generated `docusaurus.config.mjs`.
@@ -49,7 +49,7 @@ fun docusaurusConfig(): Config = unsafeJso {
     title = "ktjs-docusaurus"
     tagline = "Documentation sites as Kotlin/JS projects"
     url = "https://shijianjs.github.io"
-    baseUrl = BASE_URL
+    baseUrl = SITE_BASE_URL
     favicon = "img/favicon.svg"
     trailingSlash = true
     onBrokenLinks = ReportingSeverities.`throw`

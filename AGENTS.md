@@ -109,33 +109,40 @@ duckfn 站点一致。
      `@JsName("connectedCallback") fun` 后才会触发上面那条栈溢出。两种失败都在
      `probes/web-components` 里可复现（`<my-panel>` 与 `<my-panel-fn>`）。
 
-   所以元素类由 `demo/.../demo/elements/ElementRegistry.kt` 里 6 行 JS 提供
-   （`class extends globalThis.HTMLElement`，`connectedCallback` 回调 Kotlin），其余逻辑全在 Kotlin。
-   es2015 仍要保留，否则先炸第 1 条。
+   **本仓库的解法**：`ktjs-docusaurus-elements` 里 `DomAdapter : HTMLElement()` 用官方写法，把被
+   编译器占住的成员用不同名 `…Super` 方法转发 `super.foo(...)`（能覆盖的如 `remove()` 直接 override），
+   元素类继承它、用 `CustomElementReference` + `customElements.define` 注册，钩子写成
+   `@JsName("connectedCallback") fun`（官方 `override val` 不行）。**没有任何 JS 类字面量**。
+   细节与实测在 `probes/web-components` 的 `DomAdapter.kt` / `MyPanelAdapter.kt`。
 
-   **分层是硬约定**：`ktjs-docusaurus-kit` 是纯组件库——只有 `HomeHero(mountPoint)`、
-   `FeatureSection`、`NextStepSection` 加 `set*` setter，不知道 MDX、标签名、属性或自定义元素。
-   标签解析、注册、生命周期全部属于站点的 `demo/.../demo/elements` 包。不要往 kit 里加
-   `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。
+   **分层是硬约定**：kit 按「Node 是否加载」拆成两个都发布的共享包：
+
+   - `ktjs-docusaurus-kit`：纯组件库——`HomeHero(mountPoint)` / `FeatureSection` /
+     `NextStepSection` 加 `set*` setter，不知道 MDX、标签名、属性或自定义元素，Node 加载安全。
+   - `ktjs-docusaurus-elements`：浏览器专属——`DomAdapter` + 三个元素类 + 标签解析与注册。
+     顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进 demo 的依赖图。
+
+   不要往 kit 里加 `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。
 
    自查：`grep 'HTMLElement.call' <bundle>.mjs` 应为 0；`grep 'querySelector(selectors) {' <bundle>`
    不应出现。
 
-2. **注册放在 `onRouteDidUpdate`，不要用 `<script>` 提前注册**：脚本早于 hydration，元素先升级、
-   React 随后发现 DOM 对不上，控制台出现 hydration error #418。`onRouteDidUpdate` 在 hydration 之后，
-   React 先正常渲染标签，再升级。
+2. **注册放在 hydration 之后**：静态 `<script>` 写在 `<head>` 会早于 hydration，元素先升级就让 React 报
+   hydration error #418。现在由 `ClientModule.onRouteDidUpdate` 动态插入一次
+   `<script type="module" src="<baseUrl>ktjs-client/index.mjs">`，脚本延迟到 hydration 后才加载并调用
+   `registerHomeElements()`。
 
-插件保留两条通道，当前只用第一条：
+插件两条通道：
 
 | 通道 | 生成 | 谁加载 | 能放什么 |
 | --- | --- | --- | --- |
-| `clientModuleFunction` | `client-module.mjs` | `clientModules`（浏览器 + Node prerender） | 不继承 DOM 的代码（当前用这条） |
-| `browserBundle` + `browserBundleEntry` | `static/ktjs-client/index.mjs` | `headTags` 里的 `<script type="module">` | 必须在 hydration 前就注册的元素 |
+| `clientModuleFunction` | `client-module.mjs` | `clientModules`（浏览器 + Node prerender） | 不继承 DOM 的代码 |
+| `browserBundle` + `browserBundleEntry` + `browserBundleFiles` | `static/ktjs-client/index.mjs` | hydration 后动态插入的 `<script>` | 自定义元素等浏览器专属代码 |
 
-- 两条通道的产物都来自 `additionalJs`；`docusaurusSite` 必须显式
-  `dependsOn(":依赖模块:jsProductionLibraryCompileSync")`，否则站点目录里会拷到上一次的空产物，症状是
-  webpack 报 `'X…' is not exported from …`。
-- `browserBundle` 的 `<script src>` 要写**带 baseUrl 的绝对路径**（`/my-site/ktjs-client/index.mjs`），
+- `browserBundleFiles` 必须与 `additionalJs` 分开：后者也会拷进 `generated/`，若浏览器包里带了共享模块
+  的副本，会覆盖 config bundle 的那份，webpack 报 `'X…' is not exported from …`。
+- `docusaurusSite` 必须显式 `dependsOn(":ktjs-docusaurus-elements:jsProductionLibraryCompileSync")`。
+- 浏览器入口的 `<script src>` 要写**带 baseUrl 的绝对路径**（`/my-site/ktjs-client/index.mjs`），
   相对路径在深页面上会解析到 `.../docs/intro/ktjs-client/...`。
 - `href` 写**相对页面**的路径（`docs/intro`），中英文 locale 前缀都能解析；不要写 `/docs/intro`。
 - 文案在 MDX 里，翻译放 `i18n/<locale>/docusaurus-plugin-content-pages/index.mdx`；不要为了 i18n 把
@@ -448,7 +455,7 @@ interface` 声明私有字段，`unsafeCast` 过去读写，元素被移除时�
 
 外部 `MutableMap<HTMLElement, …>` 会把每个宿主都强引用住——文档站每次进首页都新建一批元素，导航几次
 就攒下一堆永不回收的实例。`connectedCallback` 需要「找到自己上次建的那个分区」时，用元素上的字段而不是
-全局索引（见 `demo/.../demo/elements/HomeElements.kt` 的 `HomeHostState`）。
+全局索引（见 `ktjs-docusaurus-elements/.../HomeElements.kt` 的 `HomeHostState`）。
 
 ### 组件用 class，但不建通用组件基类
 
