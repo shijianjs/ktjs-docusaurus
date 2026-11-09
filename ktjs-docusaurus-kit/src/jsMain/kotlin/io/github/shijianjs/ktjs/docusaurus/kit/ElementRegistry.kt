@@ -15,7 +15,8 @@ import web.html.HTMLElement
  *   `connectedCallback` overflows the stack.
  *
  * Everything else stays in Kotlin: this function only supplies the class and forwards
- * `connectedCallback`. The kit's sections (`bindHomeHero` and friends) own the attribute parsing.
+ * `connectedCallback`. The kit's [HomeElementBinding] implementations own the attribute parsing, and
+ * [bindHomeSection] decides which instance a host owns.
  *
  * The bridge is a function expression, not module-level code: loading this module never evaluates
  * `HTMLElement`, so the kit stays usable from the server bundle.

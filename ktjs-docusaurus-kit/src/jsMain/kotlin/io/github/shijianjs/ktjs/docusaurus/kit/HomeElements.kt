@@ -15,10 +15,14 @@ package io.github.shijianjs.ktjs.docusaurus.kit
  * }
  * ```
  *
- * Safe to call on every route change: `defineElement` skips tags that are already registered.
+ * Each registration says only "which section class owns this tag"; the lifecycle, the instance storage
+ * and the attribute parsing are shared. Safe to call on every route change: `defineElement` skips tags
+ * that are already registered.
  */
 fun registerHomeElements() {
-    defineElement(HomeMarkup.HERO) { host -> bindHomeHero(host) }
-    defineElement(HomeMarkup.FEATURES) { host -> bindFeatureSection(host) }
-    defineElement(HomeMarkup.NEXT_STEPS) { host -> bindNextStepSection(host) }
+    defineElement(HomeMarkup.HERO) { host -> host.bindHomeSection(::HomeHero) }
+    defineElement(HomeMarkup.FEATURES) { host ->
+        host.bindHomeSection { FeatureSection(it, tinted = it.hasAttribute(HomeMarkup.TINTED)) }
+    }
+    defineElement(HomeMarkup.NEXT_STEPS) { host -> host.bindHomeSection(::NextStepSection) }
 }

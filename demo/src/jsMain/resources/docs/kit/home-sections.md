@@ -55,9 +55,10 @@ fun onRouteDidUpdate() {
 
 `registerHomeElements()` is idempotent and safe on every route change, so tags that arrive with a
 client-side navigation are upgraded too. Each tag is a real custom element: `connectedCallback` hands
-the host to the matching `bind*` function, which reads attributes and child tags once, builds the
-section into the element itself and drops the declarative children (`data-ktjs-read` guards the second
-connect). The section instance is stored on the element, so it is released together with it.
+the host to `bindHomeSection`, which takes the section the element already owns (or builds it once from
+the factory), then calls `HomeElementBinding.fillFrom` on it. Each section reads its own attributes and
+child tags, builds into the element and drops the declarative children (`data-ktjs-read` guards the
+second connect). The instance lives in one field on the element, so it is released together with it.
 
 The element classes come from a six-line JavaScript bridge in the kit's `ElementRegistry.kt` — a Kotlin
 class that extends `HTMLElement` is not usable here (see `AGENTS.md`). That bridge is a function

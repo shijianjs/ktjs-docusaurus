@@ -19,7 +19,7 @@ import web.window._blank
  * hero.setPrimaryAction(HeroLink("Get started", useBaseUrl("/docs/intro")))
  * ```
  */
-class HomeHero(container: HTMLElement) {
+class HomeHero(container: HTMLElement) : HomeElementBinding {
     private val root = create("section", "ktjs-hero")
     private val inner = create("div", "ktjs-hero-inner")
     private val stage = create("span", "ktjs-hero-logo-stage")
@@ -120,10 +120,10 @@ class HomeHero(container: HTMLElement) {
      * Reads a `<ktjs-hero>` host into this section.
      *
      * The attribute names and child tags are the declarative spelling of the setters above, so they
-     * belong to this class; `bindHomeHero` only decides which instance handles the host. Attributes are
+     * belong to this class; `bindHomeSection` only decides which instance handles the host. Attributes are
      * re-read on every call, the child tags are consumed once (guarded by [HomeMarkup.READ]).
      */
-    fun fillFrom(host: HTMLElement) {
+    override fun fillFrom(host: HTMLElement) {
         host.getAttribute(HomeMarkup.LOGO_SRC)?.let(::setLogo)
         setTitle(host.getAttribute(HomeMarkup.TITLE).orEmpty())
         setTagline(host.getAttribute(HomeMarkup.TAGLINE).orEmpty())

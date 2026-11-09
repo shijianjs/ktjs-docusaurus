@@ -13,7 +13,7 @@ import web.html.HTMLElement
 abstract class HomeSection internal constructor(
     container: HTMLElement,
     tinted: Boolean,
-) {
+) : HomeElementBinding {
     private val root = create(
         "section",
         if (tinted) "ktjs-section ktjs-section-tint" else "ktjs-section",
@@ -45,7 +45,7 @@ abstract class HomeSection internal constructor(
      * Reads a host element into this section: the shared `section-title` on every call, the
      * section-specific child tags exactly once (guarded by [HomeMarkup.READ]).
      */
-    fun fillFrom(host: HTMLElement) {
+    override fun fillFrom(host: HTMLElement) {
         host.getAttribute(HomeMarkup.SECTION_TITLE)?.let(::setSectionTitle)
 
         if (host.getAttribute(HomeMarkup.READ) != null) return
