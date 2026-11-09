@@ -14,4 +14,6 @@ fun main() {
     defineBridgePanel()
     // Bridge superclass + the official CustomElement interface (val connectedCallback).
     defineIfPanel()
+    // Bridge superclass that re-declares the official interfaces: DOM API on 	his, no cast.
+    defineRichPanel()
 }

@@ -31,6 +31,9 @@ kotlin {
 
     compilerOptions {
         optIn.add("kotlin.js.ExperimentalWasmJsInterop")
+        // The DOM interfaces are marked internal-API for implementations. only the probe is allowed
+        // to re-declare them.
+        optIn.add("js.internal.InternalApi")
     }
 
     sourceSets {

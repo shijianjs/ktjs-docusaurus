@@ -24,5 +24,8 @@
 <my-panel-if></my-panel-if>
 <p>Same bridge, but the lifecycle hook is the interface's `override val connectedCallback`.
     Watch whether “MyPanelIf connected!” appears.</p>
+<h3>5. Bridge superclass carrying the official interfaces</h3>
+<my-panel-rich></my-panel-rich>
+<p>Same as 3, but `querySelectorAll` / `setAttribute` / `innerHTML` are called on `this` with no cast.</p>
 </body>
 </html>
