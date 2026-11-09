@@ -86,6 +86,21 @@ subprojects {
             compilerOptions {
                 freeCompilerArgs.add("-Xir-dce=false")
             }
+
+            // Custom elements need a real `class X extends HTMLElement`. At the default ES5 target
+            // Kotlin emits `function X() { HTMLElement.call(this) }`, and a DOM constructor may only
+            // be invoked with `new` — the browser throws "Please use the 'new' operator". ES2015 is
+            // the first target that can express a class.
+            //
+            // It has to be set on the js target's compiler options; `-target es2015` through
+            // `freeCompilerArgs` on the extension has no effect.
+            targets
+                .withType(org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl::class.java)
+                .configureEach {
+                    compilerOptions {
+                        target = "es2015"
+                    }
+                }
         }
     }
 }

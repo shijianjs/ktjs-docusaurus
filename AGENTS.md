@@ -88,19 +88,15 @@ duckfn 站点一致。
 
 两条硬约束决定了元素必须独立、且类语法只能来自 JS：
 
-1. **Kotlin 的类继承不能用于 DOM 元素**：`class X : HTMLElement()` 编译成
+1. **js target 必须编译到 ES2015 以上**：默认 ES5 target 下 `class X : HTMLElement()` 会被编译成
    `function X() { HTMLElement.call(this); }`，而 DOM 构造函数只接受 `new`，浏览器直接抛
-   `Please use the 'new' operator`。所以元素类由 `defineElement()` 里的一段固定 JS 提供
-   （`class extends globalThis.HTMLElement`），`connectedCallback` 回调 Kotlin；属性解析、建树、
-   清理全在 Kotlin。这是本仓库唯一一处为了语言限制而写的 JS。
+   `Please use the 'new' operator`。根构建已经给所有 js target 统一设了
+   `compilerOptions { target = "es2015" }`。
 
-   官方 API 的路子也验过：`class X : HTMLElement(), CustomElement` + `companion object :
-   CustomElementReference<X>(X::class.js)` + `customElements.define(X.NAME, X.Companion)`
-   （照 `kotlin-wrappers/examples/web-components` 写）**能编译**，但 `CustomElementReference` 的
-   `value` 就是 `ConstructorFunction(clazz)`——直接把 Kotlin 类当构造函数用，`new` 的时候还是
-   `HTMLElement.call(this)`，运行时照样抛错。`-Xir-generate-es-classes-and-functions` 在 Kotlin
-   2.4.21 上不改变产物。自查方式：`select-string -pattern 'HTMLElement.call' <bundle>.mjs`，
-   一出现就说明还在走函数式构造。
+   两个坑：这个设置有且只有一种写法有效——`js { compilerOptions { target = "es2015" } }`（字符串）；
+   用 `freeCompilerArgs.addAll("-target", "es2015")` 放在 multiplatform extension 上是**无效**的，
+   产物不会变。`-Xir-generate-es-classes-and-functions` 也不改变任何东西。
+   自查方式：`grep 'HTMLElement.call' <bundle>.mjs` 应为 0，`grep 'class <Name>'` 应命中。
 2. **元素必须待在浏览器专属模块**：`clientModules` 也会被打进 server bundle、由 Node 求值，而
    `HTMLElement` 在 Node 里不存在——放在配置的依赖图里，`docusaurus build` 在加载 config 时就崩
    （`ReferenceError: HTMLElement is not defined`，栈里是 webpack 的 `initMetadataForClass`，

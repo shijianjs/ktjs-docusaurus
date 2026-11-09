@@ -12,16 +12,21 @@ plugins {
  *     ./gradlew :probes-web-components:jsBrowserDevelopmentRun
  *
  * then open the dev server (KGP prints the port, usually 8080) and watch the console.
+ *
+ * The build settings mirror `examplesbuild.kotlin-conventions.gradle.kts` where they matter:
+ * `target = "es2015"` is set on the **js target's** compiler options (a string), not through
+ * `-target` on the multiplatform extension.
  */
 kotlin {
     js {
         browser()
         binaries.executable()
+
+        compilerOptions {
+            target = "es2015"
+        }
     }
 
-    // Tried and dropped: neither `-target es2015` nor `-Xir-generate-es-classes-and-functions` changes
-    // the emitted constructor, which stays `function MyPanel() { HTMLElement.call(this) }`. Kotlin/JS
-    // IR models classes as function + prototype regardless of the ES target level.
     compilerOptions {
         optIn.add("kotlin.js.ExperimentalWasmJsInterop")
     }

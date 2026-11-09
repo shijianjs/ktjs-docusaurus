@@ -59,6 +59,11 @@ with a client-side navigation. `connectedCallback` reads the attributes and chil
 section into the element itself and drops the declarative children (`data-ktjs-read` guards the second
 call).
 
+The module has to compile at ES2015 or later (`js { compilerOptions { target = "es2015" } }`, already
+set for every module in the root build). At the default ES5 target Kotlin turns the class into
+`function X() { HTMLElement.call(this) }`, and a DOM constructor may only be invoked with `new` — the
+browser throws `Please use the 'new' operator` the first time an element is constructed.
+
 ## Links
 
 Write `href`s **relative to the page** — `docs/intro`, not `/docs/intro`. The same MDX file then works

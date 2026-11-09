@@ -3,26 +3,24 @@ plugins {
 }
 
 /**
- * The demo site's browser half: it registers the landing-page custom elements and drives the TOC
- * toggle.
+ * The demo site's browser half: the landing-page custom elements and the TOC toggle.
  *
- * It is a separate module because `class KtjsHero : HTMLElement()` reads `HTMLElement` at module load,
- * and the configuration's bundle is loaded by Node. Keeping the element classes here means the config
- * never imports them; the plugin points `client-module.mjs` at this module's output instead.
+ * It is a separate module because a custom-element class reads `HTMLElement` when the module loads,
+ * and the configuration's bundle is loaded by Node, which has none.
  */
 kotlin {
     js {
         useEsModules()
         browser()
         binaries.library()
+
+        // The js target compiles at ES2015 (set once for every module in the root build), which is
+        // what makes the element classes below real `class X extends HTMLElement` declarations.
+        // Without it the browser throws "Please use the 'new' operator".
     }
 
     compilerOptions {
         optIn.add("kotlin.js.ExperimentalWasmJsInterop")
-
-        // Custom elements need real ES classes: without this the compiler emits
-        // unction X() { HTMLElement.call(this) }, which a DOM constructor rejects.
-        freeCompilerArgs.add("-Xir-generate-es-classes-and-functions")
     }
 
     sourceSets {
