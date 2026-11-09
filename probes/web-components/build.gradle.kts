@@ -19,6 +19,13 @@ kotlin {
         binaries.executable()
     }
 
+    // Tried and dropped: neither `-target es2015` nor `-Xir-generate-es-classes-and-functions` changes
+    // the emitted constructor, which stays `function MyPanel() { HTMLElement.call(this) }`. Kotlin/JS
+    // IR models classes as function + prototype regardless of the ES target level.
+    compilerOptions {
+        optIn.add("kotlin.js.ExperimentalWasmJsInterop")
+    }
+
     sourceSets {
         jsMain.dependencies {
             implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.0")
