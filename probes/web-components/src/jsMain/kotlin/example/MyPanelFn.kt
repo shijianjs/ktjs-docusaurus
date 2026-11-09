@@ -21,16 +21,21 @@ import kotlin.js.JsName
  *
  *     querySelectorAll(selectors) { return this.querySelectorAll(selectors); }
  *
- * Two ways of overriding that forwarder were tried, both fail:
+ * Two earlier attempts failed: `override fun` does not compile (`getAttribute` is final in `Element`,
+ * and `querySelectorAll` clashes with the forwarder the compiler already generated), and calling
+ * through `unsafeCast<HTMLElement>(this)` still overflows because the object and its prototype are
+ * unchanged.
  *
- * 1. `override fun querySelectorAll(...) = super.querySelectorAll(...)` does not compile —
- *    `getAttribute` is final in `Element`, and declaring `querySelectorAll` clashes with the
- *    forwarder the compiler already generated.
- * 2. Calling through `unsafeCast<HTMLElement>(this)` compiles, but still overflows at runtime: the
- *    cast changes the static type only, the object and its polluted prototype are the same.
+ * What does work, without changing the superclass, is calling the parent implementation directly
+ * from inside the class — `super.getAttribute(...)`, `super.querySelectorAll(...)`. At ES2015 Kotlin/JS
+ * emits real `super.foo(...)` inside the ES class, so lookup starts at the native DOM prototype and
+ * never reaches the forwarders on `this`:
  *
- * The only thing that works is not inheriting those members in the first place — see
- * `MyPanelBridge`, whose superclass declares no DOM members at all.
+ *     MyPanelFn created! / connected! / data-x=42 / spans=0
+ *
+ * Caveats: every DOM call in the class has to be spelled with `super.`, and `class X extends
+ * HTMLElement` still evaluates `HTMLElement` at module scope — such a bundle cannot be loaded by Node
+ * (see `MyPanelBridge`'s KDoc for the empty-superclass alternative).
  */
 class MyPanelFn : HTMLElement() {
 
@@ -41,10 +46,9 @@ class MyPanelFn : HTMLElement() {
     @JsName("connectedCallback")
     fun onConnected() {
         console.log("MyPanelFn connected!")
-        console.log("MyPanelFn data-x=" + getAttribute("data-x"))
-        // `getAttribute` is fine, but the query methods are re-emitted as self-recursive forwarders,
-        // so this is the statement that overflows:
-        console.log("MyPanelFn spans=" + querySelectorAll("span").length)
+        // Call the parent implementation directly, bypassing the forwarders on `this`' prototype.
+        console.log("MyPanelFn data-x=" + super.getAttribute("data-x"))
+        console.log("MyPanelFn spans=" + super.querySelectorAll("span").length)
     }
 
     companion object : CustomElementReference<MyPanelFn>(MyPanelFn::class.js) {
