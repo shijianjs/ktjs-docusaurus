@@ -86,10 +86,17 @@ npm 包拆模块的原因。
 `connectedCallback` 读属性与子标签、建一次分区、丢掉声明式子节点（`data-ktjs-read` 防重）。做法与
 duckfn 站点一致。
 
-元素类必须待在**浏览器专属模块**。`class X : HTMLElement()` 在模块加载时就求值 `HTMLElement`，而
-`clientModules` 也会被打进 server bundle、由 Node 求值——放在配置的依赖图里，`docusaurus build` 在加载
-config 时就会崩（`ReferenceError: HTMLElement is not defined`，栈里是 webpack 的
-`initMetadataForClass`，很容易误判成 SSR 数据问题）。
+两条硬约束决定了元素必须独立、且类语法只能来自 JS：
+
+1. **Kotlin 的类继承不能用于 DOM 元素**：`class X : HTMLElement()` 编译成
+   `function X() { HTMLElement.call(this); }`，而 DOM 构造函数只接受 `new`，浏览器直接抛
+   `Please use the 'new' operator`。所以元素类由 `defineElement()` 里的一段固定 JS 提供
+   （`class extends globalThis.HTMLElement`），`connectedCallback` 回调 Kotlin；属性解析、建树、
+   清理全在 Kotlin。这是本仓库唯一一处为了语言限制而写的 JS。
+2. **元素必须待在浏览器专属模块**：`clientModules` 也会被打进 server bundle、由 Node 求值，而
+   `HTMLElement` 在 Node 里不存在——放在配置的依赖图里，`docusaurus build` 在加载 config 时就崩
+   （`ReferenceError: HTMLElement is not defined`，栈里是 webpack 的 `initMetadataForClass`，
+   很容易误判成 SSR 数据问题）。
 
 插件因此有两条独立通道：
 
