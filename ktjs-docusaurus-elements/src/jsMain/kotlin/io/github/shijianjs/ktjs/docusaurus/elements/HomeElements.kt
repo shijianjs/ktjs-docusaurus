@@ -60,12 +60,12 @@ class KtjsHero : DomAdapter() {
     fun onConnected() {
         val hero = section(::HomeHero)
 
-        getAttributeSuper("logo-src")?.let(hero::setLogo)
-        hero.setTitle(getAttributeSuper("title").orEmpty())
-        hero.setTagline(getAttributeSuper("tagline").orEmpty())
+        getAttribute("logo-src")?.let(hero::setLogo)
+        hero.setTitle(getAttribute("title").orEmpty())
+        hero.setTagline(getAttribute("tagline").orEmpty())
 
-        if (getAttributeSuper(HomeMarkup.READ) != null) return
-        setAttributeSuper(HomeMarkup.READ, "")
+        if (getAttribute(HomeMarkup.READ) != null) return
+        setAttribute(HomeMarkup.READ, "")
 
         val actions = childTags(HomeMarkup.ACTION)
         actions.firstOrNull { it.getAttribute("kind") == "primary" }?.let { action ->
@@ -103,12 +103,12 @@ class KtjsHero : DomAdapter() {
 class KtjsFeatures : DomAdapter() {
     @JsName("connectedCallback")
     fun onConnected() {
-        val section = this.section { FeatureSection(it, tinted = hasAttributeSuper("tinted")) }
+        val section = this.section { FeatureSection(it, tinted = hasAttribute("tinted")) }
 
-        getAttributeSuper("section-title")?.let(section::setSectionTitle)
+        getAttribute("section-title")?.let(section::setSectionTitle)
 
-        if (getAttributeSuper(HomeMarkup.READ) != null) return
-        setAttributeSuper(HomeMarkup.READ, "")
+        if (getAttribute(HomeMarkup.READ) != null) return
+        setAttribute(HomeMarkup.READ, "")
 
         val features = childTags(HomeMarkup.FEATURE)
         section.setFeatures(
@@ -134,10 +134,10 @@ class KtjsNextSteps : DomAdapter() {
     fun onConnected() {
         val section = this.section(::NextStepSection)
 
-        getAttributeSuper("section-title")?.let(section::setSectionTitle)
+        getAttribute("section-title")?.let(section::setSectionTitle)
 
-        if (getAttributeSuper(HomeMarkup.READ) != null) return
-        setAttributeSuper(HomeMarkup.READ, "")
+        if (getAttribute(HomeMarkup.READ) != null) return
+        setAttribute(HomeMarkup.READ, "")
 
         val steps = childTags(HomeMarkup.STEP)
         section.setSteps(
