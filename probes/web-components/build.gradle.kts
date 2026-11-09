@@ -14,7 +14,7 @@ plugins {
  * then open the dev server (KGP prints the port, usually 8080) and watch the console.
  *
  * The build settings mirror `examplesbuild.kotlin-conventions.gradle.kts` where they matter:
- * `target = "es2015"` is set on the **js target's** compiler options (a string), not through
+ * `target = "es2020"` is set on the **js target's** compiler options (a string), not through
  * `-target` on the multiplatform extension.
  */
 kotlin {
@@ -23,6 +23,8 @@ kotlin {
         binaries.executable()
 
         compilerOptions {
+            // Kotlin/JS accepts es5 or es2015 only — `es2020` fails with "Unsupported ECMA version".
+            // es2015 is the first target that can express a real class, which custom elements need.
             target = "es2015"
         }
     }
