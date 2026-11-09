@@ -16,10 +16,21 @@ import kotlin.js.JsName
  * but `connectedCallback` silently does nothing.
  *
  * This variant uses `@JsName("connectedCallback") fun`, which does become a method on the prototype.
- * It gets called — and dies on its first DOM call, because Kotlin also emits every inherited external
- * member as a self-recursive forwarder:
+ * It gets called — and dies on `querySelectorAll`, because Kotlin emits the inherited external query
+ * methods as self-recursive forwarders:
  *
- *     getAttribute(name) { return this.getAttribute(name); }
+ *     querySelectorAll(selectors) { return this.querySelectorAll(selectors); }
+ *
+ * Two ways of overriding that forwarder were tried, both fail:
+ *
+ * 1. `override fun querySelectorAll(...) = super.querySelectorAll(...)` does not compile —
+ *    `getAttribute` is final in `Element`, and declaring `querySelectorAll` clashes with the
+ *    forwarder the compiler already generated.
+ * 2. Calling through `unsafeCast<HTMLElement>(this)` compiles, but still overflows at runtime: the
+ *    cast changes the static type only, the object and its polluted prototype are the same.
+ *
+ * The only thing that works is not inheriting those members in the first place — see
+ * `MyPanelBridge`, whose superclass declares no DOM members at all.
  */
 class MyPanelFn : HTMLElement() {
 
