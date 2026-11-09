@@ -4,7 +4,6 @@ import js.reflect.JsClass
 import js.reflect.unsafeCast
 import web.components.customElements
 import web.console.console
-import web.dom.TagName
 import web.html.HTMLElement
 import web.html.HtmlSource
 import kotlin.js.JsName
@@ -23,17 +22,18 @@ import kotlin.js.JsName
 @JsName("HTMLElement")
 external open class BridgeHTMLElement
 
+/** The same object seen through the official DOM wrapper: one cast, shared by every bridge class. */
+val BridgeHTMLElement.html: HTMLElement get() = unsafeCast<HTMLElement>(this)
+
 /**
  * The same panel, built on [BridgeHTMLElement].
  *
- * Kotlin does not consider this class an `HTMLElement`, so the DOM is reached through [dom] — one cast,
+ * Kotlin does not consider this class an `HTMLElement`, so the DOM is reached through [html] — one cast,
  * after which the official `HTMLElement` API is available as usual. That is also why
  * `CustomElementReference` (bounded on `HTMLElement`) cannot be used here and the registry is called
  * directly.
  */
 class MyPanelBridge : BridgeHTMLElement() {
-
-    private val dom: HTMLElement get() = unsafeCast<HTMLElement>(this)
 
     init {
         console.log("MyPanelBridge created!")
@@ -43,9 +43,9 @@ class MyPanelBridge : BridgeHTMLElement() {
     fun onConnected() {
         console.log("MyPanelBridge connected!")
         // The call that overflowed in MyPanelFn: now a plain native method call.
-        console.log("MyPanelBridge spans=" + dom.querySelectorAll("span").length)
-        dom.setAttribute("data-ok", "true")
-        dom.innerHTML = HtmlSource("MyPanelBridge content!")
+        console.log("MyPanelBridge spans=" + html.querySelectorAll("span").length)
+        html.setAttribute("data-ok", "true")
+        html.innerHTML = HtmlSource("MyPanelBridge content!")
     }
 
     companion object {

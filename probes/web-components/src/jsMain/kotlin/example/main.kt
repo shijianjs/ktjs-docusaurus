@@ -12,4 +12,6 @@ fun main() {
     defineFnPanel()
     // Empty external superclass: no inherited DOM members to re-emit.
     defineBridgePanel()
+    // Bridge superclass + the official CustomElement interface (val connectedCallback).
+    defineIfPanel()
 }

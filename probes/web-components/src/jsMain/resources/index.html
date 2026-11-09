@@ -20,5 +20,9 @@
 <my-panel-bridge></my-panel-bridge>
 <p>Creates, connects, queries the DOM and injects content — no stack overflow, because the superclass
     declares no DOM members for Kotlin to re-emit.</p>
+<h3>4. Bridge superclass + the official CustomElement interface</h3>
+<my-panel-if></my-panel-if>
+<p>Same bridge, but the lifecycle hook is the interface's `override val connectedCallback`.
+    Watch whether “MyPanelIf connected!” appears.</p>
 </body>
 </html>
