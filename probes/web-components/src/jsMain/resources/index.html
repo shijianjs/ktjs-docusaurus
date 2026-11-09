@@ -31,5 +31,8 @@
 <my-panel-mixed></my-panel-mixed>
 <p>Empty superclass + `ElementCSSInlineStyle`/`ElementContentEditable`/`GlobalEventHandlers`/
     `HTMLOrSVGOrMathMLElement`. Reads `style` through the interface, the rest through `html`.</p>
+<h3>7. Official HTMLElement spelling through a super-forwarding adapter</h3>
+<my-panel-adapter data-x="42"></my-panel-adapter>
+<p>All DOM calls go through `…Super` methods (or an overridable `remove()`); no JS bridge.</p>
 </body>
 </html>

@@ -16,6 +16,8 @@ fun main() {
     defineIfPanel()
     // Bridge superclass that re-declares the official interfaces: DOM API on 	his, no cast.
     defineRichPanel()
+    // Official HTMLElement spelling through an adapter that forwards to super.
+    defineAdapterPanel()
     // Empty superclass + the interface bundle without Element (which is a class).
     defineMixedPanel()
 }
