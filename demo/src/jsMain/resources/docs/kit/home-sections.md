@@ -42,13 +42,15 @@ The kit is split by runtime into two shared packages:
 | Package | Loaded by | Contents |
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | browser + Node | the section classes and setters |
-| `ktjs-docusaurus-elements` | browser only | `DomAdapter`, the three element classes, tag parsing, registration |
+| `ktjs-docusaurus-elements` | browser only | `CustomElementAdapter`, the three element classes, tag parsing, registration |
 
-The elements package uses the official custom-element API: `class KtjsHero : DomAdapter()` (which
-extends `HTMLElement`) plus a `CustomElementReference` companion and `customElements.define`. The hook
-is a `@JsName("connectedCallback") fun` — the interface's `override val` compiles to a getter the
-browser never calls. DOM calls on the host go through `DomAdapter`'s `…Super` methods, which forward to
-`super.foo(...)` and bypass the self-recursive bridges Kotlin/JS generates (see `AGENTS.md`).
+The elements package uses the official custom-element API: `class KtjsHero : CustomElementAdapter()`
+(which extends `HTMLElement`) plus a `CustomElementReference` companion and `customElements.define`.
+`CustomElementAdapter` declares `connectedCallback()` once under its native name — subclasses just
+override it — and provides `…Super` methods that forward to `super.foo(...)`, bypassing the
+self-recursive bridges Kotlin/JS generates (see `AGENTS.md`). The official `CustomElement` interface
+is deliberately not implemented: its `val connectedCallback` compiles to a getter the browser never
+calls.
 
 Because those classes evaluate `HTMLElement` at module load, the elements bundle must never be imported
 by the Node side. The Gradle plugin publishes it under `static/ktjs-client/` and the client module

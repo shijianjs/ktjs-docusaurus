@@ -1,6 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.elements
 
 import js.array.ReadonlyArray
+import kotlin.js.JsName
 import web.animations.Animation
 import web.animations.GetAnimationsOptions
 import web.animations.Keyframe
@@ -14,31 +15,38 @@ import web.events.Event
 import web.html.HTMLElement
 
 /**
- * A complete adapter for the DOM methods Kotlin/JS shadows on a class extending `HTMLElement`.
+ * Base class for a custom element written in Kotlin.
  *
- * The compiler emits one self-recursive bridge for every member that is declared with
- * `= definedExternally` on an external interface (`ParentNode`, `ChildNode`, `Animatable`,
- * `HTMLOrSVGOrMathMLElement`, `EventTargetLike`, …):
+ * Besides extending the official [HTMLElement], it does two things a site should not have to repeat:
  *
- * ```js
- * querySelectorAll(selectors) { return this.querySelectorAll(selectors); }
- * ```
+ * 1. Declares the browser's lifecycle hook once, under its native name — element classes just
+ *    `override fun connectedCallback()`. (`CustomElement`'s `val connectedCallback` compiles to a
+ *    getter the browser never calls, so it cannot be used.)
+ * 2. Provides safe entry points for every DOM method Kotlin/JS shadows on such a class. The compiler
+ *    emits one self-recursive bridge for each member declared with `= definedExternally` on an
+ *    external interface (`ParentNode`, `ChildNode`, `Animatable`, `HTMLOrSVGOrMathMLElement`,
+ *    `EventTargetLike`, …):
  *
- * This adapter covers the **whole** list seen in the development link output — `dispatchEvent`,
- * `animate` (all four overloads), `getAnimations`, `after`/`before`/`replaceWith`/`append`/`prepend`/
- * `replaceChildren` (Node and String varargs), `moveBefore`, `querySelector`, `querySelectorAll`,
- * `blur`, `focus`, `remove` — with a differently named `…Super` method that forwards to
- * `super.foo(...)`. At ES2015 that is a real ES `super` call: lookup starts at `HTMLElement.prototype`
- * and never reaches the bridge.
+ *    ```js
+ *    querySelectorAll(selectors) { return this.querySelectorAll(selectors); }
+ *    ```
  *
- * `remove()` is also overridden: that JS name is free, so the normal spelling works; the compiler then
- * emits `remove() { return this.remove_xxx$() }` → `remove_xxx$() { super.remove() }`.
+ *    The `…Super` methods below forward to `super.foo(...)`; at ES2015 that is a real ES `super`
+ *    call, so lookup starts at `HTMLElement.prototype` and never reaches the bridge. Where the stable
+ *    JS name is free (`remove`, `dispatchEvent`, `blur`, `moveBefore`) the method is overridden too,
+ *    so the normal spelling works as well.
  *
- * `getAttribute` / `setAttribute` / `hasAttribute` / `textContent` are deliberately **absent**: they
- * are abstract members of the external `Element` class, no bridge is generated for them, and calling
- * them on `this` already reaches the native implementation. Consumers use those directly.
+ * `getAttribute` / `setAttribute` / `hasAttribute` / `textContent` are deliberately absent: they are
+ * abstract members of the external `Element` class, no bridge is generated for them.
  */
-open class DomAdapter : HTMLElement() {
+open class CustomElementAdapter : HTMLElement() {
+
+    /**
+     * The browser calls this when the element is connected. Override it in the element class; the
+     * annotation keeps the emitted method name exactly `connectedCallback` for every subclass.
+     */
+    @JsName("connectedCallback")
+    open fun connectedCallback() {}
 
     // EventTargetLike
 

@@ -13,7 +13,7 @@ import web.html.HTMLElement
  * therefore starts at the native DOM prototype. Consumers that hold this element call the `…Super`
  * variants instead of `this.foo(...)`.
  */
-open class DomAdapter : HTMLElement() {
+open class CustomElementAdapter : HTMLElement() {
     fun getAttributeSuper(name: String): String? = super.getAttribute(name)
 
     fun setAttributeSuper(name: String, value: String) {

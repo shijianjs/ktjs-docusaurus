@@ -19,17 +19,18 @@ import web.html.HTMLElement
 
 /**
  * The three landing-page tags, using the official custom-element API:
- * `class X : HTMLElement()` (via [DomAdapter]) + `CustomElementReference` + `customElements.define`.
+ * `class X : [CustomElementAdapter]()` (which extends `HTMLElement`) + `CustomElementReference` +
+ * `customElements.define`.
  *
- * The only deliberate deviation is the lifecycle hook: `CustomElement.connectedCallback` is a `val`,
- * which Kotlin compiles to a getter the browser never calls, so it is spelled as a
- * `@JsName("connectedCallback") fun` instead.
+ * [CustomElementAdapter] owns what every element needs: a `connectedCallback()` hook under its native
+ * name, overridden here, and `…Super` entry points for the DOM methods Kotlin/JS shadows. The official
+ * `CustomElement` interface is deliberately not implemented — its `val connectedCallback` compiles to
+ * a getter the browser never calls.
  *
- * Every DOM access on the host goes through [DomAdapter]'s `…Super` methods. The child tags are plain
- * DOM elements created from MDX, so those need no special handling.
+ * Child tags are plain DOM elements created from MDX, so those need no special handling.
  *
- * The section each element renders into is stored in one field on the element itself: it is released
- * with the element and reused when `connectedCallback` runs again after a client-side navigation.
+ * The section each element renders into is stored in one field on the element itself: released with
+ * the element, reused when `connectedCallback` runs again after a client-side navigation.
  */
 @JsExport
 fun registerHomeElements() {
@@ -55,9 +56,8 @@ private fun <T : Any> HTMLElement.section(factory: (HTMLElement) -> T): T {
 }
 
 /** `<ktjs-hero logo-src title tagline>` with `<ktjs-action>` / `<ktjs-badge>` children. */
-class KtjsHero : DomAdapter() {
-    @JsName("connectedCallback")
-    fun onConnected() {
+class KtjsHero : CustomElementAdapter() {
+    override fun connectedCallback() {
         val hero = section(::HomeHero)
 
         getAttribute("logo-src")?.let(hero::setLogo)
@@ -100,9 +100,8 @@ class KtjsHero : DomAdapter() {
 }
 
 /** `<ktjs-features section-title tinted>` with `<ktjs-feature icon title>details</ktjs-feature>`. */
-class KtjsFeatures : DomAdapter() {
-    @JsName("connectedCallback")
-    fun onConnected() {
+class KtjsFeatures : CustomElementAdapter() {
+    override fun connectedCallback() {
         val section = this.section { FeatureSection(it, tinted = hasAttribute("tinted")) }
 
         getAttribute("section-title")?.let(section::setSectionTitle)
@@ -129,9 +128,8 @@ class KtjsFeatures : DomAdapter() {
 }
 
 /** `<ktjs-next-steps section-title>` with `<ktjs-step href title>details</ktjs-step>`. */
-class KtjsNextSteps : DomAdapter() {
-    @JsName("connectedCallback")
-    fun onConnected() {
+class KtjsNextSteps : CustomElementAdapter() {
+    override fun connectedCallback() {
         val section = this.section(::NextStepSection)
 
         getAttribute("section-title")?.let(section::setSectionTitle)

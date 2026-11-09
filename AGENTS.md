@@ -109,17 +109,18 @@ duckfn 站点一致。
      `@JsName("connectedCallback") fun` 后才会触发上面那条栈溢出。两种失败都在
      `probes/web-components` 里可复现（`<my-panel>` 与 `<my-panel-fn>`）。
 
-   **本仓库的解法**：`ktjs-docusaurus-elements` 里 `DomAdapter : HTMLElement()` 用官方写法，把被
-   编译器占住的成员用不同名 `…Super` 方法转发 `super.foo(...)`（能覆盖的如 `remove()` 直接 override），
-   元素类继承它、用 `CustomElementReference` + `customElements.define` 注册，钩子写成
-   `@JsName("connectedCallback") fun`（官方 `override val` 不行）。**没有任何 JS 类字面量**。
-   细节与实测在 `probes/web-components` 的 `DomAdapter.kt` / `MyPanelAdapter.kt`。
+   **本仓库的解法**：`ktjs-docusaurus-elements` 里 `CustomElementAdapter : HTMLElement()` 用官方写法，
+   把被编译器占住的成员用不同名 `…Super` 方法转发 `super.foo(...)`（能覆盖的直接 override），并在
+   基类里把生命周期钩子声明成 `connectedCallback()`——元素类只写 `override fun connectedCallback()`，
+   不要再起 `onConnected` 之类的别名，也不必每个类带 `@JsName`。注册用 `CustomElementReference` +
+   `customElements.define`（官方 `CustomElement` 的 `val` 不行）。**没有任何 JS 类字面量**。
+   细节与实测在 `probes/web-components` 的 `CustomElementAdapter.kt` / `MyPanelAdapter.kt`。
 
    **分层是硬约定**：kit 按「Node 是否加载」拆成两个都发布的共享包：
 
    - `ktjs-docusaurus-kit`：纯组件库——`HomeHero(mountPoint)` / `FeatureSection` /
      `NextStepSection` 加 `set*` setter，不知道 MDX、标签名、属性或自定义元素，Node 加载安全。
-   - `ktjs-docusaurus-elements`：浏览器专属——`DomAdapter` + 三个元素类 + 标签解析与注册。
+   - `ktjs-docusaurus-elements`：浏览器专属——`CustomElementAdapter` + 三个元素类 + 标签解析与注册。
      顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进 demo 的依赖图。
 
    不要往 kit 里加 `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。

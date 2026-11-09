@@ -20,7 +20,7 @@ internal object HomeMarkup {
 }
 
 /** Descendants carrying [tag], in document order. Uses the adapter's safe `super` forwarding. */
-internal fun DomAdapter.childTags(tag: String): List<Element> {
+internal fun CustomElementAdapter.childTags(tag: String): List<Element> {
     val found = querySelectorAllSuper(tag)
     return (0 until found.length).mapNotNull { found.item(it) as? Element }
 }

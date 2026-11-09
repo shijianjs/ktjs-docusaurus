@@ -8,11 +8,11 @@ import web.dom.TagName
 import kotlin.js.JsName
 
 /**
- * An element that follows the official spelling — `HTMLElement` superclass (via [DomAdapter]) plus a
+ * An element that follows the official spelling — `HTMLElement` superclass (via [CustomElementAdapter]) plus a
  * `CustomElementReference` companion — while routing every DOM call through the adapter's safe
  * `…Super` methods (and `remove()`, which the adapter was able to override).
  */
-class MyPanelAdapter : DomAdapter() {
+class MyPanelAdapter : CustomElementAdapter() {
 
     init {
         console.log("MyPanelAdapter created!")
