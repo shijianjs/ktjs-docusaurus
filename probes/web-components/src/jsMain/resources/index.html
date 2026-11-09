@@ -16,5 +16,9 @@
 <my-panel-fn data-x="42"></my-panel-fn>
 <p>This one is called and then throws
     <code>RangeError: Maximum call stack size exceeded</code> on its first DOM access.</p>
+<h3>3. Empty external superclass + unsafeCast to HTMLElement</h3>
+<my-panel-bridge></my-panel-bridge>
+<p>Creates, connects, queries the DOM and injects content — no stack overflow, because the superclass
+    declares no DOM members for Kotlin to re-emit.</p>
 </body>
 </html>

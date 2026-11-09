@@ -10,4 +10,6 @@ fun main() {
     customElements.define(MyPanel.NAME, MyPanel)
     // The same idea with a real method: called, then overflows the stack on the first DOM access.
     defineFnPanel()
+    // Empty external superclass: no inherited DOM members to re-emit.
+    defineBridgePanel()
 }
