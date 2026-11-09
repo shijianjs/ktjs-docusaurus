@@ -32,8 +32,14 @@ site's client module turns them into the kit's sections. No React page and no `.
 
 ## Wiring
 
-The kit owns the whole element contract — tag names, class syntax, attribute parsing and the three
-sections. A site only calls `registerHomeElements()` from its client module:
+**The kit is a plain component library.** `HomeHero(mountPoint)`, `FeatureSection(mountPoint, tinted)`
+and `NextStepSection(mountPoint)` build a subtree and expose named setters (`setTitle`, `setFeatures`,
+`setSteps`, …). It knows nothing about MDX, tag names, attributes or custom elements — the table above
+describes the *site's* markup, not the kit's API.
+
+That declarative layer lives in a separate package (`demo/.../demo/elements`): it registers the tags,
+reads each host's attributes and child tags once, and drives the kit's setters. A site wires it from
+its client module:
 
 ```kotlin
 // build.gradle.kts
@@ -54,16 +60,13 @@ fun onRouteDidUpdate() {
 ```
 
 `registerHomeElements()` is idempotent and safe on every route change, so tags that arrive with a
-client-side navigation are upgraded too. Each tag is a real custom element: `connectedCallback` hands
-the host to `bindHomeSection`, which takes the section the element already owns (or builds it once from
-the factory), then calls `HomeElementBinding.fillFrom` on it. Each section reads its own attributes and
-child tags, builds into the element and drops the declarative children (`data-ktjs-read` guards the
-second connect). The instance lives in one field on the element, so it is released together with it.
+client-side navigation are upgraded too. Each element owns the section it renders into — one field on
+the element — so the section is released with it; `data-ktjs-read` guards a second connect.
 
-The element classes come from a six-line JavaScript bridge in the kit's `ElementRegistry.kt` — a Kotlin
-class that extends `HTMLElement` is not usable here (see `AGENTS.md`). That bridge is a function
-expression, not module-level code, so the kit stays loadable by Node: no separate browser bundle and no
-`<script>` tag are needed, and registration happens after hydration, so React sees no mismatch.
+The element classes come from a short JavaScript bridge in that package — a Kotlin class extending
+`HTMLElement` is not usable here (see `AGENTS.md`). The bridge is a function expression, not
+module-level code, so the bundle stays loadable by Node: no separate browser bundle or `<script>` tag
+is needed, and registering after hydration means React sees no mismatch.
 
 The js targets still compile at ES2015 (set once in the root build). Kotlin/JS 2.4 accepts only
 `es5` / `es2015`; `es2020` arrives with 2.5.

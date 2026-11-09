@@ -1,7 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.demo
 
 import io.github.shijianjs.ktjs.docusaurus.kit.TocToggle
-import io.github.shijianjs.ktjs.docusaurus.kit.registerHomeElements
+import io.github.shijianjs.ktjs.docusaurus.demo.elements.registerHomeElements
 import kotlin.js.JsExport
 
 /**
@@ -11,8 +11,9 @@ import kotlin.js.JsExport
  * Everything here touches `document` or the custom-element registry, so it is guarded and only runs
  * in the browser.
  *
- * Both behaviours come from the kit: `registerHomeElements()` defines the landing-page tags, and
- * [TocToggle] adds the collapse control to the table of contents. Running this after hydration — as
+ * `registerHomeElements()` comes from the site's `elements` package, which owns the MDX tags and
+ * drives the kit's section setters; [TocToggle] adds the collapse control to the table of contents.
+ * Running this after hydration — as
  * `onRouteDidUpdate` does — means React has already rendered the tags before they are upgraded, so
  * there is no hydration mismatch.
  */

@@ -19,7 +19,7 @@ import web.window._blank
  * hero.setPrimaryAction(HeroLink("Get started", useBaseUrl("/docs/intro")))
  * ```
  */
-class HomeHero(container: HTMLElement) : HomeElementBinding {
+class HomeHero(container: HTMLElement) {
     private val root = create("section", "ktjs-hero")
     private val inner = create("div", "ktjs-hero-inner")
     private val stage = create("span", "ktjs-hero-logo-stage")
@@ -114,49 +114,6 @@ class HomeHero(container: HTMLElement) : HomeElementBinding {
             anchor.removeAttribute("target")
             anchor.removeAttribute("rel")
         }
-    }
-
-    /**
-     * Reads a `<ktjs-hero>` host into this section.
-     *
-     * The attribute names and child tags are the declarative spelling of the setters above, so they
-     * belong to this class; `bindHomeSection` only decides which instance handles the host. Attributes are
-     * re-read on every call, the child tags are consumed once (guarded by [HomeMarkup.READ]).
-     */
-    override fun fillFrom(host: HTMLElement) {
-        host.getAttribute(HomeMarkup.LOGO_SRC)?.let(::setLogo)
-        setTitle(host.getAttribute(HomeMarkup.TITLE).orEmpty())
-        setTagline(host.getAttribute(HomeMarkup.TAGLINE).orEmpty())
-
-        if (host.getAttribute(HomeMarkup.READ) != null) return
-        host.setAttribute(HomeMarkup.READ, "")
-
-        val actions = host.childElements(HomeMarkup.ACTION)
-        actions.firstOrNull { it.getAttribute("kind") == "primary" }?.let { action ->
-            setPrimaryAction(HeroLink(action.label(), action.getAttribute("href").orEmpty()))
-        }
-        actions.firstOrNull { it.getAttribute("kind") == "secondary" }?.let { action ->
-            setSecondaryAction(
-                HeroAction(
-                    label = action.label(),
-                    href = action.getAttribute("href").orEmpty(),
-                    icon = action.getAttribute("icon").orEmpty(),
-                ),
-            )
-        }
-        setBadges(
-            host.childElements(HomeMarkup.BADGE).map { badge ->
-                HeroBadge(
-                    href = badge.getAttribute("href").orEmpty(),
-                    src = badge.getAttribute("src").orEmpty(),
-                    alt = badge.getAttribute("alt").orEmpty(),
-                )
-            },
-        )
-
-        // The section owns the rendering now; the declarative children would show up twice.
-        actions.forEach { it.remove() }
-        host.childElements(HomeMarkup.BADGE).forEach { it.remove() }
     }
 
     /** One badge: an external link wrapping the shields.io image. Built once. */

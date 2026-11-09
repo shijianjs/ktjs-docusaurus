@@ -109,9 +109,14 @@ duckfn 站点一致。
      `@JsName("connectedCallback") fun` 后才会触发上面那条栈溢出。两种失败都在
      `probes/web-components` 里可复现（`<my-panel>` 与 `<my-panel-fn>`）。
 
-   所以元素类由 `ktjs-docusaurus-kit/.../ElementRegistry.kt` 里 6 行 JS 提供
+   所以元素类由 `demo/.../demo/elements/ElementRegistry.kt` 里 6 行 JS 提供
    （`class extends globalThis.HTMLElement`，`connectedCallback` 回调 Kotlin），其余逻辑全在 Kotlin。
    es2015 仍要保留，否则先炸第 1 条。
+
+   **分层是硬约定**：`ktjs-docusaurus-kit` 是纯组件库——只有 `HomeHero(mountPoint)`、
+   `FeatureSection`、`NextStepSection` 加 `set*` setter，不知道 MDX、标签名、属性或自定义元素。
+   标签解析、注册、生命周期全部属于站点的 `demo/.../demo/elements` 包。不要往 kit 里加
+   `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。
 
    自查：`grep 'HTMLElement.call' <bundle>.mjs` 应为 0；`grep 'querySelector(selectors) {' <bundle>`
    不应出现。
@@ -443,7 +448,7 @@ interface` 声明私有字段，`unsafeCast` 过去读写，元素被移除时�
 
 外部 `MutableMap<HTMLElement, …>` 会把每个宿主都强引用住——文档站每次进首页都新建一批元素，导航几次
 就攒下一堆永不回收的实例。`connectedCallback` 需要「找到自己上次建的那个分区」时，用元素上的字段而不是
-全局索引（见 `HomeBindings.kt` 的 `HomeHostState`）。
+全局索引（见 `demo/.../demo/elements/HomeElements.kt` 的 `HomeHostState`）。
 
 ### 组件用 class，但不建通用组件基类
 

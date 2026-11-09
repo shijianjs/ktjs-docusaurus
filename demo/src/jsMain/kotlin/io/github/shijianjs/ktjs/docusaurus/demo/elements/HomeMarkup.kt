@@ -1,18 +1,16 @@
-package io.github.shijianjs.ktjs.docusaurus.kit
+package io.github.shijianjs.ktjs.docusaurus.demo.elements
 
 import web.dom.Element
 
 /**
- * The declarative spellings shared by the home sections: attribute names, child tag names and the two
- * small helpers that read them.
+ * The declarative spellings of this site's landing page: tag names, attribute names, child tags.
  *
- * Kept internal — a site writes these tags in MDX, it never references the constants.
+ * These belong to the site, not to the kit — the kit only knows about `setTitle`, `setFeatures` and
+ * so on. Keeping the markup vocabulary here is what lets the kit stay a plain component library.
  */
 internal object HomeMarkup {
-    /** Marks a host whose declarative children were already consumed. */
     const val READ: String = "data-ktjs-read"
 
-    /** The landing-page tags the kit registers. */
     const val HERO: String = "ktjs-hero"
     const val FEATURES: String = "ktjs-features"
     const val NEXT_STEPS: String = "ktjs-next-steps"
@@ -21,12 +19,6 @@ internal object HomeMarkup {
     const val BADGE: String = "ktjs-badge"
     const val FEATURE: String = "ktjs-feature"
     const val STEP: String = "ktjs-step"
-
-    const val LOGO_SRC: String = "logo-src"
-    const val TITLE: String = "title"
-    const val TAGLINE: String = "tagline"
-    const val SECTION_TITLE: String = "section-title"
-    const val TINTED: String = "tinted"
 }
 
 /** The tag's own text, trimmed: what MDX writes between the opening and closing tag. */
