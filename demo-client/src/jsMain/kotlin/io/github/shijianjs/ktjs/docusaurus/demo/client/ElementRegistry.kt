@@ -5,10 +5,15 @@ import web.html.HTMLElement
 /**
  * Defines a custom element whose `connectedCallback` runs [onConnected].
  *
- * The class syntax has to come from JavaScript. Kotlin/JS compiles `class X : HTMLElement()` to
- * `function X() { HTMLElement.call(this); }`, and a DOM constructor may only be invoked with `new`:
- * the browser throws `Please use the 'new' operator`. Everything else — reading attributes, building
- * the section, deciding what to drop — stays in Kotlin; this is the only JavaScript in the module.
+ * The `CustomElement` / `CustomElementReference` API from kotlin-browser is the declarative way to
+ * write this, and it compiles — but at runtime it goes through `ConstructorFunction(clazz)`, i.e. the
+ * Kotlin class itself, and Kotlin 2.4 still compiles `class X : HTMLElement()` to
+ * `function X() { HTMLElement.call(this); }`. A DOM constructor may only be invoked with `new`, so the
+ * browser throws `Please use the 'new' operator` as soon as the element is created.
+ *
+ * Until the compiler emits a real `class X extends HTMLElement`, the class syntax comes from here: six
+ * lines of JavaScript that define the element and call back into Kotlin. Attributes, child tags,
+ * section building and cleanup all stay on the Kotlin side.
  *
  * Re-registering a tag is a no-op, which keeps a hot reload from throwing `NotSupportedError`.
  */

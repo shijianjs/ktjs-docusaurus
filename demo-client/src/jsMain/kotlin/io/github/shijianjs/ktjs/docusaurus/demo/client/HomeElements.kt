@@ -20,7 +20,7 @@ import web.html.HTMLElement
  * client-side navigation that re-connects the same element does not build a second one.
  *
  * Registration goes through [defineElement], which is where the `class extends HTMLElement` syntax
- * lives — see the note there.
+ * lives — see the note there for why it cannot be a Kotlin class.
  */
 private val heroes = mutableMapOf<HTMLElement, HomeHero>()
 private val featureSections = mutableMapOf<HTMLElement, FeatureSection>()

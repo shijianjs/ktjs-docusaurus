@@ -19,6 +19,10 @@ kotlin {
 
     compilerOptions {
         optIn.add("kotlin.js.ExperimentalWasmJsInterop")
+
+        // Custom elements need real ES classes: without this the compiler emits
+        // unction X() { HTMLElement.call(this) }, which a DOM constructor rejects.
+        freeCompilerArgs.add("-Xir-generate-es-classes-and-functions")
     }
 
     sourceSets {
