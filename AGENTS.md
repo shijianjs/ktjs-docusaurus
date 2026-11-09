@@ -92,7 +92,8 @@ Kotlin/JS 的 library 链接**默认开 IR DCE，入口只有该模块自己的 
 | `-Xir-dce=false` | 45,725 B | 是 |
 
 所以根构建给**每个 KMP 子模块**统一加 `freeCompilerArgs.add("-Xir-dce=false")`。必须逐个模块加：每个模块
-独立链接，只给 wrapper 加而 demo 不加，demo 自己的 public 声明仍会被削掉。
+独立链接，只给 wrapper 加而 demo 不加，demo 自己的 public 声明仍会被削掉。库无法保证自己一定被打进
+bundle，而消费方打包时本来就会摇树，所以这个开关对 `executable` 消费方没有体积代价。
 
 两个连带约束：
 

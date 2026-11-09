@@ -29,9 +29,8 @@ kotlin {
     }
 
     compilerOptions {
-        // Keep every public declaration in the library output; without it the linker
-        // dead-code-eliminates the module down to nothing (see AGENTS.md).
-        freeCompilerArgs.add("-Xir-dce=false")
+        // `-Xir-dce=false` is set once for every KMP subproject in the root build: see the DCE note
+        // in AGENTS.md.
         // `kotlin.js.JsAny` is the type of every upstream member declared as `unknown`.
         optIn.add("kotlin.js.ExperimentalWasmJsInterop")
     }

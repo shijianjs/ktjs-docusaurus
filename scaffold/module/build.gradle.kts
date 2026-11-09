@@ -27,6 +27,13 @@ kotlin {
         }
     }
 
+    compilerOptions {
+        // Kotlin/JS dead-code-eliminates a library's JS output down to the `@JsExport` roots, and a
+        // wrapper module has none: the whole module would compile to an empty file, so a consumer
+        // that loads it directly gets `undefined`. Keep the public API; bundling still shakes it.
+        freeCompilerArgs.add("-Xir-dce=false")
+    }
+
     sourceSets {
         jsMain.dependencies {
             implementation(npm("__NPM_PACKAGE__", upstreamVersion))
