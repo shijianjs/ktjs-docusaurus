@@ -119,6 +119,21 @@ duckfn 站点一致。
   文案塞回 Kotlin。
 - 确实需要组件树时（交互复杂、props 要计算），再引入第二个模块 + `pageFunctions`。
 
+### 等 Kotlin 2.5 再改的两件事
+
+两件都在 2.5.0-Beta2 的 EAP 里，正式版发布后统一处理，涉及 `ktjs-*` 全系列（本仓库、vaadin、echarts、
+iconify、wrapper-template）：
+
+- **`target = "es2020"`**：2.4 只接受 `es5` / `es2015`（写 `es2020` 直接报 `Unsupported ECMA version`）。
+  2.5 新增 es2020，还顺带打开 `BigInt` 这类此前需要额外开关的特性。现在五个仓库里写死的
+  `target = "es2015"` 到时候一起换 —— 它只是「能表达 `class extends HTMLElement` 的最低档」，不是终点。
+- **`KotlinPublicationFormat.KOTLIN_ARCHIVE`**：KMP 库的平台构件打成单个 `.kar`，正对着 Maven Central 的
+  发布体积限制（官方例子：7539 文件 / 91 MB → 1036 文件 / 23 MB）。发布侧仍是 Experimental，消费侧已
+  对所有项目可用。开启方式：模块里 `kotlin { publishing { publicationFormat.set(...) } }`，或全局
+  `gradle.properties` 写 `kotlin.publicationFormat=KOTLIN_ARCHIVE`。
+
+在那之前不要为了「用新语法」去调 target：es2015 之上的收益只有语法糖，而 `es2020` 会直接让构建失败。
+
 ### Kotlin/JS 的 DCE 与跨模块代码
 
 Kotlin/JS 的 library 链接**默认开 IR DCE，入口只有该模块自己的 `@JsExport`**。没有任何 `@JsExport` 的
