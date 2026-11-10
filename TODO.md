@@ -2,8 +2,8 @@
 
 把 Docusaurus 站点做成 Kotlin/JS 项目：配置是 Kotlin，页面是 Markdown/MDX，构建由 Gradle 插件驱动。
 
-- 总计：44
-- 已完成：32
+- 总计：46
+- 已完成：34
 - 明确不做：4
 - 保留：1
 - 待完成：7

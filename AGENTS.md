@@ -59,14 +59,30 @@ npm 包拆模块的原因。
 
 ### 已覆盖的范围与明确不做的部分
 
-当前覆盖「写一个文档站需要的配置面」：
+当前覆盖「写一个文档站需要的配置面」，并且**官方插件与主题全部覆盖**（口径见
+<https://docusaurus.io/docs/api/plugins> 与 <https://docusaurus.io/docs/api/themes>）：
 
 - `Config` 全字段（含 `future`、`i18n`、`storage`、`markdown`、`webpack`）；
-- `preset-classic` 的 `ClassicOptions` 与 docs / blog / pages / sitemap / svgr / gtag / gtm /
-  google-analytics / theme-classic 的选项类型；
-- `ThemeConfig`（导航栏、页脚、代码高亮、颜色模式、目录、Algolia、Mermaid）；
+- `preset-classic` 的 `ClassicOptions`；
+- `ThemeConfig`（导航栏、页脚、代码高亮、颜色模式、目录、Algolia、Mermaid、live code block）；
 - `SidebarsConfig` 与全部侧边栏条目类型；
 - `prism-react-renderer` 的 `themes`（`PrismThemes`）。
+
+官方插件（npm 包 → Kotlin 包）：`plugin-content-docs` → `plugins.contentdocs`、`content-blog` →
+`contentblog`、`content-pages` → `contentpages`、`sitemap` → `sitemap`、`svgr` → `svgr`、
+`google-analytics` → `googleanalytics`、`google-gtag` → `gtag`、`google-tag-manager` → `gtm`、
+`client-redirects` → `clientredirects`、`ideal-image` → `idealimage`、`pwa` → `pwa`、
+`rsdoctor` → `rsdoctor`、`css-cascade-layers` → `csscascadelayers`、`vercel-analytics` →
+`vercelanalytics`。`plugin-debug` 没有选项（上游签名只收 `LoadContext`），所以只有一个
+`DebugPlugin.NAME` 常量，注册时直接 `PluginConfig(DebugPlugin.NAME)`。
+
+官方主题：`theme-classic` → `plugins.themeclassic`（`customCss`）＋ `ThemeConfig` 里 classic 与
+`theme-common` 的字段；`theme-search-algolia` → `ThemeConfig.algolia`；`theme-live-codeblock` →
+`ThemeConfig.liveCodeBlock`；`theme-mermaid` → `ThemeConfig.mermaid`。主题的配置面就是 `themeConfig`
+里的字段，所以只有 classic 需要额外一个插件选项类型。
+
+`vercel-analytics` 不在上面两个索引页里，但包是官方的（3.6 起发布），一并包了。上游标为 legacy 的
+`plugin-google-analytics`（Universal Analytics，Google 已停）仍然包着——它还在发布、preset 仍然接受它。
 
 尚未覆盖，需要时按需补：
 

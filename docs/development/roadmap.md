@@ -14,8 +14,8 @@
 
 | 状态 | 数量 |
 | --- | ---: |
-| 总计 | 44 |
-| 已完成 | 32 |
+| 总计 | 46 |
+| 已完成 | 34 |
 | 明确不做 | 4 |
 | 保留 | 1 |
 | 待完成 | 7 |
@@ -29,17 +29,26 @@
 - 1.5 包名统一为 `io.github.shijianjs.ktjs.docusaurus`
 - 1.6 `../AGENTS.md` 的两条约定（国内镜像克隆、只读仓库可随意切分支/tag）
 
-## 2. wrapper 覆盖面（9 项：7 完成 / 2 不做）
+## 2. wrapper 覆盖面（11 项：9 完成 / 2 不做）
 
 - 2.1 `Config` 全字段
 - 2.2 `preset-classic` 与 docs / blog / pages / sitemap / svgr / gtag / gtm / analytics / theme-classic 选项
-- 2.3 `ThemeConfig`（navbar、footer、prism、colorMode、toc、algolia、mermaid）
+- 2.3 `ThemeConfig`（navbar、footer、prism、colorMode、toc、algolia、mermaid、liveCodeBlock）
 - 2.4 `SidebarsConfig` 与全部条目类型
 - 2.5 `PrismThemes`
 - 2.6 React 客户端层（`Layout`、`Heading`、`Link`、`Translate`、`useDocusaurusContext` 等）
 - 2.8 `@easyops-cn/docusaurus-search-local` 的选项类型：`plugins.searchlocal` 覆盖 0.55.3 的全部
   `PluginOptions`，联合类型各分支都有工厂（`hashed`、`ignoreFiles`、`searchContextByPaths`、
   `removeDefaultStopWordFilter`、`searchBarPosition`）
+- 2.9 官方插件全覆盖（14 个）：content-docs / content-blog / content-pages / sitemap / svgr /
+  google-analytics / google-gtag / google-tag-manager / client-redirects / ideal-image / pwa /
+  rsdoctor / css-cascade-layers / vercel-analytics。`plugin-debug` 没有选项，只有
+  `DebugPlugin.NAME`。顺带把已有声明按 3.10.2 补齐：docs 的 `banner` 改成字面量、pages 的
+  `editUrl` / `showLastUpdate*`、blog 的 `pageBasePath` / `tags` / `onInlineTags` / `feedOptions.xslt`、
+  sitemap 的 `lastmod` 改成 `'date' | 'datetime'`、gtag 的 `trackingID` 支持多 id
+- 2.10 官方主题全覆盖（4 个）：theme-classic 的 `customCss`、theme-search-algolia 的
+  `ThemeConfig.algolia`（含 `insights` / `searchParameters` / `translations`）、
+  theme-live-codeblock 的 `ThemeConfig.liveCodeBlock`、theme-mermaid 的 `ThemeConfig.mermaid`
 
 明确不做：
 
