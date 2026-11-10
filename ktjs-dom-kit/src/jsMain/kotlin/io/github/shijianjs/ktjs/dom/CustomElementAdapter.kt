@@ -168,6 +168,8 @@ open class CustomElementAdapter : HTMLElement() {
     // `replaceChildren`), the query methods, or external functions with `= definedExternally` default
     // parameters (`animate`, `focus`, `getAnimations`): Kotlin either reports a JS name clash with
     // the compiler-generated bridge or "Overriding 'external' function with optional parameters".
+    // `@JsName` is not an escape hatch for the override either — the compiler rejects it with
+    // "'@JsName' is prohibited for overridden members" (verified in `probes/web-components`).
     // Those all have `…Super` counterparts above.
 
     override fun dispatchEvent(event: Event): Boolean = super.dispatchEvent(event)

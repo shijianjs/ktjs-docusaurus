@@ -43,6 +43,13 @@ open class CustomElementAdapter : HTMLElement() {
         super.remove()
     }
 
+    // Probe result (2026-11-10): `override` + `@JsName("querySelectorAllImpl")` does not work.
+    //   e: '@JsName' is prohibited for overridden members.
+    //   e: JavaScript name 'querySelectorAll' generated for this declaration clashes with other
+    //      declarations.
+    // Plain `override fun querySelectorAll(...)` clashes with the compiler-generated bridge as well,
+    // so the `querySelectorAllSuper` forwarder above stays the only working spelling.
+
 
 
     var textContentSuper: String?
