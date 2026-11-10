@@ -21,12 +21,12 @@ class MyPanelAdapter : CustomElementAdapter() {
     @JsName("connectedCallback")
     fun onConnected() {
         console.log("MyPanelAdapter connected!")
-        console.log("MyPanelAdapter data-x=" + getAttributeSuper("data-x"))
-        console.log("MyPanelAdapter spans=" + querySelectorAllSuper("span").length)
-        setAttributeSuper("data-ok", "true")
-        // `remove()` was overridable, so the normal spelling works too.
-        remove()
-        console.log("MyPanelAdapter remove() ok")
+        // Plain spelling: the bridges were deleted from the prototype by stripAdapterBridges().
+        console.log("MyPanelAdapter data-x=" + getAttribute("data-x"))
+        console.log("MyPanelAdapter spans=" + querySelectorAll("span").length)
+        setAttribute("data-ok", "true")
+        // Kept in the DOM so the probe page can assert data-ok; `remove()` is covered by other probes.
+        console.log("MyPanelAdapter bridgeless ok")
     }
 
     companion object : CustomElementReference<MyPanelAdapter>(MyPanelAdapter::class.js) {
