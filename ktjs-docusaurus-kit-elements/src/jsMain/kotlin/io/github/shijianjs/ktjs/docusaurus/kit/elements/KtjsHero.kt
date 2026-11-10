@@ -1,5 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
+import io.github.shijianjs.ktjs.dom.CustomElementAdapter
+
 import io.github.shijianjs.ktjs.docusaurus.kit.HeroAction
 import io.github.shijianjs.ktjs.docusaurus.kit.HeroBadge
 import io.github.shijianjs.ktjs.docusaurus.kit.HeroLink

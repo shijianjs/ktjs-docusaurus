@@ -12,6 +12,10 @@ plugins {
  *
  * Both modules are shared packages: a site depends on the kit for the section classes and adds this
  * one as a browser-only bundle.
+ *
+ * The `CustomElementAdapter` base class lives in `ktjs-dom-kit`, a Docusaurus-independent module;
+ * its linked output is emitted next to this module's into the same `kotlin/` directory, so the
+ * browser bundle keeps working without an import map.
  */
 kotlin {
     js {
@@ -27,6 +31,7 @@ kotlin {
     sourceSets {
         jsMain.dependencies {
             implementation(project(":ktjs-docusaurus-kit"))
+            implementation(project(":ktjs-dom-kit"))
         }
     }
 }

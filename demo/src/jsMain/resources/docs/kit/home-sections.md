@@ -37,20 +37,21 @@ and `NextStepSection(mountPoint)` build a subtree and expose named setters (`set
 `setSteps`, …). It knows nothing about MDX, tag names, attributes or custom elements — the table above
 describes the *site's* markup, not the kit's API.
 
-The kit is split by runtime into two shared packages:
+The kit is split by runtime into two shared packages, plus a generic module the elements build on:
 
 | Package | Loaded by | Contents |
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | browser + Node | the section classes and setters |
-| `ktjs-docusaurus-kit-elements` | browser only | `CustomElementAdapter`, the three element classes, tag parsing, registration |
+| `ktjs-docusaurus-kit-elements` | browser only | the three element classes, tag parsing, registration |
+| `ktjs-dom-kit` | browser only | `CustomElementAdapter`, the custom-element base class |
 
 The elements package uses the official custom-element API: `class KtjsHero : CustomElementAdapter()`
 (which extends `HTMLElement`) plus a `CustomElementReference` companion and `customElements.define`.
-`CustomElementAdapter` declares `connectedCallback()` once under its native name — subclasses just
-override it — and provides `…Super` methods that forward to `super.foo(...)`, bypassing the
-self-recursive bridges Kotlin/JS generates (see `AGENTS.md`). The official `CustomElement` interface
-is deliberately not implemented: its `val connectedCallback` compiles to a getter the browser never
-calls.
+`CustomElementAdapter` lives in `ktjs-dom-kit`, which knows nothing about Docusaurus: it declares
+`connectedCallback()` once under its native name — subclasses just override it — and provides
+`…Super` methods that forward to `super.foo(...)`, bypassing the self-recursive bridges Kotlin/JS
+generates (see `AGENTS.md`). The official `CustomElement` interface is deliberately not implemented:
+its `val connectedCallback` compiles to a getter the browser never calls.
 
 Because those classes evaluate `HTMLElement` at module load, the elements bundle must never be imported
 by the Node side. The Gradle plugin publishes it under `static/ktjs-client/` and the client module

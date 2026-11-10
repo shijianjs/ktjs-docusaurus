@@ -1,4 +1,4 @@
-package io.github.shijianjs.ktjs.docusaurus.kit.elements
+package io.github.shijianjs.ktjs.dom
 
 import js.array.ReadonlyArray
 import kotlin.js.JsAny

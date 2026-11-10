@@ -1,5 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
+import io.github.shijianjs.ktjs.dom.CustomElementAdapter
+
 import io.github.shijianjs.ktjs.docusaurus.kit.FeatureItem
 import io.github.shijianjs.ktjs.docusaurus.kit.FeatureSection
 import web.components.CustomElementReference
