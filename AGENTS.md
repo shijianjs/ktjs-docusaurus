@@ -109,12 +109,15 @@ duckfn 站点一致。
      `@JsName("connectedCallback") fun` 后才会触发上面那条栈溢出。两种失败都在
      `probes/web-components` 里可复现（`<my-panel>` 与 `<my-panel-fn>`）。
 
-   **本仓库的解法**：`ktjs-dom-kit` 里 `CustomElementAdapter : HTMLElement()` 用官方写法，
-   把被编译器占住的成员用不同名 `…Super` 方法转发 `super.foo(...)`（能覆盖的直接 override），并在
-   基类里把生命周期钩子声明成 `connectedCallback()`——元素类只写 `override fun connectedCallback()`，
-   不要再起 `onConnected` 之类的别名，也不必每个类带 `@JsName`。注册用 `CustomElementReference` +
-   `customElements.define`（官方 `CustomElement` 的 `val` 不行）。**没有任何 JS 类字面量**。
-   细节与实测在 `probes/web-components` 的 `CustomElementAdapter.kt` / `MyPanelAdapter.kt`。
+   **本仓库的解法**：`ktjs-dom-kit` 里 `CustomElementAdapter : HTMLElement()` 用官方写法，在
+   `customElements.define` 之前用 `stripBridgesFrom(元素类::class.js)` 沿原型链删掉编译器生成的
+   自递归桥（`Reflect.deleteProperty`，删到 `HTMLElement.prototype` 之前为止；注意 Kotlin 给链上
+   每个类都生成一层桥，只删父类不够），之后元素里直接用原生拼写 `querySelectorAll` / `append` /
+   `animate` / `focus`，不需要 `…Super` 转发。生命周期钩子声明成 `connectedCallback()`——元素类只写
+   `override fun connectedCallback()`，不要再起 `onConnected` 之类的别名，也不必每个类带 `@JsName`。
+   注册用 `CustomElementReference` + `customElements.define`（官方 `CustomElement` 的 `val` 不行）。
+   **没有任何 JS 类字面量**。细节与实测在 `probes/web-components` 的 `CustomElementAdapter.kt` /
+   `MyPanelAdapter.kt`。
 
    **分层是硬约定**：kit 按「Node 是否加载」拆成两个都发布的共享包，另有一个暂存于此的通用模块：
 

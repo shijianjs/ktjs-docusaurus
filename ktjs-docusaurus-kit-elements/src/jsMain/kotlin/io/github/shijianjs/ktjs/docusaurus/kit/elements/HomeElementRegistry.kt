@@ -1,5 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
+import io.github.shijianjs.ktjs.dom.stripBridgesFrom
 import js.reflect.unsafeCast
 import kotlin.js.JsExport
 import web.components.CustomElementReference
@@ -17,6 +18,10 @@ import web.html.HTMLElement
  */
 @JsExport
 fun registerHomeElements() {
+    stripBridgesFrom(KtjsHero::class.js)
+    stripBridgesFrom(KtjsFeatures::class.js)
+    stripBridgesFrom(KtjsNextSteps::class.js)
+
     defineIfMissing(KtjsHero.NAME, KtjsHero.Companion)
     defineIfMissing(KtjsFeatures.NAME, KtjsFeatures.Companion)
     defineIfMissing(KtjsNextSteps.NAME, KtjsNextSteps.Companion)

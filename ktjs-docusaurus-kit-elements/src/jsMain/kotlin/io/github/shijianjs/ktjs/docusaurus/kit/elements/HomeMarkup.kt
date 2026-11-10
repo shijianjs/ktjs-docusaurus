@@ -21,9 +21,9 @@ internal object HomeMarkup {
     const val STEP: String = "ktjs-step"
 }
 
-/** Descendants carrying [tag], in document order. Uses the adapter's safe `super` forwarding. */
+/** Descendants carrying [tag], in document order. */
 internal fun CustomElementAdapter.childTags(tag: String): List<Element> {
-    val found = querySelectorAllSuper(tag)
+    val found = querySelectorAll(tag)
     return (0 until found.length).mapNotNull { found.item(it) as? Element }
 }
 

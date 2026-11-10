@@ -1,24 +1,14 @@
 package io.github.shijianjs.ktjs.dom
 
-import js.array.ReadonlyArray
 import kotlin.js.JsAny
 import kotlin.js.JsName
-import web.animations.Animation
-import web.animations.GetAnimationsOptions
-import web.animations.Keyframe
-import web.animations.KeyframeAnimationOptions
-import web.animations.PropertyIndexedKeyframes
-import web.dom.Element
-import web.dom.FocusOptions
-import web.dom.Node
-import web.dom.NodeList
-import web.events.Event
+import kotlin.js.js
 import web.html.HTMLElement
 
 /**
  * Base class for a custom element written in Kotlin.
  *
- * Besides extending the official [HTMLElement], it does two things a site should not have to repeat:
+ * It does two things a site should not have to repeat:
  *
  * 1. Declares **all** of `web.components.CustomElement`'s lifecycle hooks as overridable methods under
  *    their native names: `connectedCallback`, `connectedMoveCallback`, `disconnectedCallback`,
@@ -29,22 +19,21 @@ import web.html.HTMLElement
  *    `attributeChangedCallback` only fires for attributes listed in the constructor's static
  *    `observedAttributes`; declaring that is up to the element class.
  *
- * 2. Provides safe entry points for every DOM method Kotlin/JS shadows on such a class. The compiler
- *    emits one self-recursive bridge for each member declared with `= definedExternally` on an
- *    external interface (`ParentNode`, `ChildNode`, `Animatable`, `HTMLOrSVGOrMathMLElement`,
- *    `EventTargetLike`, …):
+ * 2. Removes the self-recursive bridges Kotlin/JS emits for every external DOM member (`ParentNode`,
+ *    `ChildNode`, `Animatable`, `HTMLOrSVGOrMathMLElement`, `EventTargetLike`, …):
  *
  *    ```js
  *    querySelectorAll(selectors) { return this.querySelectorAll(selectors); }
  *    ```
  *
- *    The `…Super` methods below forward to `super.foo(...)`; at ES2015 that is a real ES `super`
- *    call, so lookup starts at `HTMLElement.prototype` and never reaches the bridge. Where the stable
- *    JS name is free (`remove`, `dispatchEvent`, `blur`, `moveBefore`) the method is overridden too,
- *    so the normal spelling works as well.
+ *    Call [stripBridgesFrom] once per element class before `customElements.define`. It walks the
+ *    class's prototype chain down to (but excluding) `HTMLElement.prototype` and deletes those names,
+ *    so instance lookups fall through to the native DOM methods and the normal spelling works:
+ *    `querySelectorAll(...)`, `append(...)`, `animate(...)`, `focus()`, … No `…Super` forwarders and
+ *    no `@JsName` aliases are needed (`@JsName` is forbidden on overridden members anyway).
  *
- * `getAttribute` / `setAttribute` / `hasAttribute` / `textContent` are deliberately absent: they are
- * abstract members of the external `Element` class, no bridge is generated for them.
+ * `getAttribute` / `setAttribute` / `hasAttribute` / `textContent` need no stripping: they are
+ * abstract members of the external `Element` class, so no bridge is generated for them.
  */
 open class CustomElementAdapter : HTMLElement() {
 
@@ -62,123 +51,38 @@ open class CustomElementAdapter : HTMLElement() {
 
     @JsName("attributeChangedCallback")
     open fun attributeChangedCallback(name: String, oldValue: JsAny?, newValue: JsAny?) {}
+}
 
-    // EventTargetLike
+/**
+ * Members Kotlin/JS re-declares on a custom element class for the external DOM interfaces it inherits.
+ * Every one of them is a self-recursive bridge sitting on that class's prototype.
+ */
+private val bridgeNames = listOf(
+    "dispatchEvent", "animate", "getAnimations", "after", "before", "replaceWith", "append",
+    "moveBefore", "prepend", "querySelector", "querySelectorAll", "replaceChildren", "blur", "focus",
+)
 
-    fun dispatchEventSuper(event: Event): Boolean = super.dispatchEvent(event)
-
-    // Animatable
-
-    fun animateSuper(keyframes: ReadonlyArray<Keyframe>?, options: Double): Animation =
-        super.animate(keyframes, options)
-
-    fun animateSuper(keyframes: ReadonlyArray<Keyframe>?, options: KeyframeAnimationOptions): Animation =
-        super.animate(keyframes, options)
-
-    fun animateSuper(keyframes: PropertyIndexedKeyframes?, options: Double): Animation =
-        super.animate(keyframes, options)
-
-    fun animateSuper(keyframes: PropertyIndexedKeyframes?, options: KeyframeAnimationOptions): Animation =
-        super.animate(keyframes, options)
-
-    fun getAnimationsSuper(options: GetAnimationsOptions): ReadonlyArray<Animation> =
-        super.getAnimations(options)
-
-    // ChildNode — the Node and String vararg overloads get distinct names, since JS methods cannot
-    // overload by signature.
-
-    fun afterNodesSuper(vararg nodes: Node) {
-        super.after(*nodes)
+/**
+ * Deletes the bridges from [klass]'s prototype chain, stopping before `HTMLElement.prototype`, where
+ * these names are the real DOM methods.
+ *
+ * Run it once per element class, before `customElements.define` and therefore before any instance
+ * exists. Passing the concrete class is enough: an instance resolves a member through the whole
+ * chain, so every class in it has to be cleaned — Kotlin emits a bridge on each class, not only on
+ * [CustomElementAdapter].
+ */
+fun stripBridgesFrom(klass: dynamic) {
+    val htmlPrototype: dynamic = js("HTMLElement.prototype")
+    var prototype: dynamic = klass.prototype
+    while (prototype != null && prototype !== htmlPrototype) {
+        deleteBridges(prototype)
+        prototype = js("Object.getPrototypeOf")(prototype)
     }
+}
 
-    fun afterTextSuper(vararg nodes: String) {
-        super.after(*nodes)
-    }
-
-    fun beforeNodesSuper(vararg nodes: Node) {
-        super.before(*nodes)
-    }
-
-    fun beforeTextSuper(vararg nodes: String) {
-        super.before(*nodes)
-    }
-
-    fun replaceWithNodesSuper(vararg nodes: Node) {
-        super.replaceWith(*nodes)
-    }
-
-    fun replaceWithTextSuper(vararg nodes: String) {
-        super.replaceWith(*nodes)
-    }
-
-    override fun remove() {
-        super.remove()
-    }
-
-    // ParentNode
-
-    fun appendNodesSuper(vararg nodes: Node) {
-        super.append(*nodes)
-    }
-
-    fun appendTextSuper(vararg nodes: String) {
-        super.append(*nodes)
-    }
-
-    fun prependNodesSuper(vararg nodes: Node) {
-        super.prepend(*nodes)
-    }
-
-    fun prependTextSuper(vararg nodes: String) {
-        super.prepend(*nodes)
-    }
-
-    fun moveBeforeSuper(node: Node, child: Node?) {
-        super.moveBefore(node, child)
-    }
-
-    fun replaceChildrenNodesSuper(vararg nodes: Node) {
-        super.replaceChildren(*nodes)
-    }
-
-    fun replaceChildrenTextSuper(vararg nodes: String) {
-        super.replaceChildren(*nodes)
-    }
-
-    fun replaceChildrenSuper() {
-        super.replaceChildren()
-    }
-
-    fun querySelectorSuper(selectors: String): Element? = super.querySelector(selectors)
-
-    fun querySelectorAllSuper(selectors: String): NodeList<Element> = super.querySelectorAll(selectors)
-
-    // HTMLOrSVGOrMathMLElement
-
-    fun blurSuper() {
-        super.blur()
-    }
-
-    fun focusSuper(options: FocusOptions) {
-        super.focus(options)
-    }
-
-    // Where the stable JS name is still free, override as well so the normal spelling works too.
-    // Not possible for vararg members (`after` / `before` / `append` / `prepend` / `replaceWith` /
-    // `replaceChildren`), the query methods, or external functions with `= definedExternally` default
-    // parameters (`animate`, `focus`, `getAnimations`): Kotlin either reports a JS name clash with
-    // the compiler-generated bridge or "Overriding 'external' function with optional parameters".
-    // `@JsName` is not an escape hatch for the override either — the compiler rejects it with
-    // "'@JsName' is prohibited for overridden members" (verified in `probes/web-components`).
-    // Those all have `…Super` counterparts above.
-
-    override fun dispatchEvent(event: Event): Boolean = super.dispatchEvent(event)
-
-    override fun blur() {
-        super.blur()
-    }
-
-    override fun moveBefore(node: Node, child: Node?) {
-        super.moveBefore(node, child)
+private fun deleteBridges(prototype: dynamic) {
+    val deleteProperty: dynamic = js("Reflect.deleteProperty")
+    for (name in bridgeNames) {
+        deleteProperty(prototype, name)
     }
 }
