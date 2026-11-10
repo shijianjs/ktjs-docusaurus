@@ -24,6 +24,10 @@ internal const val HOME_CSS: String = """
 .ktjs-hero {
   position: relative;
   isolation: isolate;
+  /* Span the viewport so the glow below is clipped at the window edge, not by the framework's
+     content container; the clip keeps the 100vw from adding a horizontal scrollbar. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
   overflow-x: clip;
   padding: 4.5rem 1.5rem 4rem;
   text-align: center;
@@ -88,7 +92,9 @@ internal const val HOME_CSS: String = """
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    padding-bottom: 0.06em;
+    /* `background-clip: text` only paints inside the padding box, so the tight line box would leave
+       the tail of "g" transparent; 0.06em was not enough at the clamped font size. */
+    padding-bottom: 0.14em;
   }
 }
 
@@ -182,6 +188,9 @@ internal const val HOME_CSS: String = """
 /* -------------------------------------------------------------- sections */
 
 .ktjs-section {
+  /* Same viewport-spanning rule as the hero: the tinted band has to reach the window edge. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
   padding: 4.5rem 0;
 }
 
