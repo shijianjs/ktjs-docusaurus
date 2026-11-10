@@ -144,7 +144,7 @@ Building a section in code uses the same elements — create, set attributes, ap
 
 ```kotlin
 val hero = KtjsHero.NAME.createElement {
-    setAttribute("logo-src", "img/favicon.svg")
+    setAttribute("logo-src", "img/ktjs-docusaurus-logo.png")
     setAttribute("title", "my-project")
 }
 hero.appendChild(
