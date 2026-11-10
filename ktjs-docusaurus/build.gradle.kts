@@ -53,6 +53,15 @@ kotlin {
             implementation(npm("@docusaurus/core", docusaurusVersion))
             implementation(npm("@docusaurus/preset-classic", docusaurusVersion))
             implementation(npm("prism-react-renderer", prismReactRendererVersion))
+
+            // A theme is resolved by name from the generated configuration, so it has to be
+            // installed next to the wrapper even though no Kotlin code imports it.
+            implementation(
+                npm(
+                    "@easyops-cn/docusaurus-search-local",
+                    npmVersions.getValue("@easyops-cn/docusaurus-search-local"),
+                ),
+            )
         }
         jsTest.dependencies {
             implementation(kotlin("test"))

@@ -4,6 +4,7 @@
   "description": "Source of truth for npm package versions used by the Kotlin/JS build. Read by build.gradle.kts and updated by Dependabot.",
   "dependencies": {
     "@docusaurus/core": "3.10.2",
+    "@easyops-cn/docusaurus-search-local": "0.55.3",
     "@docusaurus/preset-classic": "3.10.2",
     "@docusaurus/types": "3.10.2",
     "prism-react-renderer": "^2.4.1",
