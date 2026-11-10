@@ -30,8 +30,21 @@ kotlin {
 
     sourceSets {
         jsMain.dependencies {
-            implementation(project(":ktjs-docusaurus-kit"))
             implementation(project(":ktjs-dom-kit"))
+            // Wrapper for <iconify-icon>; it also registers the element and ships the npm package.
+            implementation("io.github.shijianjs:ktjs-iconify-icon:3.0.4-kt.6")
         }
     }
+}
+
+/**
+ * The library bundle keeps `import 'iconify-icon'` as a bare specifier (library output is not
+ * webpack-bundled). Stage the npm ESM file next to the linked output so the site serves it, and let
+ * the generated `headTags` import map resolve the name in the browser.
+ */
+val stageIconifyIcon by tasks.registering(Copy::class) {
+    from(rootProject.layout.buildDirectory.dir("js/node_modules/iconify-icon/dist")) {
+        include("iconify-icon.mjs")
+    }
+    into(layout.buildDirectory.dir("staged-iconify"))
 }

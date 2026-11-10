@@ -4,8 +4,8 @@ sidebar_position: 1
 
 # Home sections
 
-A landing page is written in MDX: the section tags below read like the markup they produce, and the
-site's client module turns them into the kit's sections. No React page and no `.tsx` file.
+A landing page is written in MDX: the section tags below read like the markup they produce, and each
+one is a real custom element. No React page and no `.tsx` file.
 
 ```mdx
 <ktjs-hero logo-src="img/favicon.svg" title="my-project" tagline="One sentence about it">
@@ -30,30 +30,31 @@ site's client module turns them into the kit's sections. No React page and no `.
 | `ktjs-features` | `section-title`, `tinted` | `ktjs-feature` (`icon`, `title`), body text is the details |
 | `ktjs-next-steps` | `section-title` | `ktjs-step` (`href`, `title`), body text is the details |
 
-## Wiring
+## How the components fit together
 
-**The kit is a plain component library.** `HomeHero(mountPoint)`, `FeatureSection(mountPoint, tinted)`
-and `NextStepSection(mountPoint)` build a subtree and expose named setters (`setTitle`, `setFeatures`,
-`setSteps`, …). It knows nothing about MDX, tag names, attributes or custom elements — the table above
-describes the *site's* markup, not the kit's API.
+Every tag is its own custom element with its own shadow root — parents included. The parent renders the
+frame (heading, grid, hero shell) and exposes a `<slot>`; the children render their own card. `ktjs-hero`
+routes its children into named slots by tag name, so MDX does not need a `slot` attribute.
 
-The kit is split by runtime into two shared packages, plus a generic module the elements build on:
+That means a card is not data handed to a section object: `<ktjs-feature>` is a node the browser
+upgrades on its own, and the grid is ordinary CSS on the slot's assigned elements.
 
-| Package | Loaded by | Contents |
-| --- | --- | --- |
-| `ktjs-docusaurus-kit` | browser + Node | the section classes and setters |
-| `ktjs-docusaurus-kit-elements` | browser only | the three element classes, tag parsing, registration |
-| `ktjs-dom-kit` | browser only | `CustomElementAdapter`, the custom-element base class |
-
-The elements package uses the official custom-element API: `class KtjsHero : CustomElementAdapter()`
+The elements package uses the official custom-element API: `class KtjsFeature : CustomElementAdapter()`
 (which extends `HTMLElement`) plus a `CustomElementReference` companion and `customElements.define`.
 `CustomElementAdapter` lives in `ktjs-dom-kit`, which knows nothing about Docusaurus: it declares
 `connectedCallback()` once under its native name — subclasses just override it. Before defining a tag,
-`defineIfMissing` (from `ktjs-dom-kit`) calls `stripBridgesFrom`, which deletes the self-recursive
-bridges Kotlin/JS puts on every class in the prototype chain; after that the native spelling works
-directly (`querySelectorAll`, `append`, …), with no `…Super` forwarders (see `AGENTS.md`). The official
-`CustomElement` interface is deliberately not implemented: its `val connectedCallback` compiles to a
-getter the browser never calls.
+`defineIfMissing` calls `stripBridgesFrom`, which deletes the self-recursive bridges Kotlin/JS puts on
+every class in the prototype chain; after that the native spelling works directly (`querySelectorAll`,
+`append`, …), with no `…Super` forwarders (see `AGENTS.md`). The official `CustomElement` interface is
+deliberately not implemented: its `val connectedCallback` compiles to a getter the browser never calls.
+
+## Packages
+
+| Package | Loaded by | Contents |
+| --- | --- | --- |
+| `ktjs-docusaurus-kit` | browser + Node | the Node-safe helpers (`TocToggle`) |
+| `ktjs-docusaurus-kit-elements` | browser only | all home elements and their shadows |
+| `ktjs-dom-kit` | browser only | `CustomElementAdapter`, `defineIfMissing`, `createElement` |
 
 Because those classes evaluate `HTMLElement` at module load, the elements bundle must never be imported
 by the Node side. The Gradle plugin publishes it under `static/ktjs-client/` and the client module
@@ -69,20 +70,7 @@ docusaurus {
 }
 ```
 
-```kotlin
-// the site's client module
-@JsExport
-fun onRouteDidUpdate() {
-    if (!isBrowser) return
-    loadBrowserBundle(SITE_BASE_URL + "ktjs-client/index.mjs")
-    tocToggle.install()
-    tocToggle.refresh()
-}
-```
-
 Loading after hydration means React has already rendered the tags, so there is no hydration mismatch.
-Each element owns the section it renders into — one field on the element — so the section is released
-with it; `data-ktjs-read` guards a second connect.
 
 The js targets still compile at ES2015 (set once in the root build). Kotlin/JS 2.4 accepts only
 `es5` / `es2015`; `es2020` arrives with 2.5.
@@ -90,36 +78,62 @@ The js targets still compile at ES2015 (set once in the root build). Kotlin/JS 2
 ## Links
 
 Write `href`s **relative to the page** — `docs/intro`, not `/docs/intro`. The same MDX file then works
-under every locale prefix (`/my-site/` and `/my-site/zh-Hans/`) without the kit having to resolve a
-base URL.
+under every locale prefix (`/my-site/` and `/my-site/zh-Hans/`) without resolving a base URL.
 
 ## Icons
 
-`icon` values are Iconify names (`lucide:sparkles`, `simple-icons:github`). The kit creates
-`<iconify-icon>` elements and lets the official package fetch the glyph; nothing ships with the site.
+`icon` values are Iconify names (`lucide:sparkles`, `simple-icons:github`). The elements wrap
+`<iconify-icon>` through [`ktjs-iconify`](https://github.com/shijianjs/ktjs-iconify) — `registerIconifyIcon()`
+pulls in the official package, and the glyph is fetched at runtime.
+
+The library bundle leaves `import 'iconify-icon'` as a bare specifier, so the site ships the npm ESM file
+next to the bundle and declares an import map in `headTags`:
+
+```kotlin
+// docusaurus.config.kt
+headTags = arrayOf(
+    unsafeJso<HtmlTagObject> {
+        tagName = "script"
+        attributes = /* type = "importmap" */
+        innerHTML = """{"imports":{"iconify-icon":"/my-site/ktjs-client/iconify-icon.mjs"}}"""
+    },
+)
+```
 
 ## Styling
 
-Class names are prefixed with `ktjs-`, and the palette is read from inherited custom properties, so a
-site restyles the sections without forking them:
+Every element renders into a shadow root, so the page stylesheet cannot leak in and these rules cannot
+leak out. Theme changes cross the boundary through inherited custom properties:
 
 ```css
 :root {
   --ktjs-accent: #1f6feb;
   --ktjs-accent-strong: #1a5fd0;
+  --ktjs-card-bg: var(--ifm-background-surface-color);
 }
 ```
 
+`HOME_CSS` falls back to Infima's `--ifm-*` tokens, so light and dark mode work without a single
+`[data-theme]` selector inside the shadow trees.
+
 ## From Kotlin
 
-The tags are sugar over the classes; code can mount a section directly, which is what a page that
-needs computed content would do:
+Building a section in code uses the same elements — create, set attributes, append:
 
 ```kotlin
-val hero = HomeHero(host)
-hero.setTitle("my-project")
-hero.setLogo("img/favicon.svg")
-hero.setPrimaryAction(HeroLink("Get started", "docs/intro"))
+val hero = KtjsHero.NAME.createElement {
+    setAttribute("logo-src", "img/favicon.svg")
+    setAttribute("title", "my-project")
+}
+hero.appendChild(
+    KtjsAction.NAME.createElement {
+        setAttribute("kind", "primary")
+        setAttribute("href", "docs/intro")
+        textContent = "Get started"
+    },
+)
+host.appendChild(hero)
 ```
 
-Both paths end in the same setters — there is no `render()` / `apply()` entry point.
+`TagName<T>.createElement { }` is the typed wrapper over `document.createElement(TagName<T>)`; the
+callback receives the concrete element type.

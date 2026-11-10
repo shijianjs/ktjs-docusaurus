@@ -1,16 +1,13 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
-
 import web.dom.Element
 
 /**
- * The declarative spelling of the home sections: tag and attribute names, plus the two small helpers
- * that read them. Shared by the three element classes in this package; not part of the kit's API.
+ * The declarative spelling of the home sections: tag and attribute names, plus the helper that reads
+ * the child tags.
  */
 internal object HomeMarkup {
-    const val READ: String = "data-ktjs-read"
-
     const val HERO: String = "ktjs-hero"
     const val FEATURES: String = "ktjs-features"
     const val NEXT_STEPS: String = "ktjs-next-steps"
@@ -26,6 +23,3 @@ internal fun CustomElementAdapter.childTags(tag: String): List<Element> {
     val found = querySelectorAll(tag)
     return (0 until found.length).mapNotNull { found.item(it) as? Element }
 }
-
-/** The tag's own text, trimmed: what MDX writes between the opening and closing tag. */
-internal fun Element.label(): String = textContent.orEmpty().trim()

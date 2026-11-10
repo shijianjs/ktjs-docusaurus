@@ -21,3 +21,14 @@ internal fun localStorageOrNull(): WebStorage? =
 
 /** The global `setTimeout`. */
 internal external fun setTimeout(handler: () -> Unit, timeout: Int)
+
+/** Reinterprets a DOM element as the concrete subtype the caller knows it is. */
+@Suppress("UNCHECKED_CAST")
+internal fun <T> web.dom.Element.unsafeCastElement(): T = this as T
+
+/** Appends an inline `<style>` with [css] as its only child. */
+internal fun appendStyle(host: web.dom.Element, css: String) {
+    val style = web.dom.document.createElement("style").unsafeCastElement<web.html.HTMLStyleElement>()
+    style.textContent = css
+    host.appendChild(style)
+}

@@ -79,6 +79,19 @@ fun docusaurusConfig(): Config = unsafeJso {
     // once React is done with the page.
     clientModules = arrayOf("./client-module.mjs")
 
+    // The kit's browser bundle imports `<iconify-icon>` by its bare npm name, which a browser cannot
+    // resolve on its own; this import map points it at the copy staged next to the bundle.
+    headTags = arrayOf(
+        unsafeJso<HtmlTagObject> {
+            tagName = "script"
+            attributes = unsafeJso<ImportMapAttributes> {
+                type = "importmap"
+            }.unsafeCast<Record<JsAny, BooleanOrString>>()
+            innerHTML =
+                """{"imports":{"iconify-icon":"${SITE_BASE_URL}ktjs-client/iconify-icon.mjs"}}"""
+        },
+    )
+
     presets = arrayOf<PresetConfig?>(
         classicPreset(
             unsafeJso {
@@ -218,6 +231,11 @@ fun sidebars(): SidebarsConfig = unsafeJso<DemoSidebars> {
         },
     )
 }.unsafeCast<SidebarsConfig>()
+
+/** Attributes for the generated `<script type="importmap">`. */
+private external interface ImportMapAttributes {
+    var type: String
+}
 
 /** The locale record the site declares; keys must match the ids in `Config.i18n.locales`. */
 private external interface DemoLocaleConfigs {

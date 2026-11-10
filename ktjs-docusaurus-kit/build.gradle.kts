@@ -27,9 +27,6 @@ kotlin {
     sourceSets {
         jsMain.dependencies {
             api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.0")
-
-            // Side-effect dependency: registers the <iconify-icon> element the sections create.
-            implementation(npm("iconify-icon", "3.0.4"))
         }
         jsTest.dependencies {
             implementation(kotlin("test"))

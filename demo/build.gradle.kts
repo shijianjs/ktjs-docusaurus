@@ -45,6 +45,9 @@ docusaurus {
     browserBundleFiles.from(
         project(":ktjs-docusaurus-kit-elements")
             .layout.buildDirectory.dir("compileSync/js/main/productionLibrary/kotlin"),
+        // The npm ESM file behind the `iconify-icon` bare specifier; the page's import map points at it.
+        project(":ktjs-docusaurus-kit-elements")
+            .layout.buildDirectory.dir("staged-iconify"),
     )
 }
 
@@ -52,4 +55,5 @@ docusaurus {
 // before the site is assembled.
 tasks.named("docusaurusSite") {
     dependsOn(":ktjs-docusaurus-kit-elements:jsProductionLibraryCompileSync")
+    dependsOn(":ktjs-docusaurus-kit-elements:stageIconifyIcon")
 }

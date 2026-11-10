@@ -120,10 +120,12 @@ duckfn 站点一致。
 
    **分层是硬约定**：kit 按「Node 是否加载」拆成两个都发布的共享包，另有一个暂存于此的通用模块：
 
-   - `ktjs-docusaurus-kit`：纯组件库——`HomeHero(mountPoint)` / `FeatureSection` /
-     `NextStepSection` 加 `set*` setter，不知道 MDX、标签名、属性或自定义元素，Node 加载安全。
-   - `ktjs-docusaurus-kit-elements`：浏览器专属——三个元素类 + 标签解析与注册。
-     顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进 demo 的依赖图。
+   - `ktjs-docusaurus-kit`：Node 安全的辅助（目前是 TOC toggle），不知道 MDX、标签名或自定义元素。
+   - `ktjs-docusaurus-kit-elements`：浏览器专属——全部 home 元素：`ktjs-hero` / `ktjs-action` /
+     `ktjs-badge` / `ktjs-features` / `ktjs-feature` / `ktjs-next-steps` / `ktjs-step`。每个元素
+     都渲染进自己的 shadow root：父级负责框架和 `<slot>` 布局，子级自己渲染卡片，子标签是真元素，
+     不再被解析成数据后丢弃。顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进
+     demo 的依赖图。
    - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`），与 Docusaurus 无关。模块名不以
      `ktjs-docusaurus` 开头，因此不参与发布和 Dokka；元素包用 `implementation` 依赖它，产物作为
      独立 `.mjs` 一起进 `static/ktjs-client/`。以后搬到独立仓库。
