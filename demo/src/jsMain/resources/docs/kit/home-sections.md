@@ -54,7 +54,7 @@ deliberately not implemented: its `val connectedCallback` compiles to a getter t
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | yes, with the UI bundle | Node-safe helpers (`TocToggle`) + a `browser` artifact |
 | `ktjs-docusaurus-kit-elements` | no | all home elements and their shadows |
-| `ktjs-dom-kit` | no (moves to its own repository) | `CustomElementAdapter`, `defineIfMissing`, `createElement`, `attachStyledShadow` |
+| `ktjs-dom-kit` | no (moves to its own repository) | `CustomElementAdapter`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `appendStyle` |
 
 The home UI travels with the kit: the webpack bundle is attached to the kit's coordinate as a
 `browser` artifact, so another project needs one dependency and one copy:
@@ -135,13 +135,22 @@ leak out. Theme changes cross the boundary through inherited custom properties:
 }
 ```
 
-`HOME_CSS` falls back to Infima's `--ifm-*` tokens, so light and dark mode work without a single
-`[data-theme]` selector inside the shadow trees.
+Every `--ktjs-*` token falls back to an Infima `--ifm-*` value, so light and dark mode work without a
+single `[data-theme]` selector inside the shadow trees.
 
-The rules are one constructed `CSSStyleSheet` (the text is parsed once, at module load). Attaching a
-shadow root goes through `attachStyledShadow(sheet)` in `ktjs-dom-kit`, which adopts it for that root:
-every element shares the same object, the browser parses it once, and no `<style>` node is added per
-element.
+Styles live where the element is written, in three grades:
+
+| Where | What goes there | Example |
+| --- | --- | --- |
+| `inlineStyle.apply { … }` in the element's constructor | everything a plain declaration can say | `display = Display.flex`, `padding = Padding(1.5.rem)`, `color = accent` |
+| a `<style>` in that element's own shadow root | what inline styles cannot: `:hover`, `::before`, `@media`, `@supports` | the button's hover colours, the hero's glow blobs |
+| an adopted sheet (`attachStyledShadow`) | what several elements genuinely share | the `box-sizing` reset in `HomeReset.kt` |
+
+Values are typed (`Display.flex`, `1.5.rem`, `Color("var(--ktjs-accent, …)")`, `clamp(…)`), never
+strings built by hand. `ktjs-dom-kit` exposes the two mechanics: `HTMLElement.inlineStyle`, which is
+the element's own `CSSStyleDeclaration` seen as `csstype.Properties`, and `ShadowRoot.appendStyle`,
+which appends a `<style>` to that element's shadow tree. A component's rules therefore never travel
+into a shared file, and no element carries a stylesheet it does not paint with.
 
 ## From Kotlin
 

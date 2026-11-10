@@ -1,11 +1,23 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.appendStyle
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.createElement
+import io.github.shijianjs.ktjs.dom.inlineStyle
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import web.components.CustomElementReference
+import web.cssom.AlignItems
+import web.cssom.Display
+import web.cssom.FlexDirection
+import web.cssom.JustifyContent
+import web.cssom.Margin
+import web.cssom.integer
+import web.cssom.number
+import web.cssom.pct
+import web.cssom.px
+import web.cssom.rem
 import web.dom.TagName
 import web.html.HTMLHeadingElement
 import web.html.HTMLParagraphElement
@@ -17,7 +29,8 @@ import web.html.HtmlTagName
  * `<ktjs-feature icon="lucide:…" title="…">details</ktjs-feature>` — one card in a
  * [`KtjsFeatures`] grid.
  *
- * Renders itself into a shadow root, so the parent only lays the cards out.
+ * Renders itself into a shadow root, so the parent only lays the cards out. Border and background
+ * are in [FEATURE_CSS] rather than inline because the card's `:hover` changes them.
  */
 class KtjsFeature : CustomElementAdapter() {
     private val icon: IconifyIconElement
@@ -25,25 +38,53 @@ class KtjsFeature : CustomElementAdapter() {
     private val details: HTMLParagraphElement
 
     init {
-        val shadow = attachStyledShadow(HOME_STYLE_SHEET)
+        val shadow = attachStyledShadow(HOME_RESET)
+        shadow.appendStyle(FEATURE_CSS)
+
         icon = IconifyIconTagName.iconifyIcon.createElement {
-            classList.add("ktjs-feature-icon")
+            inlineStyle.fontSize = 1.375.rem
             setAttribute("aria-hidden", "true")
         }
         heading = HtmlTagName.h3.createElement {
-            classList.add("ktjs-feature-title")
+            inlineStyle.apply {
+                margin = Margin(0.px, 0.px, 0.5.rem)
+                fontSize = 1.0625.rem
+                fontWeight = integer(600)
+            }
         }
         details = HtmlTagName.p.createElement {
-            classList.add("ktjs-feature-details")
+            inlineStyle.apply {
+                margin = 0.px
+                fontSize = 0.9375.rem
+                lineHeight = number(1.7)
+                color = mutedText
+            }
+        }
+        val chip = HtmlTagName.span.createElement {
+            inlineStyle.apply {
+                display = Display.inlineFlex
+                alignItems = AlignItems.center
+                justifyContent = JustifyContent.center
+                width = 2.5.rem
+                height = 2.5.rem
+                marginBottom = 1.rem
+                borderRadius = 0.75.rem
+                backgroundColor = accentSoft
+                color = accent
+            }
+            appendChild(icon)
         }
         val card = HtmlTagName.article.createElement<HTMLElement> {
+            // Hover state only, hence the hook.
             classList.add("ktjs-feature-card")
-            appendChild(
-                HtmlTagName.span.createElement {
-                    classList.add("ktjs-feature-icon-chip")
-                    appendChild(icon)
-                },
-            )
+            inlineStyle.apply {
+                display = Display.flex
+                flexDirection = FlexDirection.column
+                height = 100.pct
+                padding = 1.5.rem
+                borderRadius = 1.rem
+            }
+            appendChild(chip)
             appendChild(heading)
             appendChild(details)
         }
@@ -60,3 +101,17 @@ class KtjsFeature : CustomElementAdapter() {
         val NAME: TagName<KtjsFeature> = TagName(HomeMarkup.FEATURE)
     }
 }
+
+/** The card's surface and its `:hover` lift. */
+private const val FEATURE_CSS: String = """
+.ktjs-feature-card {
+  border: 1px solid var(--ktjs-card-border, rgba(127, 127, 127, 0.24));
+  background-color: var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff));
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ktjs-feature-card:hover {
+  border-color: var(--ktjs-accent, var(--ifm-color-primary));
+  box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18));
+}
+"""

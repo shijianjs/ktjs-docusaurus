@@ -1,17 +1,40 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.appendStyle
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.createElement
+import io.github.shijianjs.ktjs.dom.inlineStyle
 import web.components.CustomElementReference
 import web.components.HTMLSlotElement
+import web.cssom.AlignItems
+import web.cssom.Auto
+import web.cssom.Color
+import web.cssom.Display
+import web.cssom.FlexWrap
+import web.cssom.Isolation
+import web.cssom.JustifyContent
+import web.cssom.Margin
+import web.cssom.Overflow
+import web.cssom.Padding
+import web.cssom.Position
+import web.cssom.TextAlign
+import web.cssom.clamp
+import web.cssom.dropShadow
+import web.cssom.em
+import web.cssom.integer
+import web.cssom.minus
+import web.cssom.number
+import web.cssom.pct
+import web.cssom.px
+import web.cssom.rem
+import web.cssom.vw
 import web.dom.TagName
 import web.html.HTMLDivElement
 import web.html.HTMLHeadingElement
 import web.html.HTMLImageElement
 import web.html.HTMLParagraphElement
 import web.html.HTMLSpanElement
-import web.html.HTMLStyleElement
 import web.html.HTMLElement
 import web.html.HtmlTagName
 
@@ -30,32 +53,76 @@ class KtjsHero : CustomElementAdapter() {
     private val badges: HTMLDivElement
 
     init {
-        val shadow = attachStyledShadow(HOME_STYLE_SHEET)
+        inlineStyle.display = Display.block
+
+        val shadow = attachStyledShadow(HOME_RESET)
+        shadow.appendStyle(HERO_CSS)
 
         logo = HtmlTagName.img.createElement {
-            classList.add("ktjs-logo")
+            inlineStyle.apply {
+                display = Display.block
+                width = clamp(7.rem, 16.vw, 10.rem)
+                height = Auto.auto
+                margin = Margin(0.px, Auto.auto)
+                filter = dropShadow(0.px, 14.px, 28.px, Color(GLOW))
+            }
             alt = ""
         }
         heading = HtmlTagName.h1.createElement {
+            // The gradient title is a `@supports` block, so it needs this hook (see HERO_CSS).
             classList.add("ktjs-title")
+            inlineStyle.apply {
+                margin = Margin(1.5.rem, 0.px, 0.px)
+                fontSize = clamp(2.25.rem, 5.vw, 3.25.rem)
+                fontWeight = integer(700)
+                letterSpacing = (-0.02).em
+                lineHeight = number(1.1)
+            }
         }
         tagline = HtmlTagName.p.createElement {
-            classList.add("ktjs-tagline")
+            inlineStyle.apply {
+                maxWidth = 34.rem
+                margin = Margin(1.25.rem, Auto.auto, 0.px)
+                fontSize = clamp(1.05.rem, 2.2.vw, 1.25.rem)
+                lineHeight = number(1.65)
+                color = mutedText
+            }
         }
         val stage = HtmlTagName.span.createElement {
-            classList.add("ktjs-logo-stage")
+            inlineStyle.apply {
+                display = Display.inlineBlock
+                lineHeight = number(0.0)
+            }
             appendChild(logo)
         }
         actions = HtmlTagName.div.createElement {
+            // Only the small-screen stacking comes from CSS, so the row needs its hook.
             classList.add("ktjs-actions")
+            inlineStyle.apply {
+                display = Display.flex
+                flexWrap = FlexWrap.wrap
+                justifyContent = JustifyContent.center
+                rowGap = 0.75.rem
+                columnGap = 1.rem
+                marginTop = 2.25.rem
+            }
             appendChild(HtmlTagName.slot.createElement<HTMLSlotElement> { name = "action" })
         }
         badges = HtmlTagName.div.createElement {
-            classList.add("ktjs-badges")
+            inlineStyle.apply {
+                display = Display.flex
+                flexWrap = FlexWrap.wrap
+                alignItems = AlignItems.center
+                justifyContent = JustifyContent.center
+                rowGap = 0.5.rem
+                columnGap = 0.5.rem
+                marginTop = 2.rem
+            }
             appendChild(HtmlTagName.slot.createElement<HTMLSlotElement> { name = "badge" })
         }
         val inner = HtmlTagName.div.createElement {
-            classList.add("ktjs-hero-inner")
+            inlineStyle.maxWidth = 46.rem
+            inlineStyle.margin = Margin(0.px, Auto.auto)
             appendChild(stage)
             appendChild(heading)
             appendChild(tagline)
@@ -64,7 +131,17 @@ class KtjsHero : CustomElementAdapter() {
         }
 
         val section = HtmlTagName.section.createElement<HTMLElement> {
+            // The two glow blobs are `::before` / `::after` (see HERO_CSS).
             classList.add("ktjs-hero")
+            inlineStyle.apply {
+                position = Position.relative
+                isolation = Isolation.isolate
+                width = 100.vw
+                marginInline = 50.pct - 50.vw
+                overflowX = Overflow.clip
+                padding = Padding(clamp(3.rem, 5.vw, 4.5.rem), 1.5.rem, 4.rem)
+                textAlign = TextAlign.center
+            }
             appendChild(inner)
         }
         shadow.appendChild(section)
@@ -90,3 +167,62 @@ class KtjsHero : CustomElementAdapter() {
         val NAME: TagName<KtjsHero> = TagName(HomeMarkup.HERO)
     }
 }
+
+/** The glow colour shared by the logo shadow and the hero's radial blob. */
+private const val GLOW: String = "var(--ktjs-glow, rgba(31, 111, 235, 0.16))"
+
+/**
+ * Everything in the hero that inline styles cannot say: two decorative pseudo-elements, the
+ * `@supports`-guarded gradient text (inline colour would beat a descendant rule), and the small-screen
+ * stacking of the action row.
+ */
+private const val HERO_CSS: String = """
+.ktjs-hero::before,
+.ktjs-hero::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ktjs-hero::before {
+  top: -18rem;
+  left: 50%;
+  width: 52rem;
+  height: 52rem;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, $GLOW, transparent 70%);
+}
+
+.ktjs-hero::after {
+  right: -10rem;
+  bottom: -14rem;
+  width: 34rem;
+  height: 34rem;
+  background: radial-gradient(circle, var(--ktjs-glow-warm, rgba(255, 193, 7, 0.10)), transparent 70%);
+}
+
+.ktjs-title {
+  color: var(--ktjs-accent, var(--ifm-color-primary));
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .ktjs-title {
+    background-image: linear-gradient(120deg, var(--ktjs-accent-deep, #1a5fd0), var(--ktjs-accent-bright, #6cb6ff));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* `background-clip: text` only paints inside the padding box, so the tight line box would leave
+       the tail of "g" transparent; 0.06em was not enough at the clamped font size. */
+    padding-bottom: 0.14em;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .ktjs-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+"""

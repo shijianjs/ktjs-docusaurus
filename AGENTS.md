@@ -147,11 +147,21 @@ duckfn 站点一致。
      都渲染进自己的 shadow root：父级负责框架和 `<slot>` 布局，子级自己渲染卡片，子标签是真元素，
      不再被解析成数据后丢弃。顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进
      demo 的依赖图。**不发布**：这是本站的 UI，不是通用契约，其他项目通过 kit 分发的 bundle 使用。
-   - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`）与 `attachStyledShadow(vararg CSSStyleSheet)`，
-     与 Docusaurus 无关。模块名不以 `ktjs-docusaurus` 开头，因此不参与发布和 Dokka；元素包用
+   - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`）、挂 shadow root 的 `attachShadowRoot` /
+     `attachStyledShadow(vararg CSSStyleSheet)`，以及 `HTMLElement.inlineStyle`（`csstype.Properties`
+     视图），与 Docusaurus 无关。模块名不以 `ktjs-docusaurus` 开头，因此不参与发布和 Dokka；元素包用
      `implementation` 依赖它，产物作为独立 `.mjs` 一起进 `static/ktjs-client/`。以后搬到独立仓库。
-     shadow 样式一律走 `adoptedStyleSheets`（入参是构造好的 `CSSStyleSheet`，不是 CSS 文本）：多个
-     shadow 树共用一份 sheet，浏览器只解析一次，也不为每个元素生成 `<style>` 节点。
+
+    **样式按组件拆分，就近写**（2026-11 重构，别再改回集中式 CSS）：元素自己的样式用
+    `inlineStyle.apply { display = Display.flex; padding = Padding(1.5.rem) }` 写在渲染它的那段代码旁，
+    类型是 kotlin-csstype/cssom 的值（`Display.flex`、`1.5.rem`、`Color("var(--ktjs-accent, …)")`、
+    `clamp(…)`），不拼字符串。只有内联表达不了的才写 CSS——`:hover` / `:focus-visible`、`::before` /
+    `::after`、`@media`、`@supports`、`@keyframes`；这部分是该组件自己的 `<style>`，放在同一个 `.kt` 文件里
+    用 `shadow.appendStyle(XXX_CSS)` 注入，类名只留给这些规则选中。**不要**再把各组件样式堆成一个大字符串，
+    也不要为了「每个元素一份」去 adopt sheet：`adoptedStyleSheets` 是共享机制，只有真正跨组件复用的
+    （目前只有 `HomeReset.kt` 的 `box-sizing` reset）才走 `attachStyledShadow`，主题色这类跨组件常量放
+    `HomeTheme.kt`。`ktjs-features` / `ktjs-next-steps` 共用的分区外壳（`HomeSection.kt`）属于「父容器统一
+    控制子组件布局」，是允许提取的那一类。
 
    不要往 kit 里加 `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。
 

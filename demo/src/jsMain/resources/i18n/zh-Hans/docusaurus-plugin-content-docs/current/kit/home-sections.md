@@ -53,7 +53,7 @@ override 它。定义标签之前，`defineIfMissing` 会调用 `stripBridgesFro
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | 是，带 UI bundle | Node 安全的辅助（`TocToggle`）+ 一个 `browser` 构件 |
 | `ktjs-docusaurus-kit-elements` | 否 | 全部首页元素及其 shadow |
-| `ktjs-dom-kit` | 否（以后搬到独立仓库） | `CustomElementAdapter`、`defineIfMissing`、`createElement`、`attachStyledShadow` |
+| `ktjs-dom-kit` | 否（以后搬到独立仓库） | `CustomElementAdapter`、`defineIfMissing`、`createElement`、`attachShadowRoot`、`attachStyledShadow`、`inlineStyle`、`appendStyle` |
 
 首页 UI 跟着 kit 走：webpack bundle 以 `browser` 构件的身份挂在 kit 的坐标上，所以另一个项目只要一个依赖、
 一份拷贝：
@@ -133,12 +133,21 @@ headTags = arrayOf(
 }
 ```
 
-`HOME_CSS` 回退到 Infima 的 `--ifm-*` 变量，所以亮色与暗色模式都可用，而 shadow 树里一个 `[data-theme]`
-选择器都不需要。
+每个 `--ktjs-*` 都回退到 Infima 的 `--ifm-*` 变量，所以亮色与暗色模式都可用，而 shadow 树里一个
+`[data-theme]` 选择器都不需要。
 
-样式本身是一份构造出来的 `CSSStyleSheet`（`HOME_CSS` 只在模块加载时解析一次），由 `ktjs-dom-kit` 的
-`attachStyledShadow(sheet)` 在挂 shadow root 时通过 `adoptedStyleSheets` 交给调用方：多个 shadow 树共用同一
-对象，浏览器只解析一次，也不再为每个元素生成一个 `<style>` 节点。
+样式写在元素自己身上，只有三个层级：
+
+| 位置 | 放什么 | 例子 |
+| --- | --- | --- |
+| 元素构造函数里的 `inlineStyle.apply { … }` | 一条普通声明能表达的全部 | `display = Display.flex`、`padding = Padding(1.5.rem)`、`color = accent` |
+| 该元素自己 shadow root 里的 `<style>` | 内联表达不了的：`:hover`、`::before`、`@media`、`@supports` | 按钮的悬停配色、hero 的两个光斑 |
+| 被 adopt 的 sheet（`attachStyledShadow`） | 多个元素确实共享的 | `HomeReset.kt` 里的 `box-sizing` reset |
+
+取值都是有类型的（`Display.flex`、`1.5.rem`、`Color("var(--ktjs-accent, …)")`、`clamp(…)`），不手拼字符串。
+`ktjs-dom-kit` 提供两个机制：`HTMLElement.inlineStyle`，把元素自己的 `CSSStyleDeclaration` 看成
+`csstype.Properties`；`ShadowRoot.appendStyle`，往该元素的 shadow 树追加一个 `<style>`。因此组件的规则不会
+飘进公共文件，也没有哪个元素背着它并不使用的样式表。
 
 ## 从 Kotlin 用
 
