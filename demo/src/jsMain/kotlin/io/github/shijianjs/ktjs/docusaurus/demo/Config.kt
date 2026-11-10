@@ -79,18 +79,8 @@ fun docusaurusConfig(): Config = unsafeJso {
     // once React is done with the page.
     clientModules = arrayOf("./client-module.mjs")
 
-    // The kit's browser bundle imports `<iconify-icon>` by its bare npm name, which a browser cannot
-    // resolve on its own; this import map points it at the copy staged next to the bundle.
-    headTags = arrayOf(
-        unsafeJso<HtmlTagObject> {
-            tagName = "script"
-            attributes = unsafeJso<ImportMapAttributes> {
-                type = "importmap"
-            }.unsafeCast<Record<JsAny, BooleanOrString>>()
-            innerHTML =
-                """{"imports":{"iconify-icon":"${SITE_BASE_URL}ktjs-client/iconify-icon.mjs"}}"""
-        },
-    )
+    // The browser bundle is self-contained (webpack inlines `iconify-icon`), so `<head>` needs no
+    // import map to resolve a bare module name.
 
     presets = arrayOf<PresetConfig?>(
         classicPreset(

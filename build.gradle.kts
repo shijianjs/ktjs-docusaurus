@@ -19,6 +19,10 @@ plugins {
 // settings.gradle.kts) but still follows the same upstream version.
 val publishedPrefix = "ktjs-docusaurus"
 
+// Modules that carry the prefix but are not an API surface: the browser bundle exists only to inline
+// the elements library for one site, so it must not be released or documented.
+val unpublishedModules = setOf("ktjs-docusaurus-kit-bundle")
+
 // Only the wrapper follows an upstream npm version. The kit is original code with its own semantic
 // version, so it is not looked up in wrapper-revisions.properties.
 val wrapperModules = setOf("ktjs-docusaurus")
@@ -27,7 +31,7 @@ val wrapperModules = setOf("ktjs-docusaurus")
 // published API surface, so it is excluded by the prefix filter.
 dependencies {
     subprojects
-        .filter { it.name.startsWith(publishedPrefix) }
+        .filter { it.name.startsWith(publishedPrefix) && it.name !in unpublishedModules }
         .forEach { dokka(project(it.path)) }
 }
 
@@ -115,7 +119,7 @@ subprojects {
     }
 
     // Only wrapper modules are published and documented; `demo` is the GitHub Pages site.
-    if (name.startsWith(publishedPrefix)) {
+    if (name.startsWith(publishedPrefix) && name !in unpublishedModules) {
         apply(plugin = "org.jetbrains.dokka")
     }
 }
@@ -127,7 +131,7 @@ subprojects {
 // GitHub repository) and requires the kotlin-tooling-metadata.json produced by the Kotlin
 // Multiplatform plugin. Keep both intact when changing this block.
 subprojects {
-    if (!name.startsWith(publishedPrefix)) return@subprojects
+    if (!name.startsWith(publishedPrefix) || name in unpublishedModules) return@subprojects
 
     if (name in wrapperModules) {
         check(wrapperRevisions.containsKey(name)) {
@@ -212,7 +216,8 @@ subprojects {
 // would upload before running publishToMavenCentral, so version derivation stays in the module
 // scripts rather than being duplicated in shell.
 tasks.register("printPublishedVersions") {
-    val publishedModules = subprojects.filter { it.name.startsWith(publishedPrefix) }
+    val publishedModules =
+        subprojects.filter { it.name.startsWith(publishedPrefix) && it.name !in unpublishedModules }
     doLast {
         publishedModules
             .associate { it.name to it.version.toString() }

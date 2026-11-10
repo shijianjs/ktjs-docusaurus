@@ -38,22 +38,18 @@ docusaurus {
     // TOC toggle plus the browser bundle loader; runs after hydration on every route change.
     clientModuleFunction = "onRouteDidUpdate"
 
-    // Browser-only package: the plugin copies `.mjs` files into static/ktjs-client/ and writes an
-    // index.mjs that imports the bundle and calls registerHomeElements().
-    browserBundle = "ktjs-docusaurus-ktjs-docusaurus-kit-elements.mjs"
-    browserBundleEntry = "registerHomeElements"
+    // Browser-only bundle: the webpack output of `ktjs-docusaurus-kit-bundle` already contains the
+    // elements and their npm dependencies, so the plugin just copies it and imports it for its
+    // registration side effect.
+    browserBundle = "ktjs-docusaurus-kit-bundle.js"
     browserBundleFiles.from(
-        project(":ktjs-docusaurus-kit-elements")
-            .layout.buildDirectory.dir("compileSync/js/main/productionLibrary/kotlin"),
-        // The npm ESM file behind the `iconify-icon` bare specifier; the page's import map points at it.
-        project(":ktjs-docusaurus-kit-elements")
-            .layout.buildDirectory.dir("staged-iconify"),
+        project(":ktjs-docusaurus-kit-bundle")
+            .layout.buildDirectory.dir("dist/js/productionExecutable"),
     )
 }
 
-// A file collection cannot carry a task dependency across projects, so link the browser package
+// A file collection cannot carry a task dependency across projects, so build the browser bundle
 // before the site is assembled.
 tasks.named("docusaurusSite") {
-    dependsOn(":ktjs-docusaurus-kit-elements:jsProductionLibraryCompileSync")
-    dependsOn(":ktjs-docusaurus-kit-elements:stageIconifyIcon")
+    dependsOn(":ktjs-docusaurus-kit-bundle:jsBrowserDistribution")
 }

@@ -56,3 +56,7 @@ include(":ktjs-docusaurus-kit-elements")
 // this build so the docs kit can validate it; the `ktjs-dom-kit` name keeps it out of the published
 // prefix, and it is meant to move to its own repository.
 include(":ktjs-dom-kit")
+
+// Webpack bundle of the elements library for the browser. Not published: it exists so the site loads
+// one file with npm dependencies inlined, while `ktjs-docusaurus-kit-elements` stays a library.
+include(":ktjs-docusaurus-kit-bundle")
