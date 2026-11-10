@@ -192,8 +192,8 @@ external interface DocsVersionOptions {
     /** Label shown in badges and dropdowns. */
     var label: String?
 
-    /** Banner shown at the top of the version's docs: `'none'`, `'unreleased'` or `'unmaintained'`. */
-    var banner: String?
+    /** Banner shown at the top of the version's docs. */
+    var banner: DocsVersionBanner?
 
     /** Show a badge with the version label. */
     var badge: Boolean?
@@ -203,4 +203,22 @@ external interface DocsVersionOptions {
 
     /** Extra class name for the `<html>` element. */
     var className: String?
+}
+
+/** Upstream `'none' | 'unreleased' | 'unmaintained'`. */
+sealed external interface DocsVersionBanner
+
+/** Wraps a value coming from JavaScript. Prefer [DocsVersionBanners]. */
+inline fun DocsVersionBanner(value: String): DocsVersionBanner = unsafeCast<DocsVersionBanner>(value)
+
+/** The literals of [DocsVersionBanner]. */
+object DocsVersionBanners {
+    /** No banner. */
+    inline val none: DocsVersionBanner get() = DocsVersionBanner("none")
+
+    /** The version is upcoming, docs may be incomplete. */
+    inline val unreleased: DocsVersionBanner get() = DocsVersionBanner("unreleased")
+
+    /** The version is no longer maintained. */
+    inline val unmaintained: DocsVersionBanner get() = DocsVersionBanner("unmaintained")
 }

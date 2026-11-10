@@ -51,6 +51,9 @@ external interface ThemeConfig {
 
     /** Mermaid diagram theme, used by `@docusaurus/theme-mermaid`. */
     var mermaid: MermaidThemeConfig?
+
+    /** Live code block placement, used by `@docusaurus/theme-live-codeblock`. */
+    var liveCodeBlock: LiveCodeBlockThemeConfig?
 }
 
 /** Upstream `ThemeConfig['docs']`. */
@@ -229,6 +232,24 @@ external interface AlgoliaConfig {
 
     /** Ask AI configuration; `string` is the short form. */
     var askAi: StringOrAskAiConfig?
+
+    /** Enable DocSearch insights (search analytics). */
+    var insights: Boolean?
+
+    /**
+     * Passed to DocSearch as `searchParameters`, e.g. facet filters.
+     *
+     * Upstream type is `SearchParameters` from `algoliasearch`; that package is not wrapped here.
+     */
+    var searchParameters: JsAny?
+
+    /**
+     * Text overrides for the search UI.
+     *
+     * Upstream type is `DocSearchTranslations` from `@docsearch/react`; that package is not wrapped
+     * here.
+     */
+    var translations: JsAny?
 }
 
 /** Upstream `string | AskAiConfig`. */
@@ -316,4 +337,25 @@ object MermaidThemes {
 
     /** Base colours. */
     inline val base: MermaidTheme get() = MermaidTheme("base")
+}
+
+/** Upstream `ThemeConfig['liveCodeBlock']` from `@docusaurus/theme-live-codeblock`. */
+external interface LiveCodeBlockThemeConfig {
+    /** Where the playground renders relative to the code it belongs to. Defaults to `bottom`. */
+    var playgroundPosition: PlaygroundPosition?
+}
+
+/** Upstream `PlaygroundPosition`. */
+sealed external interface PlaygroundPosition
+
+/** Wraps a value coming from JavaScript. Prefer [PlaygroundPositions]. */
+inline fun PlaygroundPosition(value: String): PlaygroundPosition = unsafeCast<PlaygroundPosition>(value)
+
+/** The literals of [PlaygroundPosition]. */
+object PlaygroundPositions {
+    /** Playground above the code block. */
+    inline val top: PlaygroundPosition get() = PlaygroundPosition("top")
+
+    /** Playground below the code block; the default. */
+    inline val bottom: PlaygroundPosition get() = PlaygroundPosition("bottom")
 }

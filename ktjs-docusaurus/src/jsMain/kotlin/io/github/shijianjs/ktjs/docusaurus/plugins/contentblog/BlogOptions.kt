@@ -25,6 +25,9 @@ external interface BlogOptions : PluginOptions {
     /** URL segment of the archive page; `null` disables it. */
     var archiveBasePath: String?
 
+    /** URL segment of the per-page routes, appended to [routeBasePath]. Defaults to `page`. */
+    var pageBasePath: String?
+
     /** Glob patterns of files to include, relative to [path]. */
     var include: Array<String>?
 
@@ -103,8 +106,14 @@ external interface BlogOptions : PluginOptions {
     /** URL prefix of the authors pages. */
     var authorsBasePath: String?
 
+    /** Path of the tags file, relative to [path]; `false` disables it. */
+    var tags: StringOrFalse?
+
     /** What to do about authors declared inline in front matter. */
     var onInlineAuthors: ReportingSeverity?
+
+    /** What to do about tags declared inline in front matter instead of in the tags file. */
+    var onInlineTags: ReportingSeverity?
 
     /** What to do about posts without a truncate marker. */
     var onUntruncatedBlogPosts: ReportingSeverity?
@@ -246,7 +255,39 @@ external interface BlogFeedOptions {
 
     /** Build the feed items yourself. Upstream type is a function. */
     var createFeedItems: JsAny?
+
+    /** Per-format XSLT stylesheet of the feeds: `true` for the bundled one, a path for your own. */
+    var xslt: BooleanOrBlogXsltOptions?
 }
+
+/** Upstream `{rss?: string | boolean | null; atom?: string | boolean | null}`. */
+external interface BlogXsltOptions {
+    /** Stylesheet of the RSS feed. */
+    var rss: StringOrBoolean?
+
+    /** Stylesheet of the Atom feed. */
+    var atom: StringOrBoolean?
+}
+
+/** Upstream `boolean | {rss?: …; atom?: …}`. */
+external interface BooleanOrBlogXsltOptions
+
+/** Wraps the [Boolean] branch: `true` uses the bundled stylesheet, `false` disables it. */
+inline fun BooleanOrBlogXsltOptions(value: Boolean): BooleanOrBlogXsltOptions =
+    unsafeCast<BooleanOrBlogXsltOptions>(value)
+
+/** Wraps the per-format branch. */
+inline fun BooleanOrBlogXsltOptions(value: BlogXsltOptions): BooleanOrBlogXsltOptions =
+    unsafeCast<BooleanOrBlogXsltOptions>(value)
+
+/** Upstream `string | boolean`. */
+external interface StringOrBoolean
+
+/** Wraps the [String] branch: a URL or path of a stylesheet. */
+inline fun StringOrBoolean(value: String): StringOrBoolean = unsafeCast<StringOrBoolean>(value)
+
+/** Wraps the [Boolean] branch. */
+inline fun StringOrBoolean(value: Boolean): StringOrBoolean = unsafeCast<StringOrBoolean>(value)
 
 /** Upstream `string | string[]`. */
 external interface StringOrStringArray

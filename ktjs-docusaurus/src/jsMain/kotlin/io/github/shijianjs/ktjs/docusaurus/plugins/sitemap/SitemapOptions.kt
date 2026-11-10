@@ -16,8 +16,8 @@ external interface SitemapOptions : PluginOptions {
     /** Priority of a page relative to the rest of the site, from `0.0` to `1.0`. */
     var priority: Double?
 
-    /** Last modification date written into the sitemap; defaults to the build date. */
-    var lastmod: String?
+    /** Format of the `lastmod` entry; `null` leaves it out entirely. */
+    var lastmod: SitemapLastmodOption?
 
     /** Glob patterns of routes left out of the sitemap. */
     var ignorePatterns: Array<String>?
@@ -57,4 +57,19 @@ object SitemapChangefreqs {
 
     /** Archived, never changes. */
     inline val never: SitemapChangefreq get() = SitemapChangefreq("never")
+}
+
+/** Upstream `'date' | 'datetime'`. */
+sealed external interface SitemapLastmodOption
+
+/** Wraps a value coming from JavaScript. Prefer [SitemapLastmodOptions]. */
+inline fun SitemapLastmodOption(value: String): SitemapLastmodOption = unsafeCast<SitemapLastmodOption>(value)
+
+/** The literals of [SitemapLastmodOption]. */
+object SitemapLastmodOptions {
+    /** Date only, `YYYY-MM-DD`. */
+    inline val date: SitemapLastmodOption get() = SitemapLastmodOption("date")
+
+    /** Full ISO 8601 datetime. */
+    inline val datetime: SitemapLastmodOption get() = SitemapLastmodOption("datetime")
 }
