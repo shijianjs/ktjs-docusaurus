@@ -37,6 +37,11 @@ jobs:
         if: github.actor == 'dependabot[bot]'
         run: ./gradlew kotlinUpgradePackageLock
 
+      # `build` runs the Kotlin/JS browser unit tests on Playwright's Chromium. The browser binary
+      # itself is installed by `kotlinInstallPlaywrightBrowsers`; this only adds its system libraries.
+      - name: Install browser test dependencies
+        run: npx --yes playwright install-deps chromium
+
       - name: Build and test
         run: ./gradlew build --stacktrace
 

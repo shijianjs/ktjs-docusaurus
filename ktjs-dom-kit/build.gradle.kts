@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalJsTestDsl
+
 plugins {
     kotlin("multiplatform")
 }
@@ -21,11 +23,10 @@ kotlin {
         browser {
             // The attribute delegates drive real attributes on a real custom element, and the change
             // notifications come from a `MutationObserver`; neither can be faked convincingly in a
-            // Node test, so this module is the one place with a browser test task.
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                }
+            // Node test. Playwright's Chromium runs these browser tests (Karma is deprecated).
+            @OptIn(ExperimentalJsTestDsl::class)
+            test {
+                chromium()
             }
         }
         binaries.library()

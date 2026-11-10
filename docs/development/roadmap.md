@@ -14,8 +14,8 @@
 
 | 状态 | 数量 |
 | --- | ---: |
-| 总计 | 46 |
-| 已完成 | 34 |
+| 总计 | 47 |
+| 已完成 | 35 |
 | 明确不做 | 4 |
 | 保留 | 1 |
 | 待完成 | 7 |
@@ -69,18 +69,19 @@
 - 3.8 插件本体的 Maven 发布（独立构建，需单独的发布命令与 staging 配置） —— **待完成**
 - 3.9 插件接入 `release.yml`，与 wrapper 同版本发布 —— **待完成**（依赖 3.8）
 
-## 4. kit（5 项：3 完成 / 2 不做）
+## 4. kit（6 项：4 完成 / 2 不做）
 
 - 4.1 `HomeHero` / `FeatureSection` / `NextStepSection`
 - 4.2 `TocToggle`
 - 4.3 iconify 图标接入
+- 4.4 JVM 版 Playwright e2e（`jvm()` + `src/jvmTest` + `e2eTest`，参考 `ktjs-vaadin`）
 
 明确不做：
 
 | 名称 | 理由 |
 | --- | --- |
 | colormath 颜色计算 | 组件只读 `--ktjs-*` 自定义属性，不参与颜色运算 |
-| Playwright / e2e 套件 | 组件由 Karma 的浏览器单元测试覆盖（`ktjs-dom-kit`、`ktjs-docusaurus-kit-elements`）；不需要端到端套件，duckfn 那套已有 JVM 实现 |
+| Playwright 的 TS wrapper / TS 测试层 | 直接用 Playwright Java API 与 JUnit 5 集成；duckfn kit 那套 TS 封装不搬，简单思路可参考 |
 
 ## 5. demo 文档站（7 项：全部完成）
 

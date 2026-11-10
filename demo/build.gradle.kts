@@ -20,6 +20,10 @@ kotlin {
         binaries.library()
     }
 
+    // The JVM target carries only the Playwright end-to-end suite in `src/jvmTest`; the site itself
+    // stays a Kotlin/JS module, so the demo remains one KMP project.
+    jvm()
+
     compilerOptions {
         optIn.add("kotlin.js.ExperimentalWasmJsInterop")
     }
@@ -28,6 +32,16 @@ kotlin {
         jsMain.dependencies {
             implementation(project(":ktjs-docusaurus"))
             implementation(project(":ktjs-docusaurus-kit"))
+        }
+        jvmTest.dependencies {
+            // Playwright's official Java library already includes the JUnit 5 integration; the
+            // version has to match the npm Playwright bundled with the Kotlin Gradle Plugin so both
+            // reuse the Chromium installed by `kotlinInstallPlaywrightBrowsers`.
+            implementation("com.microsoft.playwright:playwright:1.61.0")
+            implementation("org.junit.jupiter:junit-jupiter:6.1.3")
+            implementation("org.junit-pioneer:junit-pioneer:2.3.0")
+            implementation(kotlin("test-junit5"))
+            runtimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
         }
     }
 }
@@ -53,3 +67,31 @@ docusaurus {
 tasks.named("docusaurusSite") {
     dependsOn(":ktjs-docusaurus-kit-bundle:jsBrowserDistribution")
 }
+
+// ---------------------------------------------------------------------------------------------
+// End-to-end suite
+//
+// `src/jvmTest` runs Playwright's Java API against the *built site*, not against a development
+// server. The test JVM serves the Docusaurus output itself (see `DemoServer.kt`), rewriting the
+// configured `/ktjs-docusaurus/` baseUrl. `jvmTest` is disabled to keep `build`/`check`
+// browser-free — this dedicated task runs the same test compilation on demand.
+// ---------------------------------------------------------------------------------------------
+val jvmE2eCompilation = kotlin.targets.getByName("jvm").compilations.getByName("test")
+
+tasks.register<Test>("e2eTest") {
+    group = "verification"
+    description = "Runs the Kotlin/JVM Playwright suite against the built Docusaurus site."
+    useJUnitPlatform()
+    dependsOn("docusaurusBuild", ":ktjs-dom-kit:kotlinInstallPlaywrightBrowsers")
+    testClassesDirs = jvmE2eCompilation.output.classesDirs
+    classpath = files(jvmE2eCompilation.output.allOutputs, jvmE2eCompilation.runtimeDependencyFiles)
+    systemProperty(
+        "demo.dist",
+        rootProject.layout.buildDirectory.dir("js/docusaurus/demo/build").get().asFile.absolutePath,
+    )
+    systemProperty("e2e.output", layout.buildDirectory.dir("e2e-results").get().asFile.absolutePath)
+    systemProperty("junit.jupiter.execution.timeout.default", "60 s")
+    outputs.upToDateWhen { false }
+}
+
+tasks.named<Test>("jvmTest") { enabled = false }

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalJsTestDsl
+
 plugins {
     kotlin("multiplatform")
 }
@@ -22,12 +24,11 @@ kotlin {
         useEsModules()
         browser {
             // These are the browser half of the kit, so their one test checks the elements in a real
-            // browser: markup in, shadow tree out, attributes changed afterwards. It runs on the same
-            // Karma setup as `ktjs-dom-kit`.
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                }
+            // browser: markup in, shadow tree out, attributes changed afterwards. Playwright's
+            // Chromium runs these browser tests (Karma is deprecated).
+            @OptIn(ExperimentalJsTestDsl::class)
+            test {
+                chromium()
             }
         }
         // `library` is what the release process publishes. KGP keeps only one binary per target, so

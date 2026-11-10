@@ -369,6 +369,18 @@ Gradle 9 / JDK 25。升级时注意 2.0 的插件 ID 是 `dev.detekt`，规则�
   `kotlinInstallPlaywrightBrowsers` 是 `DefaultTask`、内部用 `ExecOperations` 起 node，任务本身不接受
   `environment` 配置，所以只能靠环境变量注入，不能用 `init.d` 脚本改任务。**只在本机生效，不要提交到仓库，
   也不要写进工作流——CI 走官方源。**
+- demo 的端到端套件用 **JVM 版 Playwright**（照 `ktjs-vaadin`）：`demo` 加 `jvm()` target，
+  `src/jvmTest` 里 `@UsePlaywright` + `OptionsFactory`，测试 JVM 内嵌静态服务器直接服务
+  `:demo:docusaurusBuild` 的产物。**不引入 TS/Node 测试层，也不给 Playwright 写 TS wrapper**；
+  「不同步 duckfn 的 playwright 测试」当初说的是不搬它那套 TS 封装、其它轻量思路可参考，不是不做测试。
+- `e2eTest` 是 `verification` 组里的独立 `Test` 任务，`jvmTest` 置 `enabled = false`，所以
+  `build` / `check` 与 CI 都不跑 e2e；改完 demo 本地按需 `./gradlew :demo:e2eTest` 核对。
+- e2e 的静态服务器用 JDK `HttpServer` 自己控制 MIME：Docusaurus 的元素入口是 ES module，
+  `.mjs` 返回 `application/octet-stream` 会被浏览器拒绝执行（症状是元素全部不升级、shadow 为空）。
+  它同时剥掉 `/ktjs-docusaurus/` baseUrl 前缀，因此不必复制站点产物。
+- Playwright Java 的版本必须与 KGP 内置 npm Playwright 一致（2.4.21 → `1.61.0`），才能共用
+  `kotlinInstallPlaywrightBrowsers` 装的那份 Chromium；CI 的 `npx playwright install-deps chromium`
+  只装系统依赖，浏览器仍由该任务下载。
 - 大文件或网络盘上 Gradle 的文件监听可能漏掉改动，`compileTestKotlinJs` 会误报 UP-TO-DATE；本机加
   `-Dorg.gradle.vfs.watch=false` 强制重新检测即可（同样只是本机 workaround，不进仓库）。
 - Node 侧的 `jsNodeTest` 同样按 ESM 产物运行。
@@ -697,8 +709,9 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
 - demo 就是文档站本身：`src/jsMain/resources/{docs,pages,css,static}` 是内容，`site/Config.kt` 是配置。
   `./gradlew :demo:docusaurusBuild` 把它变成静态站点，产物在 `build/js/docusaurus/demo/build`（站点目录
   在 npm workspace 里的原因见上面的「Gradle 插件与站点组装」）。
-- 没有浏览器端 e2e 套件：demo 不是 Web 应用，链路的验证方式是「构建成功 + Docusaurus 自己的断链检查」。
-  `onBrokenLinks = 'throw'`（demo 里显式设置）让断链变成构建失败。
+- 浏览器端 e2e 是 `:demo:e2eTest`（JVM Playwright，见「Kotlin/JS 模块格式与测试运行时」），改完 demo
+  本地按需核对；它不进 `build` / `check`，也不进 CI。CI 的链路验证仍是「构建成功 + Docusaurus 自己的
+  断链检查」：`onBrokenLinks = 'throw'`（demo 里显式设置）让断链变成构建失败。
 - `./gradlew pagesSite` 把 `build/js/docusaurus/demo/build` 与 `build/dokka/html` 组装到 `build/pages`：
   站点在根目录，API 文档在 `api/`。
 - Dokka 2.2.0 同时应用到根项目和 wrapper 子模块；聚合入口是根项目的 `dependencies { dokka(...) }`，
