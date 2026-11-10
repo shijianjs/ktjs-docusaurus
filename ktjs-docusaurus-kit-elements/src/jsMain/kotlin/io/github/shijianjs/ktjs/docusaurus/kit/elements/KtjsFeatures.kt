@@ -1,6 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.createElement
 import web.components.CustomElementReference
 import web.dom.TagName
@@ -20,7 +21,7 @@ class KtjsFeatures : CustomElementAdapter() {
     private val grid: HTMLDivElement
 
     init {
-        val shadow = attachHomeShadow()
+        val shadow = attachStyledShadow(HOME_STYLE_SHEET)
         heading = HtmlTagName.h2.createElement {
             classList.add("ktjs-section-title")
         }

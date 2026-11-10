@@ -1,7 +1,12 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
+import web.cssom.CSSStyleSheet
+
 /**
- * The stylesheet every home element injects into its own shadow root.
+ * The stylesheet every home element adopts into its own shadow root.
+ *
+ * One object, shared by all of them (`attachStyledShadow(HOME_STYLES)`): the browser parses it once
+ * and no `<style>` node is created per element.
  *
  * Shadow scoping means the class names cannot leak, but they keep the `ktjs-` prefix so the trees
  * stay greppable. Theme colours cross the boundary through inheritance: `--ktjs-*` tokens (a site can
@@ -347,3 +352,11 @@ internal const val HOME_CSS: String = """
   }
 }
 """
+
+/**
+ * [HOME_CSS] as a constructed stylesheet, built once at module load.
+ *
+ * Custom elements only exist in a browser, so this module is never evaluated under Node; the
+ * constructor is safe here.
+ */
+internal val HOME_STYLE_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(HOME_CSS) }

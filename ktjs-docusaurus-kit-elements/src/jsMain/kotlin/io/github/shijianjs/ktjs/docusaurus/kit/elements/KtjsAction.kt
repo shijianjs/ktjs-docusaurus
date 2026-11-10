@@ -1,6 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
@@ -24,7 +25,7 @@ class KtjsAction : CustomElementAdapter() {
     private val icon: IconifyIconElement
 
     init {
-        val shadow = attachHomeShadow()
+        val shadow = attachStyledShadow(HOME_STYLE_SHEET)
         label = HtmlTagName.span.createElement()
         icon = IconifyIconTagName.iconifyIcon.createElement {
             classList.add("ktjs-button-icon")

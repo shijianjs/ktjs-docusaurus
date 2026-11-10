@@ -147,9 +147,11 @@ duckfn 站点一致。
      都渲染进自己的 shadow root：父级负责框架和 `<slot>` 布局，子级自己渲染卡片，子标签是真元素，
      不再被解析成数据后丢弃。顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进
      demo 的依赖图。**不发布**：这是本站的 UI，不是通用契约，其他项目通过 kit 分发的 bundle 使用。
-   - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`），与 Docusaurus 无关。模块名不以
-     `ktjs-docusaurus` 开头，因此不参与发布和 Dokka；元素包用 `implementation` 依赖它，产物作为
-     独立 `.mjs` 一起进 `static/ktjs-client/`。以后搬到独立仓库。
+   - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`）与 `attachStyledShadow(vararg CSSStyleSheet)`，
+     与 Docusaurus 无关。模块名不以 `ktjs-docusaurus` 开头，因此不参与发布和 Dokka；元素包用
+     `implementation` 依赖它，产物作为独立 `.mjs` 一起进 `static/ktjs-client/`。以后搬到独立仓库。
+     shadow 样式一律走 `adoptedStyleSheets`（入参是构造好的 `CSSStyleSheet`，不是 CSS 文本）：多个
+     shadow 树共用一份 sheet，浏览器只解析一次，也不为每个元素生成 `<style>` 节点。
 
    不要往 kit 里加 `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。
 

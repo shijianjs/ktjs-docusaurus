@@ -1,6 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
@@ -23,7 +24,7 @@ class KtjsStep : CustomElementAdapter() {
     private val arrow: IconifyIconElement
 
     init {
-        val shadow = attachHomeShadow()
+        val shadow = attachStyledShadow(HOME_STYLE_SHEET)
         heading = HtmlTagName.span.createElement {
             classList.add("ktjs-next-card-title")
         }

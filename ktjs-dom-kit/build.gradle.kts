@@ -5,10 +5,11 @@ plugins {
 /**
  * Generic DOM helpers for Kotlin/JS, independent of Docusaurus.
  *
- * Currently one class: `CustomElementAdapter`, the base for custom elements written in Kotlin. It
- * lives in this repository while it is validated against the docs kit; it is deliberately **not**
- * published from here — the root build only releases modules whose name starts with
- * `ktjs-docusaurus` — and is meant to move to its own `ktjs-dom-kit` repository later.
+ * `CustomElementAdapter` is the base for custom elements written in Kotlin; `attachStyledShadow`
+ * attaches a shadow root and adopts the constructed `CSSStyleSheet`s it is given. Both live in this
+ * repository while they are validated against the docs kit; they are deliberately **not** published
+ * from here — the root build only releases modules whose name starts with `ktjs-docusaurus` — and are
+ * meant to move to their own `ktjs-dom-kit` repository later.
  *
  * The module shares the root build's KMP settings (`-Xir-dce=false`, ES2015 target, detekt) through
  * the `subprojects` blocks, so it needs no local copy of those workarounds.

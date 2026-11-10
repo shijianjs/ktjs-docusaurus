@@ -1,6 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
@@ -24,7 +25,7 @@ class KtjsFeature : CustomElementAdapter() {
     private val details: HTMLParagraphElement
 
     init {
-        val shadow = attachHomeShadow()
+        val shadow = attachStyledShadow(HOME_STYLE_SHEET)
         icon = IconifyIconTagName.iconifyIcon.createElement {
             classList.add("ktjs-feature-icon")
             setAttribute("aria-hidden", "true")

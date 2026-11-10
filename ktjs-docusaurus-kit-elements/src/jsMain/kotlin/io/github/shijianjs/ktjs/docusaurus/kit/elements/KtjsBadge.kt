@@ -1,6 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.createElement
 import web.components.CustomElementReference
 import web.dom.TagName
@@ -18,7 +19,7 @@ class KtjsBadge : CustomElementAdapter() {
     private val image: HTMLImageElement
 
     init {
-        val shadow = attachHomeShadow()
+        val shadow = attachStyledShadow(HOME_STYLE_SHEET)
         image = HtmlTagName.img.createElement {
             classList.add("ktjs-badge-image")
         }
