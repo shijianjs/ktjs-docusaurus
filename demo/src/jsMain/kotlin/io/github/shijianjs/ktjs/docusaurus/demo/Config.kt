@@ -6,10 +6,16 @@ import io.github.shijianjs.ktjs.docusaurus.config.Directions
 import io.github.shijianjs.ktjs.docusaurus.config.HtmlTagObject
 import io.github.shijianjs.ktjs.docusaurus.config.I18nConfig
 import io.github.shijianjs.ktjs.docusaurus.config.I18nLocaleConfig
+import io.github.shijianjs.ktjs.docusaurus.config.PluginConfig
 import io.github.shijianjs.ktjs.docusaurus.config.PresetConfig
 import io.github.shijianjs.ktjs.docusaurus.config.ReportingSeverities
 import io.github.shijianjs.ktjs.docusaurus.config.StringOrFalse
 import io.github.shijianjs.ktjs.docusaurus.plugins.contentdocs.DocsOptions
+import io.github.shijianjs.ktjs.docusaurus.plugins.searchlocal.BooleanOrHashed
+import io.github.shijianjs.ktjs.docusaurus.plugins.searchlocal.Hasheds
+import io.github.shijianjs.ktjs.docusaurus.plugins.searchlocal.SearchBarPositions
+import io.github.shijianjs.ktjs.docusaurus.plugins.searchlocal.SearchLocalOptions
+import io.github.shijianjs.ktjs.docusaurus.plugins.searchlocal.StringOrStringArray as SearchLocalStringOrStringArray
 import io.github.shijianjs.ktjs.docusaurus.plugins.themeclassic.StringOrStringArray
 import io.github.shijianjs.ktjs.docusaurus.plugins.themeclassic.ThemeClassicOptions
 import io.github.shijianjs.ktjs.docusaurus.presets.BlogOptionsOrFalse
@@ -81,6 +87,24 @@ fun docusaurusConfig(): Config = unsafeJso {
 
     // The browser bundle is self-contained (webpack inlines `iconify-icon`), so `<head>` needs no
     // import map to resolve a bare module name.
+
+    // Local search: the index is built from the Markdown during `docusaurus build`, so there is no
+    // server and no external crawler. It is a theme — `@theme/SearchBar` replaces the placeholder the
+    // classic theme renders in the navbar, which is why it goes in `themes`, not `plugins`.
+    themes = arrayOf<PluginConfig?>(
+        PluginConfig(
+            "@easyops-cn/docusaurus-search-local",
+            unsafeJso<SearchLocalOptions> {
+                // Every language on the site has to be listed: each one gets its own tokenizer.
+                language = SearchLocalStringOrStringArray(arrayOf("en", "zh"))
+                // The blog is not enabled in this site, so there is nothing to index.
+                indexBlog = false
+                // Put the content hash in the index URL: a redeploy invalidates browser caches.
+                hashed = BooleanOrHashed(Hasheds.query)
+                searchBarPosition = SearchBarPositions.auto
+            },
+        ),
+    )
 
     presets = arrayOf<PresetConfig?>(
         classicPreset(
@@ -187,6 +211,11 @@ fun sidebars(): SidebarsConfig = unsafeJso<DemoSidebars> {
                         type = SidebarItemTypes.doc
                         id = "guide/content"
                         label = "Content and i18n"
+                    },
+                    unsafeJso {
+                        type = SidebarItemTypes.doc
+                        id = "guide/local-search"
+                        label = "Local search"
                     },
                 )
             },
