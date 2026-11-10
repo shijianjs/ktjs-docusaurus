@@ -50,7 +50,7 @@ fun docusaurusConfig(): Config = unsafeJso {
     tagline = "Documentation sites as Kotlin/JS projects"
     url = "https://shijianjs.github.io"
     baseUrl = SITE_BASE_URL
-    favicon = "img/favicon.svg"
+    favicon = "img/ktjs-docusaurus-logo-627-256.png"
     trailingSlash = true
     onBrokenLinks = ReportingSeverities.`throw`
 
