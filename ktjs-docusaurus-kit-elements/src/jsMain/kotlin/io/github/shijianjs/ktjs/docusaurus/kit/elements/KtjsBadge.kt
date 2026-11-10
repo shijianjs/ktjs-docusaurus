@@ -2,8 +2,10 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.dom.inlineStyle
+import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.cssom.Auto
 import web.cssom.Display
@@ -18,11 +20,38 @@ import web.window._blank
 /**
  * `<ktjs-badge href="…" src="…" alt="…">` — a shields.io-style image inside an external link.
  *
+ * One delegate per attribute: the wrapper link and the image are updated from the callbacks, so the
+ * badge follows its attributes after it is connected too.
+ *
  * No stylesheet: an image in a row is exactly what inline styles can say.
  */
 class KtjsBadge : CustomElementAdapter() {
     private val anchor: HTMLAnchorElement
     private val image: HTMLImageElement
+
+    /** `href`: where the badge links to; blank leaves the anchor without `href`. */
+    @JsName("href")
+    var href: String by attr { change ->
+        if (change.newValue.isBlank()) {
+            anchor.removeAttribute("href")
+        } else {
+            anchor.href = change.newValue
+        }
+    }
+
+    /** `src`: the badge image; blank drops the `src` instead of pointing the image at the page. */
+    @JsName("src")
+    var src: String by attr { change ->
+        if (change.newValue.isBlank()) {
+            image.removeAttribute("src")
+        } else {
+            image.src = change.newValue
+        }
+    }
+
+    /** `alt`: the image's alternative text. */
+    @JsName("alt")
+    var alt: String by attr { change -> image.alt = change.newValue }
 
     init {
         val shadow = attachStyledShadow(HOME_RESET)
@@ -43,9 +72,7 @@ class KtjsBadge : CustomElementAdapter() {
     }
 
     override fun connectedCallback() {
-        anchor.href = getAttribute("href").orEmpty()
-        image.src = getAttribute("src").orEmpty()
-        image.alt = getAttribute("alt").orEmpty()
+        applyInitialAttributes()
     }
 
     companion object : CustomElementReference<KtjsBadge>(KtjsBadge::class.js) {

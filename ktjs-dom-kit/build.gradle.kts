@@ -18,7 +18,16 @@ plugins {
 kotlin {
     js {
         useEsModules()
-        browser()
+        browser {
+            // The attribute delegates drive real attributes on a real custom element, and the change
+            // notifications come from a `MutationObserver`; neither can be faked convincingly in a
+            // Node test, so this module is the one place with a browser test task.
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+            }
+        }
         binaries.library()
     }
 
@@ -32,6 +41,9 @@ kotlin {
             // and kotlin-csstype's `Properties`, the typed view of an element's inline style.
             api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.0")
             api("org.jetbrains.kotlin-wrappers:kotlin-csstype:2026.11.0-3.2.3")
+        }
+        jsTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }

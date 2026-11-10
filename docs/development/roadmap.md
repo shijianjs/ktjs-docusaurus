@@ -80,7 +80,7 @@
 | 名称 | 理由 |
 | --- | --- |
 | colormath 颜色计算 | 组件只读 `--ktjs-*` 自定义属性，不参与颜色运算 |
-| Playwright 相关 | kit 不需要浏览器测试；duckfn 那套已有 JVM 实现 |
+| Playwright / e2e 套件 | 组件由 Karma 的浏览器单元测试覆盖（`ktjs-dom-kit`、`ktjs-docusaurus-kit-elements`）；不需要端到端套件，duckfn 那套已有 JVM 实现 |
 
 ## 5. demo 文档站（7 项：全部完成）
 

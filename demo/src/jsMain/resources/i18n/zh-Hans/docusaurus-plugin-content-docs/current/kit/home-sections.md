@@ -30,6 +30,39 @@ sidebar_position: 1
 | `ktjs-features` | `section-title`、`tinted` | `ktjs-feature`（`icon`、`title`），正文即详情 |
 | `ktjs-next-steps` | `section-title` | `ktjs-step`（`href`、`title`），正文即详情 |
 
+## 属性是响应式的
+
+表里每个属性都是一个 Kotlin 委托（`ktjs-dom-kit` 的 `attr`），不是只在连接时读一次的字段：
+
+```kotlin
+class KtjsHero : CustomElementAdapter() {
+    @JsName("logoSrc")
+    var logoSrc: String by attr("logo-src") { change -> /* 用 change.newValue 重绘 */ }
+
+    @JsName("titleText")
+    var titleText: String by attr("title") { change -> headingElement.textContent = change.newValue }
+}
+```
+
+- getter 读属性、setter 写属性，所以没有第二份状态要同步：`hero.titleText = "x"` 与
+  `hero.setAttribute("title", "x")` 落到同一处，外部写入后 getter 立刻能读到。
+- 值确实变了才回调——不管变化来自属性、`setAttribute` 还是 devtools。写回同样的值不算变化，删除属性算。
+- 在 `connectedCallback()` 里调一次 `applyInitialAttributes()`：标签上原本就有的标记解析不会经过 setter，
+  这是回调第一次得知它们的途径。它是幂等的，元素重新连接不会重绘两遍。
+- 编解码器跟着属性类型走：`String`、`Int`、`Double`、`Boolean`（存在性语义，和 `hidden` 一样）是内置的；
+  `kind` 用 `enumAttributeCodec(ActionKind.entries)` 演示自定义类型的扩展点。`default = …` 是属性缺失时
+  getter 报告的值，**不会**写进标记——除非 `applyInitialAttributes(writeDefaults = true)` 明确要求。
+- 属性名默认是属性名的中划线形式（`logoSrc` → `logo-src`）；两者不同时显式指定（`titleText` → `title`，
+  因为 `HTMLElement` 已经占用了 `title`）。这些属性都带 `@JsName`：不加的话 Kotlin/JS 只会把委托属性编译成
+  名字被混淆的访问器方法，JS 侧根本看不到这个属性；加上才有稳定的 `titleText` / `logoSrc`。
+
+两个连带结论：
+
+- **不要在构造函数里给元素自己设属性。** 构造完就带属性时 `document.createElement("ktjs-hero")` 会抛
+  `NotSupportedError`（解析器和升级路径不会）。hero 的 `display: block` 因此写成 `:host` 规则。
+- 外部写入在微任务里上报——元素用 `MutationObserver` 观察自己，因为规范里的 `observedAttributes` 得在
+  `customElements.define` 时重复列出每个属性，那时委托还没创建。Kotlin 侧的写入是同步上报的。
+
 ## 组件之间如何配合
 
 每个标签都是自己的自定义元素，有自己的 shadow root——父级也一样。父级渲染框架（标题、网格、hero 外壳）
@@ -53,7 +86,7 @@ override 它。定义标签之前，`defineIfMissing` 会调用 `stripBridgesFro
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | 是，带 UI bundle | Node 安全的辅助（`TocToggle`）+ 一个 `browser` 构件 |
 | `ktjs-docusaurus-kit-elements` | 否 | 全部首页元素及其 shadow |
-| `ktjs-dom-kit` | 否（以后搬到独立仓库） | `CustomElementAdapter`、`defineIfMissing`、`createElement`、`attachShadowRoot`、`attachStyledShadow`、`inlineStyle`、`appendStyle` |
+| `ktjs-dom-kit` | 否（以后搬到独立仓库） | `CustomElementAdapter`、`attr` 与 `AttributeCodec`、`defineIfMissing`、`createElement`、`attachShadowRoot`、`attachStyledShadow`、`inlineStyle`、`appendStyle` |
 
 首页 UI 跟着 kit 走：webpack bundle 以 `browser` 构件的身份挂在 kit 的坐标上，所以另一个项目只要一个依赖、
 一份拷贝：
@@ -155,18 +188,18 @@ headTags = arrayOf(
 
 ```kotlin
 val hero = KtjsHero.NAME.createElement {
-    setAttribute("logo-src", "img/ktjs-docusaurus-logo.png")
-    setAttribute("title", "my-project")
+    logoSrc = "img/ktjs-docusaurus-logo.png"
+    titleText = "my-project"
 }
 hero.appendChild(
     KtjsAction.NAME.createElement {
-        setAttribute("kind", "primary")
-        setAttribute("href", "docs/intro")
+        kind = ActionKind.Primary
+        href = "docs/intro"
         textContent = "Get started"
     },
 )
 host.appendChild(hero)
 ```
 
-`TagName<T>.createElement { }` 是 `document.createElement(TagName<T>)` 的类型安全包装；回调拿到的是具体的
-元素类型。
+属性写入的就是同名 attribute，所以这样得到的就是 MDX 产出的那个元素。`TagName<T>.createElement { }` 是
+`document.createElement(TagName<T>)` 的类型安全包装；回调拿到的是具体的元素类型。

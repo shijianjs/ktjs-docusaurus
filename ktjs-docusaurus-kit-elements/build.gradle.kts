@@ -20,7 +20,16 @@ plugins {
 kotlin {
     js {
         useEsModules()
-        browser()
+        browser {
+            // These are the browser half of the kit, so their one test checks the elements in a real
+            // browser: markup in, shadow tree out, attributes changed afterwards. It runs on the same
+            // Karma setup as `ktjs-dom-kit`.
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+            }
+        }
         // `library` is what the release process publishes. KGP keeps only one binary per target, so
         // the browser bundle stays a set of linked `.mjs` files; the npm import is resolved by the
         // site's import map instead of a webpack pass.
@@ -36,6 +45,9 @@ kotlin {
             implementation(project(":ktjs-dom-kit"))
             // Wrapper for <iconify-icon>; it also registers the element and ships the npm package.
             implementation("io.github.shijianjs:ktjs-iconify-icon:3.0.4-kt.6")
+        }
+        jsTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }

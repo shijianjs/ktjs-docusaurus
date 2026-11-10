@@ -27,6 +27,9 @@ import web.html.HtmlTagName
  * `ktjs-features` and `ktjs-next-steps` are the same band with different cards inside, and the band
  * is one look that has to stay identical in both — that is real sharing, so it is built once here.
  * The cards themselves belong to the elements that render them.
+ *
+ * The `tinted` background is not set here: the section's `attr` delegate owns it, so a later change
+ * to the attribute repaints the band.
  */
 internal class HomeSection(
     val root: HTMLElement,
@@ -34,7 +37,7 @@ internal class HomeSection(
     val heading: HTMLHeadingElement,
 )
 
-internal fun homeSection(tinted: Boolean): HomeSection {
+internal fun homeSection(): HomeSection {
     val heading = HtmlTagName.h2.createElement {
         inlineStyle.apply {
             margin = 0.px
@@ -58,7 +61,6 @@ internal fun homeSection(tinted: Boolean): HomeSection {
             width = 100.vw
             marginInline = 50.pct - 50.vw
             padding = Padding(clamp(3.5.rem, 6.vw, 4.5.rem), 0.px)
-            if (tinted) backgroundColor = sectionTint
         }
         appendChild(content)
     }

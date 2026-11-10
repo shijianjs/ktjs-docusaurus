@@ -2,8 +2,10 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.dom.inlineStyle
+import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.cssom.Auto
 import web.cssom.Display
@@ -24,6 +26,10 @@ class KtjsNextSteps : CustomElementAdapter() {
     private val section: HomeSection
     private val grid: HTMLDivElement
 
+    /** `section-title`: the heading above the grid. */
+    @JsName("sectionTitle")
+    var sectionTitle: String by attr("section-title") { change -> section.heading.textContent = change.newValue }
+
     init {
         val shadow = attachStyledShadow(HOME_RESET)
         grid = HtmlTagName.div.createElement {
@@ -37,13 +43,13 @@ class KtjsNextSteps : CustomElementAdapter() {
             }
             appendChild(HtmlTagName.slot.createElement())
         }
-        section = homeSection(tinted = hasAttribute("tinted"))
+        section = homeSection()
         section.content.appendChild(grid)
         shadow.appendChild(section.root)
     }
 
     override fun connectedCallback() {
-        section.heading.textContent = getAttribute("section-title").orEmpty()
+        applyInitialAttributes()
     }
 
     companion object : CustomElementReference<KtjsNextSteps>(KtjsNextSteps::class.js) {

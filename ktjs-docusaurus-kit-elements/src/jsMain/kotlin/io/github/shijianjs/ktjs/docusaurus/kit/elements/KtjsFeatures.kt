@@ -2,8 +2,10 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.dom.inlineStyle
+import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.cssom.Display
 import web.cssom.rem
@@ -22,6 +24,16 @@ class KtjsFeatures : CustomElementAdapter() {
     private val section: HomeSection
     private val grid: HTMLDivElement
 
+    /** `section-title`: the heading above the grid. */
+    @JsName("sectionTitle")
+    var sectionTitle: String by attr("section-title") { change -> section.heading.textContent = change.newValue }
+
+    /** `tinted`: paints the band with the section tint; a boolean attribute, so presence means `true`. */
+    @JsName("tinted")
+    var tinted: Boolean by attr { change ->
+        section.root.inlineStyle.backgroundColor = if (change.newValue) sectionTint else null
+    }
+
     init {
         val shadow = attachStyledShadow(HOME_RESET)
         grid = HtmlTagName.div.createElement {
@@ -34,13 +46,13 @@ class KtjsFeatures : CustomElementAdapter() {
             }
             appendChild(HtmlTagName.slot.createElement())
         }
-        section = homeSection(tinted = hasAttribute("tinted"))
+        section = homeSection()
         section.content.appendChild(grid)
         shadow.appendChild(section.root)
     }
 
     override fun connectedCallback() {
-        section.heading.textContent = getAttribute("section-title").orEmpty()
+        applyInitialAttributes()
     }
 
     companion object : CustomElementReference<KtjsFeatures>(KtjsFeatures::class.js) {

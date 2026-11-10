@@ -30,6 +30,47 @@ one is a real custom element. No React page and no `.tsx` file.
 | `ktjs-features` | `section-title`, `tinted` | `ktjs-feature` (`icon`, `title`), body text is the details |
 | `ktjs-next-steps` | `section-title` | `ktjs-step` (`href`, `title`), body text is the details |
 
+## Attributes are reactive
+
+Each attribute in that table is a Kotlin delegate (`ktjs-dom-kit`'s `attr`), not a field read once on
+connect:
+
+```kotlin
+class KtjsHero : CustomElementAdapter() {
+    @JsName("logoSrc")
+    var logoSrc: String by attr("logo-src") { change -> /* repaint from change.newValue */ }
+
+    @JsName("titleText")
+    var titleText: String by attr("title") { change -> headingElement.textContent = change.newValue }
+}
+```
+
+- The getter reads the attribute and the setter writes it, so there is no second copy to keep in sync:
+  `hero.titleText = "x"` and `hero.setAttribute("title", "x")` end up in the same place, and the getter
+  sees an outside write immediately.
+- The callback runs when the value actually changes — from the property, from `setAttribute`, from
+  devtools. Writing the same value again is not a change; removing the attribute is.
+- Call it from `connectedCallback()` with `applyInitialAttributes()`: markup that was already parsed
+  never passes through a setter, so that is how the callbacks first hear about it. It is idempotent,
+  so reconnecting an element does not repaint it twice.
+- The codec follows the property type: `String`, `Int`, `Double` and `Boolean` (presence, like
+  `hidden`) are built in; `kind` passes `enumAttributeCodec(ActionKind.entries)` to show the extension
+  point for a custom type. `default = …` is what the getter reports while the attribute is absent — it
+  is not written to the markup unless `applyInitialAttributes(writeDefaults = true)` asks for it.
+- The attribute name is the property name in kebab case (`logoSrc` → `logo-src`); pass one when they
+  differ (`titleText` → `title`, because `HTMLElement` already owns `title`). The properties carry
+  `@JsName`: without it Kotlin/JS compiles a delegated property into mangled accessor methods and
+  JavaScript sees no property at all. TypeScript users get a predictable `titleText` / `logoSrc`.
+
+Two consequences:
+
+- **Do not set an attribute on the element itself in its constructor.** `document.createElement("ktjs-hero")`
+  throws `NotSupportedError` if the constructed element already has attributes (the parser and the
+  upgrade path do not). The hero's `display: block` is a `:host` rule for that reason.
+- A write from outside is reported on a microtask — the element watches itself with a
+  `MutationObserver`, since the spec's `observedAttributes` list would have to repeat every attribute
+  at `customElements.define`, before the delegates exist. A Kotlin write reports synchronously.
+
 ## How the components fit together
 
 Every tag is its own custom element with its own shadow root — parents included. The parent renders the
@@ -54,7 +95,7 @@ deliberately not implemented: its `val connectedCallback` compiles to a getter t
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | yes, with the UI bundle | Node-safe helpers (`TocToggle`) + a `browser` artifact |
 | `ktjs-docusaurus-kit-elements` | no | all home elements and their shadows |
-| `ktjs-dom-kit` | no (moves to its own repository) | `CustomElementAdapter`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `appendStyle` |
+| `ktjs-dom-kit` | no (moves to its own repository) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `appendStyle` |
 
 The home UI travels with the kit: the webpack bundle is attached to the kit's coordinate as a
 `browser` artifact, so another project needs one dependency and one copy:
@@ -158,18 +199,19 @@ Building a section in code uses the same elements — create, set attributes, ap
 
 ```kotlin
 val hero = KtjsHero.NAME.createElement {
-    setAttribute("logo-src", "img/ktjs-docusaurus-logo.png")
-    setAttribute("title", "my-project")
+    logoSrc = "img/ktjs-docusaurus-logo.png"
+    titleText = "my-project"
 }
 hero.appendChild(
     KtjsAction.NAME.createElement {
-        setAttribute("kind", "primary")
-        setAttribute("href", "docs/intro")
+        kind = ActionKind.Primary
+        href = "docs/intro"
         textContent = "Get started"
     },
 )
 host.appendChild(hero)
 ```
 
-`TagName<T>.createElement { }` is the typed wrapper over `document.createElement(TagName<T>)`; the
-callback receives the concrete element type.
+The properties write the attributes, so this is the same element MDX produces. `TagName<T>.createElement { }`
+is the typed wrapper over `document.createElement(TagName<T>)`; the callback receives the concrete
+element type.

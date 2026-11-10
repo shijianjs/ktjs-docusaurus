@@ -3,8 +3,10 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.appendStyle
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.dom.inlineStyle
+import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.components.HTMLSlotElement
 import web.cssom.AlignItems
@@ -41,24 +43,46 @@ import web.html.HtmlTagName
 /**
  * `<ktjs-hero logo-src="…" title="…" tagline="…">` with `<ktjs-action>` / `<ktjs-badge>` children.
  *
- * Renders into a shadow root. `logo-src` / `title` / `tagline` are read on connect; the child tags are
+ * Renders into a shadow root. `logo-src` / `title` / `tagline` are `attr` delegates, so the shadow
+ * tree follows them whenever they change — not only when the element is connected. The child tags are
  * routed into their own slots (`action`, `badge`) by tag name, so MDX does not need a `slot`
  * attribute. Each child is a real custom element that renders itself.
  */
 class KtjsHero : CustomElementAdapter() {
-    private val logo: HTMLImageElement
-    private val heading: HTMLHeadingElement
-    private val tagline: HTMLParagraphElement
+    private val logoElement: HTMLImageElement
+    private val headingElement: HTMLHeadingElement
+    private val taglineElement: HTMLParagraphElement
     private val actions: HTMLDivElement
     private val badges: HTMLDivElement
 
-    init {
-        inlineStyle.display = Display.block
+    /** `logo-src`: the logo image; blank drops the `src` instead of pointing the image at the page. */
+    @JsName("logoSrc")
+    var logoSrc: String by attr("logo-src") { change ->
+        if (change.newValue.isBlank()) {
+            logoElement.removeAttribute("src")
+        } else {
+            logoElement.src = change.newValue
+        }
+    }
 
+    /**
+     * `title`: the heading text.
+     *
+     * Named `titleText` because `HTMLElement` already has a `title` (the tooltip attribute), and the
+     * spec spelling of the attribute is the only thing the markup cares about.
+     */
+    @JsName("titleText")
+    var titleText: String by attr("title") { change -> headingElement.textContent = change.newValue }
+
+    /** `tagline`: the sentence under the heading. */
+    @JsName("tagline")
+    var tagline: String by attr { change -> taglineElement.textContent = change.newValue }
+
+    init {
         val shadow = attachStyledShadow(HOME_RESET)
         shadow.appendStyle(HERO_CSS)
 
-        logo = HtmlTagName.img.createElement {
+        logoElement = HtmlTagName.img.createElement {
             inlineStyle.apply {
                 display = Display.block
                 width = clamp(7.rem, 16.vw, 10.rem)
@@ -68,7 +92,7 @@ class KtjsHero : CustomElementAdapter() {
             }
             alt = ""
         }
-        heading = HtmlTagName.h1.createElement {
+        headingElement = HtmlTagName.h1.createElement {
             // The gradient title is a `@supports` block, so it needs this hook (see HERO_CSS).
             classList.add("ktjs-title")
             inlineStyle.apply {
@@ -79,7 +103,7 @@ class KtjsHero : CustomElementAdapter() {
                 lineHeight = number(1.1)
             }
         }
-        tagline = HtmlTagName.p.createElement {
+        taglineElement = HtmlTagName.p.createElement {
             inlineStyle.apply {
                 maxWidth = 34.rem
                 margin = Margin(1.25.rem, Auto.auto, 0.px)
@@ -93,7 +117,7 @@ class KtjsHero : CustomElementAdapter() {
                 display = Display.inlineBlock
                 lineHeight = number(0.0)
             }
-            appendChild(logo)
+            appendChild(logoElement)
         }
         actions = HtmlTagName.div.createElement {
             // Only the small-screen stacking comes from CSS, so the row needs its hook.
@@ -124,8 +148,8 @@ class KtjsHero : CustomElementAdapter() {
             inlineStyle.maxWidth = 46.rem
             inlineStyle.margin = Margin(0.px, Auto.auto)
             appendChild(stage)
-            appendChild(heading)
-            appendChild(tagline)
+            appendChild(headingElement)
+            appendChild(taglineElement)
             appendChild(actions)
             appendChild(badges)
         }
@@ -148,9 +172,9 @@ class KtjsHero : CustomElementAdapter() {
     }
 
     override fun connectedCallback() {
-        getAttribute("logo-src")?.let { logo.src = it }
-        heading.textContent = getAttribute("title").orEmpty()
-        tagline.textContent = getAttribute("tagline").orEmpty()
+        // Markup attributes never reach a property setter, so this is where the three delegates first
+        // hear about them. Later changes arrive on their own.
+        applyInitialAttributes()
 
         // Route the declarative children into their slots. Reading `children` keeps React's nodes in
         // place; the browser does the actual distribution through `slot`.
@@ -177,6 +201,12 @@ private const val GLOW: String = "var(--ktjs-glow, rgba(31, 111, 235, 0.16))"
  * stacking of the action row.
  */
 private const val HERO_CSS: String = """
+/* The host itself: a custom element is inline by default, and this block cannot be set from the
+   constructor — a `style` attribute there makes `document.createElement("ktjs-hero")` throw. */
+:host {
+  display: block;
+}
+
 .ktjs-hero::before,
 .ktjs-hero::after {
   content: '';
