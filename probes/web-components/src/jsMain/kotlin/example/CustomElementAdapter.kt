@@ -17,25 +17,6 @@ import web.html.HTMLElement
  * variants instead of `this.foo(...)`.
  */
 open class CustomElementAdapter : HTMLElement() {
-    init {
-        // Probe: strip the bridges from the *runtime* class's prototype (the concrete subclass being
-        // constructed), so instance lookups fall through to the native HTMLElement.prototype.
-        val runtime: dynamic = unsafeCast<dynamic>(this)
-        // `createExternalThis` wraps every class level in a fresh `class extends ctor {}` and copies
-        // the Kotlin members onto its prototype, so walk the chain and clean each level - but never
-        // touch `HTMLElement.prototype`, where these names are the real DOM methods.
-        val htmlPrototype: dynamic = js("HTMLElement.prototype")
-        var prototype: dynamic = js("Object.getPrototypeOf")(runtime)
-        while (prototype != null && prototype !== htmlPrototype) {
-            deleteBridges(prototype)
-            prototype = js("Object.getPrototypeOf")(prototype)
-        }
-        console.log(
-            "strip: ctor=" + runtime.constructor.name +
-                " ownAfter=" + js("Object.getPrototypeOf")(runtime).hasOwnProperty("querySelectorAll"),
-        )
-    }
-
     fun getAttributeSuper(name: String): String? = super.getAttribute(name)
 
     fun setAttributeSuper(name: String, value: String) {
@@ -93,8 +74,17 @@ private val bridgeNames = listOf(
     "moveBefore", "prepend", "querySelector", "querySelectorAll", "replaceChildren", "blur", "focus",
 )
 
-fun stripAdapterBridges() {
-    deleteBridges(unsafeCast<dynamic>(CustomElementAdapter::class.js).prototype)
+/**
+ * Probe: delete the bridges on [klass]'s prototype chain, stopping before `HTMLElement.prototype`
+ * (where these names are the real DOM methods). Runs once, before the element is defined.
+ */
+internal fun stripBridgesFrom(klass: dynamic) {
+    val htmlPrototype: dynamic = js("HTMLElement.prototype")
+    var prototype: dynamic = klass.prototype
+    while (prototype != null && prototype !== htmlPrototype) {
+        deleteBridges(prototype)
+        prototype = js("Object.getPrototypeOf")(prototype)
+    }
 }
 
 private fun deleteBridges(prototype: dynamic) {
