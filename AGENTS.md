@@ -125,7 +125,7 @@ duckfn 站点一致。
      `ktjs-badge` / `ktjs-features` / `ktjs-feature` / `ktjs-next-steps` / `ktjs-step`。每个元素
      都渲染进自己的 shadow root：父级负责框架和 `<slot>` 布局，子级自己渲染卡片，子标签是真元素，
      不再被解析成数据后丢弃。顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进
-     demo 的依赖图。
+     demo 的依赖图。**不发布**：这是本站的 UI，不是通用契约，其他项目通过 kit 分发的 bundle 使用。
    - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`），与 Docusaurus 无关。模块名不以
      `ktjs-docusaurus` 开头，因此不参与发布和 Dokka；元素包用 `implementation` 依赖它，产物作为
      独立 `.mjs` 一起进 `static/ktjs-client/`。以后搬到独立仓库。

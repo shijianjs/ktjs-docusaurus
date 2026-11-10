@@ -19,9 +19,13 @@ plugins {
 // settings.gradle.kts) but still follows the same upstream version.
 val publishedPrefix = "ktjs-docusaurus"
 
-// Modules that carry the prefix but are not an API surface: the browser bundle exists only to inline
-// the elements library for one site, so it must not be released or documented.
-val unpublishedModules = setOf("ktjs-docusaurus-kit-bundle")
+// Modules that carry the prefix but are not an API surface. The home elements are this site's UI, not
+// a reusable contract, and the bundle only exists to inline them for one site; neither is released or
+// documented. What other projects consume is the bundle, distributed as an artifact of the kit.
+val unpublishedModules = setOf(
+    "ktjs-docusaurus-kit-bundle",
+    "ktjs-docusaurus-kit-elements",
+)
 
 // Only the wrapper follows an upstream npm version. The kit is original code with its own semantic
 // version, so it is not looked up in wrapper-revisions.properties.
@@ -207,6 +211,31 @@ subprojects {
             maven {
                 name = "hubStaging"
                 url = module.layout.buildDirectory.dir("hub-staging").get().asFile.toURI()
+            }
+        }
+    }
+
+    // The kit ships the home UI as data: the webpack bundle is attached to the kit's own coordinate
+    // with a `browser` classifier, so a site depends on the kit and copies the artifact into
+    // `static/` — no second library coordinate, and the version cannot drift.
+    if (name == "ktjs-docusaurus-kit") {
+        // The bundle project has to be evaluated before its task can be wired here.
+        evaluationDependsOn(":ktjs-docusaurus-kit-bundle")
+        afterEvaluate {
+            val bundleProject = project(":ktjs-docusaurus-kit-bundle")
+            val bundleTask = bundleProject.tasks.named("jsBrowserDistribution")
+            val bundleFile = bundleProject.layout.buildDirectory
+                .file("dist/js/productionExecutable/ktjs-docusaurus-kit-bundle.js")
+                .get()
+                .asFile
+            extensions.configure<PublishingExtension> {
+                publications.named<MavenPublication>("kotlinMultiplatform") {
+                    artifact(bundleFile) {
+                        classifier = "browser"
+                        extension = "js"
+                        builtBy(bundleTask)
+                    }
+                }
             }
         }
     }

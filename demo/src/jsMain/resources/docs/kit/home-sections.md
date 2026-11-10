@@ -50,11 +50,33 @@ deliberately not implemented: its `val connectedCallback` compiles to a getter t
 
 ## Packages
 
-| Package | Loaded by | Contents |
+| Package | Published | Contents |
 | --- | --- | --- |
-| `ktjs-docusaurus-kit` | browser + Node | the Node-safe helpers (`TocToggle`) |
-| `ktjs-docusaurus-kit-elements` | browser only | all home elements and their shadows |
-| `ktjs-dom-kit` | browser only | `CustomElementAdapter`, `defineIfMissing`, `createElement` |
+| `ktjs-docusaurus-kit` | yes, with the UI bundle | Node-safe helpers (`TocToggle`) + a `browser` artifact |
+| `ktjs-docusaurus-kit-elements` | no | all home elements and their shadows |
+| `ktjs-dom-kit` | no (moves to its own repository) | `CustomElementAdapter`, `defineIfMissing`, `createElement` |
+
+The home UI travels with the kit: the webpack bundle is attached to the kit's coordinate as a
+`browser` artifact, so another project needs one dependency and one copy:
+
+```kotlin
+val browserUi by configurations.creating
+dependencies {
+    browserUi("io.github.shijianjs:ktjs-docusaurus-kit:<version>") {
+        artifact {
+            classifier = "browser"
+            type = "js"
+        }
+    }
+}
+
+tasks.register<Copy>("stageHomeUi") {
+    from(browserUi)
+    into("static/ktjs-client")
+}
+```
+
+The elements module itself is not published: it is this site's UI, not a reusable contract.
 
 Because those classes evaluate `HTMLElement` at module load, the elements bundle must never be imported
 by the Node side. The Gradle plugin publishes it under `static/ktjs-client/` and the client module
