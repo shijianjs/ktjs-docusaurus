@@ -49,9 +49,9 @@ The elements package uses the official custom-element API: `class KtjsHero : Cus
 (which extends `HTMLElement`) plus a `CustomElementReference` companion and `customElements.define`.
 `CustomElementAdapter` lives in `ktjs-dom-kit`, which knows nothing about Docusaurus: it declares
 `connectedCallback()` once under its native name — subclasses just override it. Before defining a tag,
-`registerHomeElements()` calls `stripBridgesFrom(...)`, which deletes the self-recursive bridges
-Kotlin/JS puts on every class in the prototype chain; after that the native spelling works directly
-(`querySelectorAll`, `append`, …), with no `…Super` forwarders (see `AGENTS.md`). The official
+`defineIfMissing` (from `ktjs-dom-kit`) calls `stripBridgesFrom`, which deletes the self-recursive
+bridges Kotlin/JS puts on every class in the prototype chain; after that the native spelling works
+directly (`querySelectorAll`, `append`, …), with no `…Super` forwarders (see `AGENTS.md`). The official
 `CustomElement` interface is deliberately not implemented: its `val connectedCallback` compiles to a
 getter the browser never calls.
 

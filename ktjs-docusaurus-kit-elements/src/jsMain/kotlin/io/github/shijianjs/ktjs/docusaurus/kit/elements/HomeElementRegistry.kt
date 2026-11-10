@@ -1,12 +1,8 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
-import io.github.shijianjs.ktjs.dom.stripBridgesFrom
+import io.github.shijianjs.ktjs.dom.defineIfMissing
 import js.reflect.unsafeCast
 import kotlin.js.JsExport
-import web.components.CustomElementReference
-import web.components.customElements
-import web.components.define
-import web.dom.TagName
 import web.html.HTMLElement
 
 /**
@@ -15,22 +11,15 @@ import web.html.HTMLElement
  * Each element class follows the official API (`CustomElementAdapter` → `HTMLElement`,
  * `CustomElementReference` companion) and owns the section it renders into. This file is the only
  * place that knows the full set of tags; the classes live in their own files.
+ *
+ * `defineIfMissing` comes from `ktjs-dom-kit`; it strips the compiler-generated bridges before
+ * defining the tag, so the elements can use the native DOM spelling.
  */
 @JsExport
 fun registerHomeElements() {
-    stripBridgesFrom(KtjsHero::class.js)
-    stripBridgesFrom(KtjsFeatures::class.js)
-    stripBridgesFrom(KtjsNextSteps::class.js)
-
     defineIfMissing(KtjsHero.NAME, KtjsHero.Companion)
     defineIfMissing(KtjsFeatures.NAME, KtjsFeatures.Companion)
     defineIfMissing(KtjsNextSteps.NAME, KtjsNextSteps.Companion)
-}
-
-private fun <T : HTMLElement> defineIfMissing(name: TagName<T>, reference: CustomElementReference<T>) {
-    if (customElements.get(name) == null) {
-        customElements.define(name, reference)
-    }
 }
 
 /**
