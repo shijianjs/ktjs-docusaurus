@@ -105,15 +105,17 @@ def parse_headers(values):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="streamable-HTTP MCP client")
-    parser.add_argument("--url", default=None)
-    parser.add_argument("--header", action="append", default=[])
-    parser.add_argument("--project", default=os.environ.get("IDE_MCP_PROJECT"))
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--url", default=None)
+    common.add_argument("--header", action="append", default=[])
+    common.add_argument("--project", default=os.environ.get("IDE_MCP_PROJECT"))
+
+    parser = argparse.ArgumentParser(description="streamable-HTTP MCP client", parents=[common])
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("list")
-    schema = sub.add_parser("schema")
+    sub.add_parser("list", parents=[common])
+    schema = sub.add_parser("schema", parents=[common])
     schema.add_argument("names", nargs="+")
-    call = sub.add_parser("call")
+    call = sub.add_parser("call", parents=[common])
     call.add_argument("name")
     call.add_argument("arguments", nargs="?", default="{}")
 
