@@ -24,9 +24,23 @@ fun onRouteDidUpdate() {
 
 `install()` is idempotent — it reads the stored preference and wires the viewport listener once.
 `refresh()` reconciles the button with the page: the TOC is rendered by React, so it only exists on
-pages with headings, only on wide viewports, and the button can be discarded by a re-render.
+pages with headings, and only on wide viewports. The button itself is created once on `<body>` and
+removed again on pages without a TOC, so a re-render of the article cannot take it with it.
 
 The Gradle plugin turns the export into `client-module.mjs`; the site lists it in `clientModules`.
+
+## Layout
+
+The button is fixed to the bottom-right corner of the viewport: it stays reachable while scrolling,
+and — more importantly — while the TOC is collapsed. Injecting it next to the TOC instead would put
+it inside a React subtree, and hiding the TOC column would hide the button with it.
+
+Collapsing hides the TOC column and widens the article column to the full row. The second half needs
+its own class (`.ktjs-doc-article`) and `max-width: 100% !important`: Docusaurus pins the article with
+`max-width: 75% !important` in a hashed CSS module, so hiding the TOC alone would leave a 25% gap.
+
+The button only appears at `min-width: 997px`, the same breakpoint Docusaurus uses for the desktop
+TOC.
 
 ## Why the class is on `<body>`
 

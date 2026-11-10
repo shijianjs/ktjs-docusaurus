@@ -76,7 +76,12 @@ npm 包拆模块的原因。
   `Link`、`Translate`、`useDocusaurusContext` 等声明好了（kotlin-react），但**站点默认不写 tsx 页面**。
   首页这类「静态为主 + 少量动态」的页面用 MDX：页面里写 `<ktjs-…>` 标签，由 client module 升级成
   kit 的分区（见下文「页面用 MDX」）。`client` 包留给确实需要组件树的人；
-- 第三方主题与插件（`@easyops-cn/docusaurus-search-local` 等）的选项类型：各自在自己的 Kotlin 包里加。
+- 第三方主题与插件（`@easyops-cn/docusaurus-search-local` 等）的选项类型：各自在自己的 Kotlin 包里加
+  （`plugins.searchlocal` 就是一份完整示例）。这类包由生成的配置**按名字**解析，Kotlin 侧不 import 它们，
+  所以还要在 `ktjs-docusaurus/build.gradle.kts` 里 `implementation(npm(...))`，否则站点在 `build/js` 下
+  找不到它。注意搜索那个包是**主题**（`@theme/SearchBar` / `@theme/SearchPage`），要放进 `Config.themes`；
+  Docusaurus 3.10 在没有 `type: 'search'` 导航条目时会自己渲染 `@theme/SearchBar`。索引是 `postBuild`
+  产物，落在 `<site>/build/search-index.json` 与 `<site>/build/<locale>/search-index.json`。
 - Gradle 插件的 Maven 发布尚未接进 `release.yml`（它是独立构建，需要单独一条发布命令）。
 
 ### 页面用 MDX，不用 tsx
@@ -666,6 +671,10 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
   内容始终对应触发时 `master` 的提交。仓库 Settings → Pages 的 Source 必须选 **GitHub Actions**。
 - 本地预览：执行 `./gradlew pagesSite` 后给 `build/pages` 起任意静态服务器。直接开 `file://` 会因相对
   路径与 CORS 导致资源加载异常。要看 dev server 用 `./gradlew :demo:docusaurusStart`。
+- 右侧目录的折叠按钮由 kit 的 `TocToggle` 注入：按钮挂在 `<body>` 上（插进 React 子树里会被下次
+  reconciliation 影响，而且收起目录列时会跟着 `display: none`）。收起靠 `body.ktjs-toc-collapsed`，
+  同时给文章列加 `ktjs-doc-article` 加宽到整行——Docusaurus 在哈希 CSS module 里用
+  `max-width: 75% !important` 钉住文章列，只隐藏目录列会留下 25% 空白。
 
 ## 文档约定
 

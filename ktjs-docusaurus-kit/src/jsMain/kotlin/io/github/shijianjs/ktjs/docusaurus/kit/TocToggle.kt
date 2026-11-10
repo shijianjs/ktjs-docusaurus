@@ -47,6 +47,13 @@ private val DEFAULT_LABELS: Map<String, TocToggleLabels> = mapOf(
  * `<body>` — the class goes on the body, not on `<html>`, because Docusaurus rewrites the whole
  * `class` attribute of `<html>` on every route.
  *
+ * The button lives on `<body>`, not next to the TOC: everything above the article is a React tree,
+ * and a node inserted into it is at the mercy of the next reconciliation. A fixed button also stays
+ * reachable while scrolling and after collapsing, when the TOC column is `display: none`.
+ *
+ * Collapsing marks the TOC column (`.ktjs-toc-column`) and the article column (`.ktjs-doc-article`)
+ * with classes, so the article really takes over the freed 25% width instead of leaving a gap.
+ *
  * The matching CSS is [TOC_CSS]; [install] injects it once.
  *
  * ```kotlin
@@ -88,8 +95,8 @@ class TocToggle(private val options: TocToggleOptions = TocToggleOptions()) {
      * Reconciles the button with the current page.
      *
      * The TOC is rendered by React, so it exists only on pages with headings and only on wide
-     * viewports; the button may also have been discarded by a re-render, which is why it is rebuilt
-     * when it is no longer connected.
+     * viewports. The button outlives both: it is created once on `<body>`, and a page without a TOC
+     * only removes it—which is why it is rebuilt when it is no longer connected.
      */
     fun refresh() {
         val toc = document.querySelector(TOC_SELECTOR)
@@ -106,15 +113,27 @@ class TocToggle(private val options: TocToggleOptions = TocToggleOptions()) {
             return
         }
 
-        toc.parentElement?.classList?.add(ClassName(COLUMN_CLASS))
+        markLayout(toc)
 
         if (button == null) {
             val created = createButton()
             button = created
-            toc.parentElement?.insertBefore(created, toc)
+            document.body?.appendChild(created)
         }
 
         apply()
+    }
+
+    /**
+     * Tags the two columns the collapse rule needs: the TOC column and the article column beside it.
+     *
+     * The article is the previous sibling of the TOC column inside the layout row; its width is set
+     * by Infima's `.col--*` class, so the CSS needs its own class to widen it when the TOC is gone.
+     */
+    private fun markLayout(toc: web.dom.Element) {
+        val column = toc.parentElement ?: return
+        column.classList?.add(ClassName(COLUMN_CLASS))
+        column.previousElementSibling?.classList?.add(ClassName(ARTICLE_CLASS))
     }
 
     private fun createButton(): HTMLButtonElement {
@@ -174,32 +193,40 @@ class TocToggle(private val options: TocToggleOptions = TocToggleOptions()) {
         const val STATE_CLASS = "ktjs-toc-collapsed"
         const val BUTTON_CLASS = "ktjs-toc-toggle"
         const val COLUMN_CLASS = "ktjs-toc-column"
+        const val ARTICLE_CLASS = "ktjs-doc-article"
         const val TOC_ID = "ktjs-doc-toc"
         const val TOC_SELECTOR = ".theme-doc-toc-desktop"
         const val DESKTOP_QUERY = "(min-width: 997px)"
 
         /**
-         * The layout half of the toggle: the TOC sits in a column of its own, and collapsing only
-         * hides that column, so the article keeps the space it gains.
+         * The layout half of the toggle.
+         *
+         * The button is fixed to the bottom corner, so it stays clickable while scrolling and after
+         * collapsing. Collapsing hides the TOC column and widens the article column to the full row:
+         * hiding the column alone would leave its 25% empty, because Infima sizes the article with
+         * `.col--9` rather than with a flex ratio.
          */
         val TOC_CSS = """
-            .ktjs-toc-column {
-              position: relative;
-            }
-
             .ktjs-toc-toggle {
-              position: absolute;
-              inset-inline-end: 0;
-              inset-block-start: -2rem;
+              position: fixed;
+              inset-inline-end: 1rem;
+              inset-block-end: 1.5rem;
+              z-index: 100;
               display: none;
               align-items: center;
               justify-content: center;
-              width: 1.6rem;
-              height: 1.6rem;
+              width: 2rem;
+              height: 2rem;
               padding: 0;
-              border-radius: 6px;
-              opacity: 0.7;
+              border-radius: 999px;
+              background: var(--ifm-background-surface-color, #fff);
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+              opacity: 0.85;
               cursor: pointer;
+            }
+
+            .ktjs-toc-toggle:hover {
+              opacity: 1;
             }
 
             .ktjs-toc-toggle::before {
@@ -222,18 +249,16 @@ class TocToggle(private val options: TocToggleOptions = TocToggleOptions()) {
               display: none;
             }
 
-            body.ktjs-toc-collapsed .ktjs-toc-toggle::before {
-              transform: rotate(-135deg);
+            /* Docusaurus pins the article to 75% with `max-width: 75% !important` in a hashed CSS
+               module, so this rule needs `!important` as well (the body class gives it the
+               specificity, the hash would otherwise change on every upgrade). */
+            body.ktjs-toc-collapsed .ktjs-doc-article {
+              flex: 0 0 100%;
+              max-width: 100% !important;
             }
 
-            body.ktjs-toc-collapsed .ktjs-toc-toggle {
-              position: fixed;
-              inset-inline-end: 1rem;
-              inset-block-start: auto;
-              inset-block-end: 1.5rem;
-              z-index: 100;
-              background: var(--ifm-background-surface-color, #fff);
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+            body.ktjs-toc-collapsed .ktjs-toc-toggle::before {
+              transform: rotate(-135deg);
             }
         """.trimIndent()
     }
