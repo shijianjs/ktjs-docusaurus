@@ -3,10 +3,10 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.createElement
 import web.components.CustomElementReference
-import web.cssom.ClassName
 import web.dom.TagName
 import web.html.HTMLAnchorElement
 import web.html.HTMLImageElement
+import web.html.HtmlTagName
 import web.window.WindowTarget
 import web.window._blank
 
@@ -19,11 +19,11 @@ class KtjsBadge : CustomElementAdapter() {
 
     init {
         val shadow = attachHomeShadow()
-        image = TagName<HTMLImageElement>("img").createElement {
-            className = ClassName("ktjs-badge-image")
+        image = HtmlTagName.img.createElement {
+            classList.add("ktjs-badge-image")
         }
-        anchor = TagName<HTMLAnchorElement>("a").createElement {
-            className = ClassName("ktjs-badge")
+        anchor = HtmlTagName.a.createElement {
+            classList.add("ktjs-badge")
             target = WindowTarget._blank
             rel = "noopener noreferrer"
             appendChild(image)

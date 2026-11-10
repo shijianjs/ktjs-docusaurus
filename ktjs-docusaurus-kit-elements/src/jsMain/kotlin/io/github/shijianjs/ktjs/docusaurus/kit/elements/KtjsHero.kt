@@ -4,14 +4,15 @@ import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.createElement
 import web.components.CustomElementReference
 import web.components.HTMLSlotElement
-import web.cssom.ClassName
 import web.dom.TagName
 import web.html.HTMLDivElement
 import web.html.HTMLHeadingElement
 import web.html.HTMLImageElement
 import web.html.HTMLParagraphElement
 import web.html.HTMLSpanElement
+import web.html.HTMLStyleElement
 import web.html.HTMLElement
+import web.html.HtmlTagName
 
 /**
  * `<ktjs-hero logo-src="…" title="…" tagline="…">` with `<ktjs-action>` / `<ktjs-badge>` children.
@@ -30,30 +31,30 @@ class KtjsHero : CustomElementAdapter() {
     init {
         val shadow = attachHomeShadow()
 
-        logo = TagName<HTMLImageElement>("img").createElement {
-            className = ClassName("ktjs-logo")
+        logo = HtmlTagName.img.createElement {
+            classList.add("ktjs-logo")
             alt = ""
         }
-        heading = TagName<HTMLHeadingElement>("h1").createElement {
-            className = ClassName("ktjs-title")
+        heading = HtmlTagName.h1.createElement {
+            classList.add("ktjs-title")
         }
-        tagline = TagName<HTMLParagraphElement>("p").createElement {
-            className = ClassName("ktjs-tagline")
+        tagline = HtmlTagName.p.createElement {
+            classList.add("ktjs-tagline")
         }
-        val stage = TagName<HTMLSpanElement>("span").createElement {
-            className = ClassName("ktjs-logo-stage")
+        val stage = HtmlTagName.span.createElement {
+            classList.add("ktjs-logo-stage")
             appendChild(logo)
         }
-        actions = TagName<HTMLDivElement>("div").createElement {
-            className = ClassName("ktjs-actions")
-            appendChild(TagName<HTMLSlotElement>("slot").createElement { name = "action" })
+        actions = HtmlTagName.div.createElement {
+            classList.add("ktjs-actions")
+            appendChild(HtmlTagName.slot.createElement<HTMLSlotElement> { name = "action" })
         }
-        badges = TagName<HTMLDivElement>("div").createElement {
-            className = ClassName("ktjs-badges")
-            appendChild(TagName<HTMLSlotElement>("slot").createElement { name = "badge" })
+        badges = HtmlTagName.div.createElement {
+            classList.add("ktjs-badges")
+            appendChild(HtmlTagName.slot.createElement<HTMLSlotElement> { name = "badge" })
         }
-        val inner = TagName<HTMLDivElement>("div").createElement {
-            className = ClassName("ktjs-hero-inner")
+        val inner = HtmlTagName.div.createElement {
+            classList.add("ktjs-hero-inner")
             appendChild(stage)
             appendChild(heading)
             appendChild(tagline)
@@ -61,8 +62,8 @@ class KtjsHero : CustomElementAdapter() {
             appendChild(badges)
         }
 
-        val section = TagName<HTMLElement>("section").createElement {
-            className = ClassName("ktjs-hero")
+        val section = HtmlTagName.section.createElement<HTMLElement> {
+            classList.add("ktjs-hero")
             appendChild(inner)
         }
         shadow.appendChild(section)

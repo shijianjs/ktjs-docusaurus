@@ -5,12 +5,12 @@ import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import web.components.CustomElementReference
-import web.cssom.ClassName
 import web.dom.TagName
 import web.html.HTMLHeadingElement
 import web.html.HTMLParagraphElement
 import web.html.HTMLSpanElement
 import web.html.HTMLElement
+import web.html.HtmlTagName
 
 /**
  * `<ktjs-feature icon="lucide:…" title="…">details</ktjs-feature>` — one card in a
@@ -26,20 +26,20 @@ class KtjsFeature : CustomElementAdapter() {
     init {
         val shadow = attachHomeShadow()
         icon = IconifyIconTagName.iconifyIcon.createElement {
-            className = ClassName("ktjs-feature-icon")
+            classList.add("ktjs-feature-icon")
             setAttribute("aria-hidden", "true")
         }
-        heading = TagName<HTMLHeadingElement>("h3").createElement {
-            className = ClassName("ktjs-feature-title")
+        heading = HtmlTagName.h3.createElement {
+            classList.add("ktjs-feature-title")
         }
-        details = TagName<HTMLParagraphElement>("p").createElement {
-            className = ClassName("ktjs-feature-details")
+        details = HtmlTagName.p.createElement {
+            classList.add("ktjs-feature-details")
         }
-        val card = TagName<HTMLElement>("article").createElement {
-            className = ClassName("ktjs-feature-card")
+        val card = HtmlTagName.article.createElement<HTMLElement> {
+            classList.add("ktjs-feature-card")
             appendChild(
-                TagName<HTMLSpanElement>("span").createElement {
-                    className = ClassName("ktjs-feature-icon-chip")
+                HtmlTagName.span.createElement {
+                    classList.add("ktjs-feature-icon-chip")
                     appendChild(icon)
                 },
             )

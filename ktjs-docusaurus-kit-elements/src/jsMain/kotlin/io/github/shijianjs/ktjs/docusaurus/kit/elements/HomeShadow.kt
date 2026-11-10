@@ -3,9 +3,11 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 import io.github.shijianjs.ktjs.dom.createElement
 import web.components.ShadowRoot
 import web.components.ShadowRootInit
-import web.dom.TagName
-import web.html.HTMLElement
+import web.components.ShadowRootMode
+import web.components.open
 import web.html.HTMLStyleElement
+import web.html.HTMLElement
+import web.html.HtmlTagName
 
 /**
  * Attaches an open shadow root and seeds it with [HOME_CSS].
@@ -15,10 +17,10 @@ import web.html.HTMLStyleElement
  * inherit into shadow trees.
  */
 internal fun HTMLElement.attachHomeShadow(): ShadowRoot {
-    val options = js("""{ mode: 'open' }""") as ShadowRootInit
+    val options: ShadowRootInit = ShadowRootInit(mode = ShadowRootMode.open)
     val root = attachShadow(options)
     root.appendChild(
-        TagName<HTMLStyleElement>("style").createElement {
+        HtmlTagName.style.createElement<HTMLStyleElement> {
             textContent = HOME_CSS
         },
     )

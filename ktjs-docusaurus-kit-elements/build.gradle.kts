@@ -21,6 +21,9 @@ kotlin {
     js {
         useEsModules()
         browser()
+        // `library` is what the release process publishes. KGP keeps only one binary per target, so
+        // the browser bundle stays a set of linked `.mjs` files; the npm import is resolved by the
+        // site's import map instead of a webpack pass.
         binaries.library()
     }
 

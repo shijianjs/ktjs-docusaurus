@@ -3,12 +3,11 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.createElement
 import web.components.CustomElementReference
-import web.components.HTMLSlotElement
-import web.cssom.ClassName
 import web.dom.TagName
 import web.html.HTMLDivElement
 import web.html.HTMLHeadingElement
 import web.html.HTMLElement
+import web.html.HtmlTagName
 
 /**
  * `<ktjs-features section-title="…" tinted>` with `<ktjs-feature>` children.
@@ -22,22 +21,21 @@ class KtjsFeatures : CustomElementAdapter() {
 
     init {
         val shadow = attachHomeShadow()
-        heading = TagName<HTMLHeadingElement>("h2").createElement {
-            className = ClassName("ktjs-section-title")
+        heading = HtmlTagName.h2.createElement {
+            classList.add("ktjs-section-title")
         }
-        grid = TagName<HTMLDivElement>("div").createElement {
-            className = ClassName("ktjs-feature-grid")
-            appendChild(TagName<HTMLSlotElement>("slot").createElement())
+        grid = HtmlTagName.div.createElement {
+            classList.add("ktjs-feature-grid")
+            appendChild(HtmlTagName.slot.createElement())
         }
-        val inner = TagName<HTMLDivElement>("div").createElement {
-            className = ClassName("ktjs-section-inner")
+        val inner = HtmlTagName.div.createElement {
+            classList.add("ktjs-section-inner")
             appendChild(heading)
             appendChild(grid)
         }
-        val section = TagName<HTMLElement>("section").createElement {
-            className = ClassName(
-                if (hasAttribute("tinted")) "ktjs-section ktjs-section-tint" else "ktjs-section",
-            )
+        val section = HtmlTagName.section.createElement<HTMLElement> {
+            classList.add("ktjs-section")
+            if (hasAttribute("tinted")) classList.add("ktjs-section-tint")
             appendChild(inner)
         }
         shadow.appendChild(section)

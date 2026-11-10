@@ -5,10 +5,10 @@ import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import web.components.CustomElementReference
-import web.cssom.ClassName
 import web.dom.TagName
 import web.html.HTMLAnchorElement
 import web.html.HTMLSpanElement
+import web.html.HtmlTagName
 import web.window.WindowTarget
 import web.window._blank
 
@@ -25,21 +25,24 @@ class KtjsAction : CustomElementAdapter() {
 
     init {
         val shadow = attachHomeShadow()
-        label = TagName<HTMLSpanElement>("span").createElement()
+        label = HtmlTagName.span.createElement()
         icon = IconifyIconTagName.iconifyIcon.createElement {
-            className = ClassName("ktjs-button-icon")
+            classList.add("ktjs-button-icon")
             setAttribute("aria-hidden", "true")
         }
-        anchor = TagName<HTMLAnchorElement>("a").createElement {
-            append(icon, label)
+        anchor = HtmlTagName.a.createElement {
+            appendChild(icon)
+            appendChild(label)
         }
         shadow.appendChild(anchor)
     }
 
     override fun connectedCallback() {
         val secondary = getAttribute("kind") == "secondary"
-        anchor.className = ClassName(
-            if (secondary) "ktjs-button ktjs-button-secondary" else "ktjs-button ktjs-button-primary",
+        anchor.classList.remove("ktjs-button", "ktjs-button-primary", "ktjs-button-secondary")
+        anchor.classList.add(
+            "ktjs-button",
+            if (secondary) "ktjs-button-secondary" else "ktjs-button-primary",
         )
         anchor.href = getAttribute("href").orEmpty()
         if (secondary) {

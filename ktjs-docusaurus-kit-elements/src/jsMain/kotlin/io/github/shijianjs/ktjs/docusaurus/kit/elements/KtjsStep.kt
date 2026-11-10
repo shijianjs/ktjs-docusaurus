@@ -5,10 +5,10 @@ import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import web.components.CustomElementReference
-import web.cssom.ClassName
 import web.dom.TagName
 import web.html.HTMLAnchorElement
 import web.html.HTMLSpanElement
+import web.html.HtmlTagName
 
 /**
  * `<ktjs-step href="…" title="…">details</ktjs-step>` — one link card in a [`KtjsNextSteps`] grid.
@@ -24,24 +24,24 @@ class KtjsStep : CustomElementAdapter() {
 
     init {
         val shadow = attachHomeShadow()
-        heading = TagName<HTMLSpanElement>("span").createElement {
-            className = ClassName("ktjs-next-card-title")
+        heading = HtmlTagName.span.createElement {
+            classList.add("ktjs-next-card-title")
         }
-        details = TagName<HTMLSpanElement>("span").createElement {
-            className = ClassName("ktjs-next-card-details")
+        details = HtmlTagName.span.createElement {
+            classList.add("ktjs-next-card-details")
         }
         arrow = IconifyIconTagName.iconifyIcon.createElement {
-            className = ClassName("ktjs-next-card-arrow")
+            classList.add("ktjs-next-card-arrow")
             setAttribute("icon", "lucide:arrow-right")
             setAttribute("aria-hidden", "true")
         }
-        val body = TagName<HTMLSpanElement>("span").createElement {
-            className = ClassName("ktjs-next-card-body")
+        val body = HtmlTagName.span.createElement {
+            classList.add("ktjs-next-card-body")
             appendChild(heading)
             appendChild(details)
         }
-        anchor = TagName<HTMLAnchorElement>("a").createElement {
-            className = ClassName("ktjs-next-card")
+        anchor = HtmlTagName.a.createElement {
+            classList.add("ktjs-next-card")
             appendChild(body)
             appendChild(arrow)
         }

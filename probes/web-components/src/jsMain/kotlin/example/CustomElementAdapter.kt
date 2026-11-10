@@ -27,7 +27,7 @@ open class CustomElementAdapter : HTMLElement() {
 
     fun removeAttributeSuper(name: String) {
         super.removeAttribute(name)
-        classList
+        Element::classList
     }
 
     fun querySelectorSuper(selectors: String): Element? = super.querySelector(selectors)
