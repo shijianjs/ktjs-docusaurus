@@ -8,6 +8,7 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
  * override them) fall back to Infima's `--ifm-*` values, so light and dark mode work without a single
  * `[data-theme]` selector here.
  */
+// language=CSS
 internal const val HOME_CSS: String = """
 :host {
   display: block;
