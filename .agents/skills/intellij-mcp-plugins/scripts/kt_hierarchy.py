@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Kotlin type hierarchy (parents + subtypes) via the Index MCP plugin.
+"""Kotlin/JS type hierarchy (parents + subtypes) via the Index MCP plugin.
 
-The plugin's ide_type_hierarchy/find_implementations/find_super_methods do not bridge Kotlin PSI,
-but ide_symbol_info (signature incl. supertypes), ide_find_symbol (symbolId, Kotlin + libraries) and
-ide_find_references (its hits include `class X : Base()` declarations) all work on Kotlin.
+The plugin's ide_type_hierarchy/find_implementations/find_super_methods work for Java and Kotlin/JVM
+(they resolve Kotlin through JVM light classes) but not for Kotlin/JS: klib output has no JVM light
+class, so the type is reported as not found. ide_symbol_info (signature incl. supertypes),
+ide_find_symbol (symbolId, Kotlin + libraries) and ide_find_references (its hits include
+`class X : Base()` declarations) do work for Kotlin/JS, which is what this script combines.
 
 UP   : ide_symbol_info -> signature -> supertype names -> ide_find_symbol -> symbolId -> recurse
 DOWN : ide_find_references -> inheritance declarations -> ide_find_symbol -> recurse

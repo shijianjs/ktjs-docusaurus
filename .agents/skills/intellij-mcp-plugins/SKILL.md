@@ -8,17 +8,21 @@ description: 用脚本调用 IntelliJ IDEA 的 MCP server（官方内置与 IDE 
 ## 适用场景
 
 - 想从命令行或脚本查询 IDEA 索引（符号、引用、继承），不依赖 agent 客户端内置的 MCP 工具。
-- 需要 Kotlin 的 F4 等价物：父类链 + 子实现列表。
+- 需要 Kotlin/JS 的 F4 等价物：父类链 + 子实现列表（Kotlin/JVM 与 Java 直接用插件的
+  `ide_type_hierarchy`，记得带 `scope: project_and_libraries`）。
 - 在 CI 或 agent 流程里做批量语义查询。
 
 ## 背景
 
 - IDEA 有两个 MCP server：官方内置（稳定，工作流类工具）与 IDE Index MCP 插件（语义索引 / 层级 / 重构，
   迭代最快），端口不同，可以同时挂。
-- 插件的 `ide_type_hierarchy` / `ide_find_implementations` / `ide_find_super_methods` 只对 Java 有效；
-  Kotlin 未桥接 PSI（`ide_symbol_info` 的 `signatureSource`：Java 是 `java_psi`，Kotlin 是 `element_text`）。
-- 所以 Kotlin 的继承树由 `scripts/kt_hierarchy.py` 用 `ide_symbol_info` + `ide_find_symbol` +
-  `ide_find_references` 组合得出。
+- 插件的层级工具（`ide_type_hierarchy` / `ide_find_implementations` / `ide_find_super_methods`）
+  对 **Java 与 Kotlin/JVM 有效，对 Kotlin/JS（klib）无效**：它走 Java PSI + Kotlin light class 桥，
+  light class 依赖 JVM 的 `.class`，而 Kotlin/JS 产物是 klib，没有 light class。
+- `scope` 容易误判：默认 `project_files` 会把库里的父类型过滤掉（Kotlin/JVM 上看起来像空树），
+  查跨库继承要带 `project_and_libraries`。
+- 所以 **Kotlin/JS** 的继承树由 `scripts/kt_hierarchy.py` 用 `ide_symbol_info` + `ide_find_symbol` +
+  `ide_find_references` 组合得出；Java / Kotlin/JVM 直接调 `ide_type_hierarchy` 即可。
 
 ## 前置条件
 
