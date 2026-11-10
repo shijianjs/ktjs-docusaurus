@@ -30,3 +30,6 @@ __pycache__/
 # Agent skills：npx skills 生成的符号链接（绝对路径，本地生成不入库）
 .claude/skills/
 .codebuddy/skills/
+
+# playwright-cli 的本地会话快照
+/.playwright-cli/

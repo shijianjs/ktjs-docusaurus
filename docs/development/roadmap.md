@@ -3,8 +3,9 @@
 ## 来源与范围
 
 - 来源：本项目的需求清单（2026-11-08 起的需求对话）与 Docusaurus 3.10.2 的公开配置面。
-- 版本：`@docusaurus/*` 3.10.2；Kotlin 2.4.21；`kotlin-wrappers` 2026.11.0。
-- 核对日期：2026-11-09。
+- 版本：`@docusaurus/*` 3.10.2；`@easyops-cn/docusaurus-search-local` 0.55.3；Kotlin 2.4.21；
+  `kotlin-wrappers` 2026.11.0。
+- 核对日期：2026-11-10。
 - 范围：`ktjs-docusaurus` 仓库（wrapper、Gradle 插件、kit、demo），以及 `ktjs-*` 系列的通用构建约定
   （第 6 节）。
 - 不在范围：`duckfn` 站点的内容、`oop-react`（TypeScript 项目，`target: ES2022`）。
@@ -14,9 +15,10 @@
 | 状态 | 数量 |
 | --- | ---: |
 | 总计 | 44 |
-| 已完成 | 29 |
+| 已完成 | 32 |
 | 明确不做 | 4 |
-| 待完成 | 11 |
+| 保留 | 1 |
+| 待完成 | 7 |
 
 ## 1. 项目形态（6 项，全部完成）
 
@@ -27,7 +29,7 @@
 - 1.5 包名统一为 `io.github.shijianjs.ktjs.docusaurus`
 - 1.6 `../AGENTS.md` 的两条约定（国内镜像克隆、只读仓库可随意切分支/tag）
 
-## 2. wrapper 覆盖面（9 项：6 完成 / 1 待完成 / 2 不做）
+## 2. wrapper 覆盖面（9 项：7 完成 / 2 不做）
 
 - 2.1 `Config` 全字段
 - 2.2 `preset-classic` 与 docs / blog / pages / sitemap / svgr / gtag / gtm / analytics / theme-classic 选项
@@ -35,8 +37,9 @@
 - 2.4 `SidebarsConfig` 与全部条目类型
 - 2.5 `PrismThemes`
 - 2.6 React 客户端层（`Layout`、`Heading`、`Link`、`Translate`、`useDocusaurusContext` 等）
-- 2.8 `@easyops-cn/docusaurus-search-local` 的选项类型 —— **待完成**；目前只通过
-  `PluginConfig(name, options: JsAny)` 留了口子
+- 2.8 `@easyops-cn/docusaurus-search-local` 的选项类型：`plugins.searchlocal` 覆盖 0.55.3 的全部
+  `PluginOptions`，联合类型各分支都有工厂（`hashed`、`ignoreFiles`、`searchContextByPaths`、
+  `removeDefaultStopWordFilter`、`searchBarPosition`）
 
 明确不做：
 
@@ -70,23 +73,30 @@
 | colormath 颜色计算 | 组件只读 `--ktjs-*` 自定义属性，不参与颜色运算 |
 | Playwright 相关 | kit 不需要浏览器测试；duckfn 那套已有 JVM 实现 |
 
-## 5. demo 文档站（7 项：5 完成 / 2 待完成）
+## 5. demo 文档站（7 项：全部完成）
 
 - 5.1 首页 MDX + 自定义元素（`ktjs-hero` / `ktjs-features` / `ktjs-next-steps`）
 - 5.2 双语 i18n 配置（en / zh-Hans）
 - 5.3 英文文档页（`intro`、`guide/*`、`kit/*`）
-- 5.4 中文翻译：`guide/content`、`kit/home-sections`、`kit/toc-toggle`、`kit/gradle-plugin` —— **待完成**
+- 5.4 中文翻译：`guide/content`、`guide/local-search`、`kit/home-sections`、`kit/toc-toggle`、
+  `kit/gradle-plugin`
 - 5.5 导航栏两个大分类（User guide / Docs kit）
-- 5.6 TOC 在客户端导航后重新挂载（`onRouteDidUpdate` 每次路由变化都 `refresh()`）
-- 5.7 首页与 kit 的运行时验收（headless Chrome：hero 1 / 卡片 4 / 步骤 3，console 无错误）
+- 5.6 TOC 在客户端导航后重新挂载（`onRouteDidUpdate` 每次路由变化都 `refresh()`）；按钮改为挂在
+  `<body>` 上并固定在视口右下角，因为原来的位置在页面顶部会被固定导航栏盖住、收起后又会随目录列一起
+  `display: none`；收起时文章列同时加宽到整行
+- 5.7 运行时验收（headless Chromium）：首页 hero 1 / 卡片 4 / 步骤 3、shadow root 已挂载；文档页的 TOC
+  按钮在「加载 → 客户端导航 → 无目录页 → 回到有目录页」全链路都在，收起/展开与刷新后保持；本地搜索在
+  en / zh-Hans 两侧都能返回建议与结果页；console 无错误
 
-## 6. 跨仓库构建约定（5 项：2 完成 / 3 待完成）
+## 6. 跨仓库构建约定（5 项：2 完成 / 2 待完成 / 1 保留）
 
 - 6.1 `-Xir-dce=false`（本仓库、vaadin、echarts、iconify、wrapper-template）
 - 6.2 `target = "es2015"`（同上五个）
 - 6.3 Kotlin 2.5：`target = "es2020"` —— **待完成**，阻塞于 2.5 正式版
 - 6.4 Kotlin 2.5：`KOTLIN_ARCHIVE` 发布格式 —— **待完成**，同上
-- 6.5 清理 `probes/web-components`（官方示例复现模块） —— **待完成**，issue 已关闭并更正
+- 6.5 `probes/web-components` —— **保留**（原计划清理）。它是自定义元素行为的可复现探针，issue 关闭后
+  仍然有用：以后再遇到 `connectedCallback` 不触发、原型链自递归桥、`@JsName` 改名这几类问题时不必重建
+  最小工程。不参与发布与 Dokka。
 
 ## 7. 发布（3 项：全部待完成）
 
