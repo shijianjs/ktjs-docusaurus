@@ -1,0 +1,119 @@
+package io.github.shijianjs.ktjs.dom
+
+import csstype.fallback
+import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
+import io.github.shijianjs.ktjs.dom.css.colorStop
+import io.github.shijianjs.ktjs.dom.css.pointerEventsNone
+import io.github.shijianjs.ktjs.dom.css.radialGradient
+import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClip
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import web.cssom.BackgroundClip
+import web.cssom.ClassName
+import web.cssom.Color
+import web.cssom.Display
+import web.cssom.NamedColor
+import web.cssom.Position
+import web.cssom.pct
+import web.cssom.stop
+import web.cssom.`var`
+import web.cssom.CustomPropertyName
+
+/**
+ * The serializer contract: what goes into the rules object, and what has to come out of it.
+ *
+ * These run in Chromium because the package that does the work (`@emotion/serialize` + stylis) is
+ * resolved by webpack, exactly as it is in the site bundle.
+ */
+class CssSheetTest {
+
+    private val cardClass = ClassName("card")
+
+    @Test
+    fun nestedSelectorsAreResolvedAgainstTheirParent() {
+        val text = cssText {
+            cardClass {
+                display = Display.block
+                "&:hover" { display = fallback(Display.grid, Display.flex) }
+            }
+        }
+
+        assertEquals(".card{display:block;}.card:hover{display:grid;display:flex;}", text)
+    }
+
+    @Test
+    fun topLevelAtRulesAndPseudoElementsSurvive() {
+        val text = cssText {
+            cardClass {
+                "&::before" { content = web.cssom.Content() }
+            }
+            "@media (max-width: 576px)" {
+                cardClass { display = Display.block }
+            }
+        }
+
+        assertTrue(text.contains(".card::before{content:'';}"), text)
+        assertTrue(text.contains("@media (max-width: 576px){.card{display:block;}}"), text)
+    }
+
+    @Test
+    fun sheetsCarryTheSameRulesTheySerializeTo() {
+        val sheet = cssSheet {
+            cardClass {
+                display = Display.block
+                "&:focus-visible" { display = Display.block }
+            }
+        }
+
+        assertEquals(2, sheet.cssRules.length)
+        assertTrue(sheet.cssRules.item(0)?.cssText?.startsWith(".card {") == true)
+        assertTrue(sheet.cssRules.item(1)?.cssText?.startsWith(".card:focus-visible") == true)
+    }
+
+    @Test
+    fun oneClassIsOneTopLevelKey() {
+        // A rules object is a JSON object: writing the same `ClassName` twice keeps only the last
+        // block, so a class's rules belong inside a single block (nested keys, not repeated blocks).
+        val text = cssText {
+            cardClass { display = Display.block }
+            cardClass { display = Display.flex }
+        }
+
+        assertEquals(".card{display:flex;}", text)
+    }
+
+    @Test
+    fun theCssPackageFillsInWhatCssomMisses() {
+        val text = cssText {
+            cardClass {
+                position = Position.absolute
+                pointerEvents = pointerEventsNone
+                background = radialGradient(
+                    RadialGradientShape.Circle,
+                    colorStop(`var`(CustomPropertyName<Color>("--glow"), NamedColor.black)),
+                    stop(Color.transparent, 70.pct),
+                )
+                backgroundClip = BackgroundClip.text
+                webkitBackgroundClip(BackgroundClip.text)
+            }
+        }
+
+        assertTrue(text.contains("pointer-events:none;"), text)
+        assertTrue(text.contains("background:radial-gradient(circle,var(--glow,#000000),transparent 70%);"), text)
+        // The vendor declaration is kept as written: `@emotion/serialize` hyphenates camelCase keys and
+        // leaves a key that already starts with `-` alone.
+        assertTrue(text.contains("-webkit-background-clip:text;"), text)
+        assertTrue(text.contains("background-clip:text;"), text)
+    }
+
+    @Test
+    fun theTopLevelIsTheSelector() {
+        val text = cssText {
+            cardClass { display = Display.block }
+        }
+
+        assertEquals(".card{display:block;}", text)
+    }
+}

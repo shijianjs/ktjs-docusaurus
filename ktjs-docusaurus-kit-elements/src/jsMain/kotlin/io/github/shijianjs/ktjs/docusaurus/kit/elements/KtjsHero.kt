@@ -3,33 +3,50 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
+import io.github.shijianjs.ktjs.dom.cssSheet
+import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
+import io.github.shijianjs.ktjs.dom.css.colorStop
+import io.github.shijianjs.ktjs.dom.css.radialGradient
+import io.github.shijianjs.ktjs.dom.css.pointerEventsNone
+import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClip
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.dom.inlineStyle
 import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.components.HTMLSlotElement
 import web.cssom.AlignItems
+import web.cssom.BackgroundClip
 import web.cssom.CSSStyleSheet
 import web.cssom.Auto
 import web.cssom.Color
+import web.cssom.ClassName
+import web.cssom.Content
 import web.cssom.Display
+import web.cssom.FlexDirection
 import web.cssom.FlexWrap
 import web.cssom.Isolation
 import web.cssom.JustifyContent
 import web.cssom.Margin
+import web.cssom.MediaQuery
 import web.cssom.Overflow
 import web.cssom.Padding
 import web.cssom.Position
 import web.cssom.TextAlign
 import web.cssom.clamp
+import web.cssom.deg
 import web.cssom.dropShadow
 import web.cssom.em
 import web.cssom.integer
+import web.cssom.linearGradient
 import web.cssom.minus
 import web.cssom.number
 import web.cssom.pct
 import web.cssom.px
 import web.cssom.rem
+import web.cssom.rgb
+import web.cssom.stop
+import web.cssom.translatex
+import web.cssom.`var`
 import web.cssom.vw
 import web.dom.TagName
 import web.html.HTMLDivElement
@@ -87,13 +104,13 @@ class KtjsHero : CustomElementAdapter() {
                 width = clamp(7.rem, 16.vw, 10.rem)
                 height = Auto.auto
                 margin = Margin(0.px, Auto.auto)
-                filter = dropShadow(0.px, 14.px, 28.px, Color(GLOW))
+                filter = dropShadow(0.px, 14.px, 28.px, glow)
             }
             alt = ""
         }
         headingElement = HtmlTagName.h1.createElement {
             // The gradient title is a `@supports` block, so it needs this hook (see CSS).
-            classList.add("ktjs-title")
+            classList.add(TITLE)
             inlineStyle.apply {
                 margin = Margin(1.5.rem, 0.px, 0.px)
                 fontSize = clamp(2.25.rem, 5.vw, 3.25.rem)
@@ -120,7 +137,7 @@ class KtjsHero : CustomElementAdapter() {
         }
         actions = HtmlTagName.div.createElement {
             // Only the small-screen stacking comes from CSS, so the row needs its hook.
-            classList.add("ktjs-actions")
+            classList.add(ACTIONS)
             inlineStyle.apply {
                 display = Display.flex
                 flexWrap = FlexWrap.wrap
@@ -154,8 +171,8 @@ class KtjsHero : CustomElementAdapter() {
         }
 
         val section = HtmlTagName.section.createElement<HTMLElement> {
-            // The two glow blobs are `::before` / `::after` (see CSS).
-            classList.add("ktjs-hero")
+            // The two glow blobs are `::before` / `::after` (see SHEET).
+            classList.add(HERO)
             inlineStyle.apply {
                 position = Position.relative
                 isolation = Isolation.isolate
@@ -189,74 +206,81 @@ class KtjsHero : CustomElementAdapter() {
     companion object : CustomElementReference<KtjsHero>(KtjsHero::class.js) {
         val NAME: TagName<KtjsHero> = TagName(HomeMarkup.HERO)
 
-        /** The glow colour shared by the logo shadow and the hero's radial blob. */
-        private const val GLOW: String = "var(--ktjs-glow, rgba(31, 111, 235, 0.16))"
+        /** The host, the gradient headline and the action row, as typed class names. */
+        private val HERO: ClassName = ClassName("ktjs-hero")
+        private val TITLE: ClassName = ClassName("ktjs-title")
+        private val ACTIONS: ClassName = ClassName("ktjs-actions")
 
         /**
          * Everything in the hero that inline styles cannot say: two decorative pseudo-elements, the
          * `@supports`-guarded gradient text (inline colour would beat a descendant rule), and the
          * small-screen stacking of the action row. The host's own `display` lives in `HOME_RESET`.
          *
-         * **This is the one sheet in the module still written as CSS text** instead of through
-         * `cssSheet` (see `ktjs-dom-kit/docs/css-sheet.md`): cssom models `background-clip` but not
-         * the `-webkit-background-clip` the guard needs, so that declaration cannot be written as a
-         * typed property at all. The other two oddities would only need a cast — `content: ''` has no
-         * `Content` factory, and `radial-gradient(…)` has no factory (only `linearGradient`) — but a
-         * half-converted rule is harder to read than the text, so the block stays as it was.
+         * The two `-webkit-` needs of this sheet come from `ktjs-dom-kit`'s `css` package:
+         * `radialGradient` and `webkitBackgroundClip`, since cssom models neither.
          */
-        private val SHEET_TEXT: String = """
-            .ktjs-hero::before,
-            .ktjs-hero::after {
-              content: '';
-              position: absolute;
-              z-index: -1;
-              border-radius: 50%;
-              pointer-events: none;
+        private val SHEET: CSSStyleSheet = cssSheet {
+            HERO {
+                "&::before, &::after" {
+                    content = Content()
+                    position = Position.absolute
+                    zIndex = integer(-1)
+                    borderRadius = 50.pct
+                    pointerEvents = pointerEventsNone
+                }
+
+                "&::before" {
+                    top = (-18).rem
+                    left = 50.pct
+                    width = 52.rem
+                    height = 52.rem
+                    transform = translatex((-50).pct)
+                    background = radialGradient(
+                        RadialGradientShape.Circle,
+                        colorStop(glow),
+                        stop(Color.transparent, 70.pct),
+                    )
+                }
+
+                "&::after" {
+                    right = (-10).rem
+                    bottom = (-14).rem
+                    width = 34.rem
+                    height = 34.rem
+                    background = radialGradient(
+                        RadialGradientShape.Circle,
+                        colorStop(glowWarm),
+                        stop(Color.transparent, 70.pct),
+                    )
+                }
             }
 
-            .ktjs-hero::before {
-              top: -18rem;
-              left: 50%;
-              width: 52rem;
-              height: 52rem;
-              transform: translateX(-50%);
-              background: radial-gradient(circle, $GLOW, transparent 70%);
+            TITLE {
+                color = `var`(accentHook, `var`(primaryColorHook))
             }
 
-            .ktjs-hero::after {
-              right: -10rem;
-              bottom: -14rem;
-              width: 34rem;
-              height: 34rem;
-              background: radial-gradient(circle, var(--ktjs-glow-warm, rgba(255, 193, 7, 0.10)), transparent 70%);
+            "@supports (-webkit-background-clip: text) or (background-clip: text)" {
+                TITLE {
+                    backgroundImage = linearGradient(
+                        120.deg,
+                        colorStop(accentDeep),
+                        colorStop(accentBright),
+                    )
+                    webkitBackgroundClip(BackgroundClip.text)
+                    backgroundClip = BackgroundClip.text
+                    color = Color.transparent
+                    // `background-clip: text` only paints inside the padding box, so the tight line box
+                    // would leave the tail of "g" transparent; 0.06em was not enough at the clamped size.
+                    paddingBottom = 0.14.em
+                }
             }
 
-            .ktjs-title {
-              color: var(--ktjs-accent, var(--ifm-color-primary));
+            "@media ${MediaQuery("screen and (max-width: 576px)")}" {
+                ACTIONS {
+                    flexDirection = FlexDirection.column
+                    alignItems = AlignItems.stretch
+                }
             }
-
-            @supports (-webkit-background-clip: text) or (background-clip: text) {
-              .ktjs-title {
-                background-image: linear-gradient(120deg, var(--ktjs-accent-deep, #1a5fd0), var(--ktjs-accent-bright, #6cb6ff));
-                -webkit-background-clip: text;
-                background-clip: text;
-                color: transparent;
-                /* `background-clip: text` only paints inside the padding box, so the tight line box
-                   would leave the tail of "g" transparent; 0.06em was not enough at the clamped font
-                   size. */
-                padding-bottom: 0.14em;
-              }
-            }
-
-            @media screen and (max-width: 576px) {
-              .ktjs-actions {
-                flex-direction: column;
-                align-items: stretch;
-              }
-            }
-        """.trimIndent()
-
-        /** [SHEET_TEXT] parsed once; every `<ktjs-hero>` adopts this one sheet. */
-        private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(SHEET_TEXT) }
+        }
     }
 }

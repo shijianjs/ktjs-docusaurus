@@ -213,9 +213,12 @@ private val SHEET: CSSStyleSheet = cssSheet {
 `ktjs-dom-kit` serializes that object through the same two packages emotion's cache uses
 (`@emotion/serialize` + `stylis`), so what lands in the sheet is what emotion would emit. Property
 names, values, units and pseudo-class structure come from types; the only strings left are the theme's
-custom property names and the `"&:hover"` key. `KtjsHero` is the exception: cssom models
-`background-clip` but not `-webkit-background-clip`, has no `radial-gradient` factory and no way to
-spell `content: ''`, so its one sheet stays CSS text.
+custom property names and the `"&:hover"` key.
+
+What cssom does not model lives in `ktjs-dom-kit`'s own `css` package instead of back in a string:
+`radialGradient` / `colorStop` (cssom ships the linear and angular shapes only),
+`webkitBackgroundClip` (the prefixed property is missing) and `pointerEventsNone` (the value union
+lists only the SVG keywords). Every element, the hero included, builds its sheet the same way.
 
 ## From Kotlin
 

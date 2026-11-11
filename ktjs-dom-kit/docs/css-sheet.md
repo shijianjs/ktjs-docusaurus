@@ -101,10 +101,20 @@ cssom 没有应用级属性名的常量，字符串在这里出现一次；具�
 `PropertyName.borderColor` 能当过渡属性名，是因为 `PropertyName<T> : Ident`，而 `IdentType` 里包含
 `TransitionProperty`——所以 `TransitionProperty` 只暴露 `all` 并不妨碍使用，**不需要 cast**。
 
-### 3.4 真的表达不了时
+### 3.4 cssom 没覆盖的部分：在 `io.github.shijianjs.ktjs.dom.css` 里补
 
-cssom 没给工厂的值（目前遇到：`radial-gradient(…)`、`content: ''`、`-webkit-background-clip` 一类
-只有前缀写法才有意义的属性），用 `unsafeCast("…")` 并**在注释里写明原因**，不要为了绕开它把整条规则退回文本。
+不要因为「cssom 没有」就把整条规则退回文本，也不要让 `unsafeCast` 散到调用点。缺什么就在本模块的
+`css` 包里按官方风格（`unsafeCast` 拼一次、值仍然类型化）补一个，调用点照常写类型：
+
+| 缺的东西 | 补在哪 | 调用点形态 |
+| --- | --- | --- |
+| `radial-gradient(…)` | `css/Gradients.kt` | `radialGradient(RadialGradientShape.Circle, colorStop(glow), stop(Color.transparent, 70.pct))` |
+| 无位置的颜色停靠点 | `css/Gradients.kt` | `colorStop(color)`——cssom 的 `stop` 总要带位置 |
+| `-webkit-background-clip` | `css/VendorProperties.kt` | `webkitBackgroundClip(BackgroundClip.text)` |
+| `pointer-events: none` | `css/Values.kt` | `pointerEventsNone`（`PointerEvents` 生成出来只有 SVG 那批值） |
+
+补的规矩：**值仍然类型化**（枚举、工具类型、`Length`），只有「属性名」这种没法类型化的东西才写成字符串；
+一个缺口一个函数或常量，不要提供 `putRaw(name, value)` 这类通用逃生口——那等于把字符串又请回来。
 
 ## 4. 坑（都是实测过的）
 
@@ -131,6 +141,8 @@ hover {}      -> .probe-sugar :hover{…}     ← 不是 .probe-sugar:hover
 ### 4.3 产物与手写文本不是逐字相同
 
 比对时先归一化，别断言整串：`#fff` → `#FFFFFF`、`0` → `0px`、逗号后可能没有空格、
+`-webkit-background-clip` 与 `background-clip` 在 Chrome 里是同一属性的别名，文本里两条都在、从 CSSOM
+读回来只剩一条、
 `transition: border-color 0.2s ease` 里的 `ease` 在 CSSOM 回读时会消失（文本路径不会）。
 等价即可；要断言就断语义片段（见 `ktjs-docusaurus-probes` 里的用例）。
 
@@ -146,7 +158,7 @@ hover {}      -> .probe-sugar :hover{…}     ← 不是 .probe-sugar:hover
 | `HomeReset.kt` | ✅ `cssSheet`（`*` / `*::before` / `*::after` / `:host`） |
 | `KtjsFeature.kt`、`KtjsStep.kt` | ✅ `cssSheet`（卡片表面 + `&:hover` / `&:focus-visible`） |
 | `KtjsAction.kt` | ✅ `cssSheet`（`:host > a` + 两个 pill 类 + 悬停态） |
-| `KtjsHero.kt` | ❌ 仍是 CSS 文本：见 3.4，三段都命中不可表达的值 |
+| `KtjsHero.kt` | ✅ `cssSheet`（伪元素光斑 + `@supports` 渐变字 + `@media`；用到 `css` 包的 `radialGradient` / `webkitBackgroundClip`） |
 
 迁移一个组件时的步骤：先把内联表达不了的那几条规则搬进 `cssSheet { }`，跑一次
 `jsBrowserTest`，再把 sheet 读出来（`element.shadowRoot.adoptedStyleSheets`）与原来的文本做语义比对

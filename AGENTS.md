@@ -219,9 +219,10 @@ duckfn 站点一致。
       过渡属性名不需要 cast：`PropertyName<T>` 继承 `Ident`，而 `IdentType` 里包含 `TransitionProperty`。
       自定义属性名（`--ktjs-*`、`--ifm-*`）在 `HomeTheme.kt` 里各是一个具名 `CustomPropertyName<T>` 常量，
       字符串每处只写一次。
-    ④ 真表达不了才退回文本，并在注释里写明卡在哪。目前 `KtjsHero` 是唯一的例外：cssom 没有
-      `radial-gradient` 工厂、`Content` 没有字符串工厂、`-webkit-background-clip` 干脆没有属性，三段都
-      命中，所以它整块保留 CSS 文本。
+    ④ cssom 没覆盖的部分**在 `ktjs-dom-kit` 的 `io.github.shijianjs.ktjs.dom.css` 包里补**，不要退回
+      文本，也不要把 `unsafeCast` 撒到调用点。已有的补丁：`radialGradient` + `colorStop`（cssom 只有
+      线性/角度渐变）、`webkitBackgroundClip`（`-webkit-` 属性没有）、`pointerEventsNone`（值联合缺
+      `none`）。补的时候值仍然类型化，一个缺口一个函数，不要提供通用的 `putRaw(name, value)`。
 
     同一段卡片规则：手写约 455 个字符的 CSS，这套写法里手写 CSS 文本 0、cast 0，只剩自定义属性名和
     一个 `"&:hover"` 键。判断值不值得用这套，看的是「还剩多少 CSS 文本要手写」，不是源码行数。

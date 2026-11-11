@@ -36,6 +36,14 @@ internal val shadowHook = CustomPropertyName<BoxShadow>("--ktjs-shadow")
 
 internal val outlineBorderHook = CustomPropertyName<Color>("--ktjs-outline-border")
 
+internal val glowHook = CustomPropertyName<Color>("--ktjs-glow")
+
+internal val glowWarmHook = CustomPropertyName<Color>("--ktjs-glow-warm")
+
+internal val accentDeepHook = CustomPropertyName<Color>("--ktjs-accent-deep")
+
+internal val accentBrightHook = CustomPropertyName<Color>("--ktjs-accent-bright")
+
 internal val mutedTextHook = CustomPropertyName<Color>("--ifm-color-emphasis-700")
 
 internal val subtleTextHook = CustomPropertyName<Color>("--ifm-color-emphasis-500")
@@ -53,6 +61,17 @@ internal val mutedText: Color = `var`(mutedTextHook)
 
 /** The arrow / lowest-emphasis glyph. */
 internal val subtleText: Color = `var`(subtleTextHook)
+
+/** The cool glow behind the hero and under the logo. */
+internal val glow: Color = `var`(glowHook, rgb(31, 111, 235, 0.16))
+
+/** The warm glow in the hero's lower-right corner. */
+internal val glowWarm: Color = `var`(glowWarmHook, rgb(255, 193, 7, 0.1))
+
+/** The two ends of the headline's gradient. */
+internal val accentDeep: Color = `var`(accentDeepHook, rgb(26, 95, 208))
+
+internal val accentBright: Color = `var`(accentBrightHook, rgb(108, 182, 255))
 
 /** Background of a `tinted` section band. */
 internal val sectionTint: Color = `var`(sectionTintHook, rgb(127, 127, 127, 0.05))
