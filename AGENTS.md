@@ -157,9 +157,14 @@ duckfn 站点一致。
     `CustomElementAdapter` 的 `MutationObserver` 在微任务里上报，`connectedCallback` 里调一次
     `applyInitialAttributes()` 把解析好的标记喂给回调（幂等）。默认值只读、不自动写进 HTML，需要写入时
     显式 `applyInitialAttributes(writeDefaults = true)`。属性名默认字段名转小写中划线，原生拼写
-    （`tabindex`、`title`）要显式给名。三条实测约束：委托属性**必须**带 `@JsName`，否则 Kotlin/JS 只生成
+    （`tabindex`、`title`）要显式给名。四条实测约束：委托属性**必须**带 `@JsName`，否则 Kotlin/JS 只生成
     混淆名的访问器方法，JS 侧根本看不到该属性；回调里只改 shadow 内容、不要再写属性；构造函数里不要给
-    元素自己写 attribute（会让 `document.createElement` 抛 `NotSupportedError`，宿主样式写 `:host` 规则）。
+    元素自己写 attribute（会让 `document.createElement` 抛 `NotSupportedError`，宿主样式写 `:host` 规则）；
+    **setter 必须容忍字符串**——React 19 把自定义元素的每个同名 JSX prop 直接赋给 property
+    （`<ktjs-action kind="secondary">` → `element.kind = "secondary"`），所以委托把字符串按 attribute 原文
+    写入，只有属性自身类型的值才过 codec。漏掉这条的症状很隐蔽：整页加载（Hydrate 只对账、不重设 prop）
+    正常，**SPA 路由切回首页**（React 客户端建 `<ktjs-*>`）时在 `enumAttributeCodec.encode` 抛
+    `ClassCastException`，错误边界把整页换成 "This page crashed."；`SiteE2eTest` 用客户端导航覆盖它。
 
     **样式按组件拆分，就近写**（2026-11 重构，别再改回集中式 CSS）：元素自己的样式用
     `inlineStyle.apply { display = Display.flex; padding = Padding(1.5.rem) }` 写在渲染它的那段代码旁，

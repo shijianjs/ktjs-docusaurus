@@ -239,6 +239,35 @@ class AttributeDelegateTest {
         assertEquals(null, asJs.text as String?)
     }
 
+    /**
+     * React 19 assigns every matching JSX prop to the property that exists on a custom element, so
+     * `<ktjs-action kind="secondary">` reaches this setter as a **string** even though the property's
+     * type is the enum — and a `tinted="false"`-style boolean prop as one too. A string is the
+     * attribute's raw form, so it is written verbatim instead of being handed to the codec.
+     */
+    @Test
+    fun aStringAssignedFromJavaScriptIsTheAttributesRawValue() {
+        val probe = newProbe()
+        probe.applyInitialAttributes()
+        probe.changes.clear()
+        val asJs = probe.unsafeCast<dynamic>()
+
+        asJs.kind = "secondary"
+        assertEquals("secondary", probe.getAttribute("kind"))
+        assertEquals(ProbeKind.Secondary, probe.kind)
+
+        asJs.maxCount = "7"
+        assertEquals("7", probe.getAttribute("max-count"))
+        assertEquals(7, probe.maxCount)
+
+        // HTML boolean semantics are unchanged: it is the attribute's presence that counts.
+        asJs.flagged = "false"
+        assertEquals("false", probe.getAttribute("flagged"))
+        assertTrue(probe.flagged)
+
+        assertEquals(listOf("kind", "max-count", "flagged"), probe.changes.map { it.name })
+    }
+
     @Test
     fun everyDelegateReportsItsOwnAttribute() {
         val probe = newProbe()

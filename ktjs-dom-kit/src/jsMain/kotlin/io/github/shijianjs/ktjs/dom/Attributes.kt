@@ -111,6 +111,11 @@ class AttributeProvider<T> internal constructor(
  * - **Values are converted by [codec]**, which defaults to the built-in one for [T]
  *   ([StringAttributeCodec], [BooleanAttributeCodec], [IntAttributeCodec], [DoubleAttributeCodec]).
  *   Pass a codec for any other type; see [enumAttributeCodec].
+ * - **A string assigned from JavaScript is the attribute's raw value.** The property is also the
+ *   element's JS-facing API, and a JS caller only has the value it was given: React 19 assigns every
+ *   matching JSX prop to the property, so `<ktjs-action kind="secondary">` becomes
+ *   `element.kind = "secondary"`. That string is written to the attribute verbatim, exactly where
+ *   `setAttribute` would have put it; a value of the property's own type still goes through [codec].
  * - **[default] is not written to the markup**; it is what the getter returns while the attribute is
  *   absent. Removing the attribute goes back to it.
  * - **[onChange] runs whenever the decoded value really changed** — from the setter, from outside, or
@@ -181,10 +186,23 @@ internal class AttributeDelegate<T>(
         valueOf(thisRef.getAttribute(name))
 
     override fun setValue(thisRef: CustomElementAdapter, property: KProperty<*>, value: T) {
-        val encoded = codec.encode(value)
+        val encoded = encodeAssigned(value)
         if (encoded == null) thisRef.removeAttribute(name) else thisRef.setAttribute(name, encoded)
         sync()
     }
+
+    /**
+     * The attribute value for a value the setter was handed.
+     *
+     * Kotlin can only pass a real [T], but JavaScript passes whatever it has, and does: a custom
+     * element's property is what React 19 assigns every matching JSX prop to, so
+     * `<ktjs-action kind="secondary">` arrives here as the **string** `"secondary"` even though the
+     * property's type is the enum. A string is therefore taken as the attribute's raw form — the text
+     * `setAttribute` would have stored — and only a value of the property's own type goes through
+     * [codec]. For `T = String` the two are the same thing, since that codec is the identity.
+     */
+    private fun encodeAssigned(value: T): String? =
+        if (value is String) value else codec.encode(value)
 
     /**
      * Reads the attribute again and reports it when the value differs from the last report.

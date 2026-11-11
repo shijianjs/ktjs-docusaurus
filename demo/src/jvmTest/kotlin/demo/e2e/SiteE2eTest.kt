@@ -3,6 +3,7 @@ package demo.e2e
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.junit.UsePlaywright
+import com.microsoft.playwright.options.AriaRole
 import com.microsoft.playwright.options.WaitUntilState
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -32,6 +33,29 @@ class SiteE2eTest {
         assertEquals(4, page.locator("ktjs-feature").count())
         assertEquals(3, page.locator("ktjs-step").count())
         assertThat(page.locator("ktjs-feature h3").first()).hasText("Configuration is Kotlin")
+    }
+
+    /**
+     * The route change a full page load never exercises: React builds the `<ktjs-*>` tree again,
+     * client-side, while the tags are already upgraded, and assigns each JSX prop to the matching
+     * property. A property that only accepts its Kotlin type makes that assignment throw, the error
+     * boundary replaces the page, and the user sees "This page crashed."
+     */
+    @RetryingTest(maxAttempts = 2)
+    fun `a client-side navigation back to the home page renders it instead of crashing`(page: Page) {
+        openHome(page)
+
+        // Both hops are in-site links, so the router re-renders the page in place — no reload, and
+        // the kit stays registered from the first hop onward.
+        page.getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("User guide")).click()
+        assertThat(page.locator("h1")).hasText("Introduction")
+
+        // The navbar brand and the sidebar logo both link to the site root; either is a client-side hop.
+        page.getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("ktjs-docusaurus")).first().click()
+
+        assertThat(page.locator("ktjs-hero h1")).hasText("ktjs-docusaurus")
+        assertEquals(2, page.locator("ktjs-action").count())
+        assertEquals(0, page.getByText("This page crashed").count())
     }
 
     @RetryingTest(maxAttempts = 2)

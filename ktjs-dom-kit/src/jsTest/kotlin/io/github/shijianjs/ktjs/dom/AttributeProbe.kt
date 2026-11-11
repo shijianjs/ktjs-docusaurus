@@ -26,6 +26,7 @@ internal class AttributeProbe : CustomElementAdapter() {
 
     var ratio: Double by attr(default = 1.5) { changes.add(it) }
 
+    @JsName("flagged")
     var flagged: Boolean by attr { changes.add(it) }
 
     var explicit: String by attr("data-explicit") { changes.add(it) }
@@ -33,6 +34,7 @@ internal class AttributeProbe : CustomElementAdapter() {
     @JsName("publicName")
     var internalName: String by attr { changes.add(it) }
 
+    @JsName("kind")
     var kind: ProbeKind by attr(codec = kindCodec, default = ProbeKind.Primary) { changes.add(it) }
 
     var second: Int by attr("second", default = 5) { changes.add(it) }
