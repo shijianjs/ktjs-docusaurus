@@ -176,6 +176,7 @@ class CssSheetExperiment {
         append("           + ").append(customPropertyNames.size).append(" custom property names (")
             .append(customPropertyNames.sumOf { it.length })
             .append(" characters), the same names the text form spells\n")
+        append("           + one selector key, \"&:hover\" (see 8f: the typed sugar is broken upstream)\n")
         append('\n')
         append("Everything else is a typed value: Border(1.px, LineStyle.solid, …), rgb(127, 127, 127, 0.24),\n")
         append("BoxShadow(0.px, 10.px, 24.px, …), var(name, fallback), fallback(grid, flex), 1.5.rem.\n")
