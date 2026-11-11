@@ -174,16 +174,16 @@ headTags = arrayOf(
 | 位置 | 放什么 | 例子 |
 | --- | --- | --- |
 | 元素构造函数里的 `inlineStyle.apply { … }` | 一条普通声明能表达的全部 | `display = Display.flex`、`padding = Padding(1.5.rem)`、`color = accent` |
-| 该组件自己的一份 sheet（`private val X_SHEET`） | 内联表达不了的：`:hover`、`::before`、`@media`、`@supports` | 按钮的悬停配色、hero 的两个光斑 |
+| 该组件自己的一份 sheet（`private val X_SHEET`，放在它的 `companion object` 里） | 内联表达不了的：`:hover`、`::before`、`@media`、`@supports` | 按钮的悬停配色、hero 的两个光斑 |
 | 所有元素都 adopt 的 sheet | 所有元素都需要、或好几个确实共享的 | `HomeReset.kt` 里的 `box-sizing` 与 `:host { display: block }` |
 
 取值都是有类型的（`Display.flex`、`1.5.rem`、`Color("var(--ktjs-accent, …)")`、`clamp(…)`），不手拼字符串。
 `ktjs-dom-kit` 提供两个机制：`HTMLElement.inlineStyle`，把元素自己的 `CSSStyleDeclaration` 看成
 `csstype.Properties`；`attachStyledShadow(sheet…)`，挂 shadow root 并把给定的 sheet adopt 掉。
 
-组件自己的规则是**每个类一份 `CSSStyleSheet`**，模块加载时建好、该组件的所有实例共用——就是 Lit 的
-`static styles` 那套。所以永远不会创建 `<style>` 节点：一百张卡片共用一份已解析的 sheet，而不是各自背一份
-同样的文本。组件的规则因此不会飘进公共文件，也没有哪个元素背着它并不使用的样式表。
+组件自己的规则是**每个类一份 `CSSStyleSheet`**，建在该类的 `companion object` 里、该组件的所有实例共用——
+就是 Lit 的 `static styles` 那套，只是放在 Kotlin 存类静态成员的地方。所以永远不会创建 `<style>` 节点：
+一百张卡片共用一份已解析的 sheet，而不是各自背一份同样的文本。组件的规则因此不会飘进公共文件，也没有哪个元素背着它并不使用的样式表。
 
 ## 从 Kotlin 用
 

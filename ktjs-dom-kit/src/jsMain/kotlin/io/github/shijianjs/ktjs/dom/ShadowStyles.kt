@@ -24,12 +24,12 @@ fun HTMLElement.attachShadowRoot(
  *
  * Adoption is a **sharing** mechanism, and it works at two levels:
  *
- * - **One sheet per component class**, held in a module-level `val` and given to every instance of
- *   that element. This is the normal case for a component that has any CSS rule at all: the rules are
- *   static, so they are parsed once and one `CSSStyleSheet` object serves every instance — the model
- *   Lit uses for `static styles`. Never create a `<style>` node per instance: a page with four
- *   hundred cells would carry four hundred copies of the same text and pay parse cost four hundred
- *   times.
+ * - **One sheet per component class**, held in that class's `companion object` and given to every
+ *   instance of that element. This is the normal case for a component that has any CSS rule at all:
+ *   the rules are static, so they are parsed once and one `CSSStyleSheet` object serves every
+ *   instance — the model Lit uses for `static styles`, in the place Kotlin keeps a class's statics.
+ *   Never create a `<style>` node per instance: a page with four hundred cells would carry four
+ *   hundred copies of the same text and pay parse cost four hundred times.
  * - **One sheet across components**, for what genuinely must change together: a reset, the theme
  *   tokens, a layout a parent imposes on its children.
  *
@@ -38,14 +38,16 @@ fun HTMLElement.attachShadowRoot(
  * `@supports`, `@keyframes`.
  *
  * ```kotlin
- * private val CARD_CSS: String = """
- * .card:hover { border-color: var(--accent); }
- * """
- *
- * private val CARD_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CARD_CSS) }
- *
  * class Card : CustomElementAdapter() {
  *     private val shadow = attachStyledShadow(RESET, CARD_SHEET)
+ *
+ *     companion object {
+ *         private val CARD_CSS: String = """
+ *             .card:hover { border-color: var(--accent); }
+ *         """.trimIndent()
+ *
+ *         private val CARD_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CARD_CSS) }
+ *     }
  * }
  * ```
  */

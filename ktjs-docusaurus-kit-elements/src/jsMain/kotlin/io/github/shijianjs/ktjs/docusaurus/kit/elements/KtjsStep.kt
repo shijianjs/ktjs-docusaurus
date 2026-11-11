@@ -117,23 +117,23 @@ class KtjsStep : CustomElementAdapter() {
 
     companion object : CustomElementReference<KtjsStep>(KtjsStep::class.js) {
         val NAME: TagName<KtjsStep> = TagName(HomeMarkup.STEP)
+
+        /** The card's surface and its `:hover` / `:focus-visible` lift. */
+        private val STEP_CSS: String = """
+            .ktjs-next-card {
+              border: 1px solid var(--ktjs-card-border, rgba(127, 127, 127, 0.24));
+              background-color: var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff));
+              transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .ktjs-next-card:hover,
+            .ktjs-next-card:focus-visible {
+              border-color: var(--ktjs-accent, var(--ifm-color-primary));
+              box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18));
+            }
+        """.trimIndent()
+
+        /** [STEP_CSS] parsed once; every `<ktjs-step>` adopts this one sheet. */
+        private val STEP_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(STEP_CSS) }
     }
 }
-
-/** The card's surface and its `:hover` / `:focus-visible` lift. */
-private const val STEP_CSS: String = """
-.ktjs-next-card {
-  border: 1px solid var(--ktjs-card-border, rgba(127, 127, 127, 0.24));
-  background-color: var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff));
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.ktjs-next-card:hover,
-.ktjs-next-card:focus-visible {
-  border-color: var(--ktjs-accent, var(--ifm-color-primary));
-  box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18));
-}
-"""
-
-/** [STEP_CSS] parsed once at module load; every `<ktjs-step>` adopts this one sheet. */
-private val STEP_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(STEP_CSS) }

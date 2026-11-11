@@ -136,46 +136,47 @@ class KtjsAction : CustomElementAdapter() {
 
         /** `ActionKind` cannot be enumerated through reflection in Kotlin/JS, hence the explicit list. */
         private val kindCodec: AttributeCodec<ActionKind> = enumAttributeCodec(ActionKind.entries)
+
+        /**
+         * What the pill cannot express inline: the border (hovered through `border-color`), the
+         * transition that animates it, and the two colour schemes with their `:hover` /
+         * `:focus-visible` states.
+         */
+        private val ACTION_CSS: String = """
+            :host > a {
+              border: 1px solid transparent;
+              transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .ktjs-button-primary {
+              background-color: var(--ktjs-accent, var(--ifm-color-primary));
+              border-color: var(--ktjs-accent, var(--ifm-color-primary));
+              color: #fff;
+            }
+
+            .ktjs-button-primary:hover,
+            .ktjs-button-primary:focus-visible {
+              background-color: var(--ktjs-accent-strong, #1a5fd0);
+              border-color: var(--ktjs-accent-strong, #1a5fd0);
+              color: #fff;
+              box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.24));
+            }
+
+            .ktjs-button-secondary {
+              background-color: transparent;
+              border-color: var(--ktjs-outline-border, rgba(127, 127, 127, 0.35));
+              color: var(--ktjs-accent, var(--ifm-color-primary));
+            }
+
+            .ktjs-button-secondary:hover,
+            .ktjs-button-secondary:focus-visible {
+              background-color: var(--ktjs-accent-soft, rgba(31, 111, 235, 0.10));
+              border-color: var(--ktjs-accent, var(--ifm-color-primary));
+              color: var(--ktjs-accent, var(--ifm-color-primary));
+            }
+        """.trimIndent()
+
+        /** [ACTION_CSS] parsed once; every `<ktjs-action>` adopts this one sheet. */
+        private val ACTION_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(ACTION_CSS) }
     }
 }
-
-/**
- * What the pill cannot express inline: the border (hovered through `border-color`), the transition
- * that animates it, and the two colour schemes with their `:hover` / `:focus-visible` states.
- */
-private const val ACTION_CSS: String = """
-:host > a {
-  border: 1px solid transparent;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.ktjs-button-primary {
-  background-color: var(--ktjs-accent, var(--ifm-color-primary));
-  border-color: var(--ktjs-accent, var(--ifm-color-primary));
-  color: #fff;
-}
-
-.ktjs-button-primary:hover,
-.ktjs-button-primary:focus-visible {
-  background-color: var(--ktjs-accent-strong, #1a5fd0);
-  border-color: var(--ktjs-accent-strong, #1a5fd0);
-  color: #fff;
-  box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.24));
-}
-
-.ktjs-button-secondary {
-  background-color: transparent;
-  border-color: var(--ktjs-outline-border, rgba(127, 127, 127, 0.35));
-  color: var(--ktjs-accent, var(--ifm-color-primary));
-}
-
-.ktjs-button-secondary:hover,
-.ktjs-button-secondary:focus-visible {
-  background-color: var(--ktjs-accent-soft, rgba(31, 111, 235, 0.10));
-  border-color: var(--ktjs-accent, var(--ifm-color-primary));
-  color: var(--ktjs-accent, var(--ifm-color-primary));
-}
-"""
-
-/** [ACTION_CSS] parsed once at module load; every `<ktjs-action>` adopts this one sheet. */
-private val ACTION_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(ACTION_CSS) }

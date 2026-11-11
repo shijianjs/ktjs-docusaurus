@@ -188,67 +188,68 @@ class KtjsHero : CustomElementAdapter() {
 
     companion object : CustomElementReference<KtjsHero>(KtjsHero::class.js) {
         val NAME: TagName<KtjsHero> = TagName(HomeMarkup.HERO)
+
+        /** The glow colour shared by the logo shadow and the hero's radial blob. */
+        private const val GLOW: String = "var(--ktjs-glow, rgba(31, 111, 235, 0.16))"
+
+        /**
+         * Everything in the hero that inline styles cannot say: two decorative pseudo-elements, the
+         * `@supports`-guarded gradient text (inline colour would beat a descendant rule), and the
+         * small-screen stacking of the action row. The host's own `display` lives in `HOME_RESET`.
+         */
+        private val HERO_CSS: String = """
+            .ktjs-hero::before,
+            .ktjs-hero::after {
+              content: '';
+              position: absolute;
+              z-index: -1;
+              border-radius: 50%;
+              pointer-events: none;
+            }
+
+            .ktjs-hero::before {
+              top: -18rem;
+              left: 50%;
+              width: 52rem;
+              height: 52rem;
+              transform: translateX(-50%);
+              background: radial-gradient(circle, $GLOW, transparent 70%);
+            }
+
+            .ktjs-hero::after {
+              right: -10rem;
+              bottom: -14rem;
+              width: 34rem;
+              height: 34rem;
+              background: radial-gradient(circle, var(--ktjs-glow-warm, rgba(255, 193, 7, 0.10)), transparent 70%);
+            }
+
+            .ktjs-title {
+              color: var(--ktjs-accent, var(--ifm-color-primary));
+            }
+
+            @supports (-webkit-background-clip: text) or (background-clip: text) {
+              .ktjs-title {
+                background-image: linear-gradient(120deg, var(--ktjs-accent-deep, #1a5fd0), var(--ktjs-accent-bright, #6cb6ff));
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                /* `background-clip: text` only paints inside the padding box, so the tight line box
+                   would leave the tail of "g" transparent; 0.06em was not enough at the clamped font
+                   size. */
+                padding-bottom: 0.14em;
+              }
+            }
+
+            @media screen and (max-width: 576px) {
+              .ktjs-actions {
+                flex-direction: column;
+                align-items: stretch;
+              }
+            }
+        """.trimIndent()
+
+        /** [HERO_CSS] parsed once; every `<ktjs-hero>` adopts this one sheet. */
+        private val HERO_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(HERO_CSS) }
     }
 }
-
-/** The glow colour shared by the logo shadow and the hero's radial blob. */
-private const val GLOW: String = "var(--ktjs-glow, rgba(31, 111, 235, 0.16))"
-
-/**
- * Everything in the hero that inline styles cannot say: two decorative pseudo-elements, the
- * `@supports`-guarded gradient text (inline colour would beat a descendant rule), and the small-screen
- * stacking of the action row. The host's own `display` lives in `HOME_RESET`.
- */
-private const val HERO_CSS: String = """
-.ktjs-hero::before,
-.ktjs-hero::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.ktjs-hero::before {
-  top: -18rem;
-  left: 50%;
-  width: 52rem;
-  height: 52rem;
-  transform: translateX(-50%);
-  background: radial-gradient(circle, $GLOW, transparent 70%);
-}
-
-.ktjs-hero::after {
-  right: -10rem;
-  bottom: -14rem;
-  width: 34rem;
-  height: 34rem;
-  background: radial-gradient(circle, var(--ktjs-glow-warm, rgba(255, 193, 7, 0.10)), transparent 70%);
-}
-
-.ktjs-title {
-  color: var(--ktjs-accent, var(--ifm-color-primary));
-}
-
-@supports (-webkit-background-clip: text) or (background-clip: text) {
-  .ktjs-title {
-    background-image: linear-gradient(120deg, var(--ktjs-accent-deep, #1a5fd0), var(--ktjs-accent-bright, #6cb6ff));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    /* `background-clip: text` only paints inside the padding box, so the tight line box would leave
-       the tail of "g" transparent; 0.06em was not enough at the clamped font size. */
-    padding-bottom: 0.14em;
-  }
-}
-
-@media screen and (max-width: 576px) {
-  .ktjs-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-"""
-
-/** [HERO_CSS] parsed once at module load; every `<ktjs-hero>` adopts this one sheet. */
-private val HERO_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(HERO_CSS) }

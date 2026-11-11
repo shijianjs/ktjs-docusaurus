@@ -109,22 +109,22 @@ class KtjsFeature : CustomElementAdapter() {
 
     companion object : CustomElementReference<KtjsFeature>(KtjsFeature::class.js) {
         val NAME: TagName<KtjsFeature> = TagName(HomeMarkup.FEATURE)
+
+        /** The card's surface and its `:hover` lift. */
+        private val FEATURE_CSS: String = """
+            .ktjs-feature-card {
+              border: 1px solid var(--ktjs-card-border, rgba(127, 127, 127, 0.24));
+              background-color: var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff));
+              transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .ktjs-feature-card:hover {
+              border-color: var(--ktjs-accent, var(--ifm-color-primary));
+              box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18));
+            }
+        """.trimIndent()
+
+        /** [FEATURE_CSS] parsed once; every `<ktjs-feature>` adopts this one sheet. */
+        private val FEATURE_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(FEATURE_CSS) }
     }
 }
-
-/** The card's surface and its `:hover` lift. */
-private const val FEATURE_CSS: String = """
-.ktjs-feature-card {
-  border: 1px solid var(--ktjs-card-border, rgba(127, 127, 127, 0.24));
-  background-color: var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff));
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.ktjs-feature-card:hover {
-  border-color: var(--ktjs-accent, var(--ifm-color-primary));
-  box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18));
-}
-"""
-
-/** [FEATURE_CSS] parsed once at module load; every `<ktjs-feature>` adopts this one sheet. */
-private val FEATURE_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(FEATURE_CSS) }

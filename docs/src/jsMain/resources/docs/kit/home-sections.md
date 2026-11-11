@@ -184,7 +184,7 @@ Styles live where the element is written, in three grades:
 | Where | What goes there | Example |
 | --- | --- | --- |
 | `inlineStyle.apply { … }` in the element's constructor | everything a plain declaration can say | `display = Display.flex`, `padding = Padding(1.5.rem)`, `color = accent` |
-| one sheet of that element's own (`private val X_SHEET`) | what inline styles cannot: `:hover`, `::before`, `@media`, `@supports` | the button's hover colours, the hero's glow blobs |
+| one sheet of that element's own (`private val X_SHEET` in its `companion object`) | what inline styles cannot: `:hover`, `::before`, `@media`, `@supports` | the button's hover colours, the hero's glow blobs |
 | the sheet every element adopts | what all of them need, or what several genuinely share | `box-sizing` and `:host { display: block }` in `HomeReset.kt` |
 
 Values are typed (`Display.flex`, `1.5.rem`, `Color("var(--ktjs-accent, …)")`, `clamp(…)`), never
@@ -192,9 +192,10 @@ strings built by hand. `ktjs-dom-kit` exposes the mechanics: `HTMLElement.inline
 own `CSSStyleDeclaration` seen as `csstype.Properties`, and `attachStyledShadow(sheet…)`, which attaches
 the root and adopts the sheets it is given.
 
-A component's own rules are **one `CSSStyleSheet` per class**, built at module load and adopted by every
-instance — Lit's `static styles` model. That is why no `<style>` node is ever created: a hundred cards
-share one parsed sheet instead of carrying a hundred copies of the same text. A component's rules
+A component's own rules are **one `CSSStyleSheet` per class**, built once in that class's companion
+object and adopted by every instance — Lit's `static styles`, in the place Kotlin keeps a class's
+statics. That is why no `<style>` node is ever created: a hundred cards share one parsed sheet instead
+of carrying a hundred copies of the same text. A component's rules
 therefore never travel into a shared file, and no element carries a stylesheet it does not paint with.
 
 ## From Kotlin
