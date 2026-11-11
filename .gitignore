@@ -33,3 +33,4 @@ __pycache__/
 
 # playwright-cli 的本地会话快照
 /.playwright-cli/
+/.loomy-attachments

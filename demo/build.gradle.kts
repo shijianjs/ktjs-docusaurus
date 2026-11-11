@@ -60,6 +60,8 @@ docusaurus {
         project(":ktjs-docusaurus-kit-bundle")
             .layout.buildDirectory.dir("dist/js/productionExecutable"),
     )
+    // --locale zh-Hans
+    startArguments = listOf("--locale", "zh-Hans")
 }
 
 // A file collection cannot carry a task dependency across projects, so build the browser bundle
