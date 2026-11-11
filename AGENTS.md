@@ -186,11 +186,21 @@ duckfn 站点一致。
     主题色这类跨组件常量放 `HomeTheme.kt`。`ktjs-features` / `ktjs-next-steps` 共用的分区外壳
     （`HomeSection.kt`）属于「父容器统一控制子组件布局」，是允许提取的那一类。
 
-    **不要再试 `kotlin-css`（`kotlinx.css`）那套 CSS DSL**（2026-11-11 实测过，别重复投入）：它不给
-    值做校验（`Color`/`LinearDimension` 只是 `String` 包装，`var(--x, …)` 照写），`transition` 会强制补
-    `0s` 延迟，`box-shadow: var(--ktjs-shadow, …)` 这种整值兜底只能退回 `put("box-shadow", "…")`，
-    `hover` / `before` / `media` 的糖不解析 `&`（原样输出 `&:hover {}` 嵌套，等于要求 CSS Nesting），
-    并且带进第二套取值词汇（`kotlinx.css.Color` 与 `web.cssom.Color` 并存）。纯文本 CSS 更短也更准。
+    **CSS 写成文本，不要换成 CSS DSL**（2026-11-11 两套都实测过，别重复投入）：
+
+    - `kotlin-css`（`kotlinx.css`，`ruleSet` / `CssBuilder`）：值不做校验（`Color`/`LinearDimension`
+      只是 `String` 包装），`transition` 强制补 `0s` 延迟，整值 `var()` 兜底只能退回 `put("box-shadow", "…")`，
+      `hover` / `before` / `media` 的糖不解析 `&`（原样输出 `&:hover {}`，等于要求 CSS Nesting），还带进
+      第二套取值词汇（`kotlinx.css.Color` 与 `web.cssom.Color` 并存）。不可用。
+    - `kotlin-csstype` 的规则 DSL（`unsafeJso<PropertiesBuilder> { ".selector" { …; hover { … } } }`）：
+      值是 `web.cssom` 那套类型，`border = Border(1.px, LineStyle.solid, Color("var(…)"))`、`hover {}` 都
+      正常，生成的声明与文本版逐字一致（`transition` 也不会被补 `0s`）。但**它没有文本后端**——产物是给
+      emotion / styled / MUI 的 JSO。要用在 `adoptedStyleSheets` 上必须自己写适配层（实测约 30 行：
+      「哪些 key 是声明、哪些是嵌套选择器」的判据、`fallback(a, b)` 产生的数组要摊成多条声明、
+      `WebkitX` 这类要补 `-webkit-`）；且 Kotlin 侧丢了 TS 的 `(string & {})` 逃生口，`transition` 多值、
+      `box-shadow: var(…)` 仍然要 `unsafeCast(String)`（`TransitionProperty` 只暴露 `all`）。
+      结论：源码不更短（12 行 vs 10 行 + 8 个 import）、要养一层自研序列化，收益只落在少数属性的
+      拼装上。真要做，方向是「JSO 灌进真正的 CSSOM（`insertRule` + `rule.style`）」而不是自写文本序列化。
 
    不要往 kit 里加 `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。
 
