@@ -8,24 +8,27 @@ import web.cssom.AtRules
  *
  * `csstype.RuleBuilder` already has `@media(query) { … }` (plus `@container`, `@font-face`,
  * `@view-transition`), so those are used directly; `web.cssom.AtRules` types every at-rule keyword
- * (`media`, `supports`, `layer`, `page`, …) as an `AtRules` constant. Only the condition has no type
- * — cssom models media queries (`MediaQuery`, `MediaType`, `maxWidth`, …) but no supports condition —
- * so this helper takes the condition as text and takes the keyword from [AtRules.supports]:
+ * (`media`, `supports`, `layer`, `page`, …) as an `AtRules` constant. cssom has no supports-condition
+ * type, so `SupportsQuery` (in this package) mirrors `MediaQuery`: typed declarations plus
+ * `and` / `or` / `not`.
  *
  * ```kotlin
  * cssSheet {
  *     `@media`(MediaType.screen and maxWidth(576.px)) {
  *         actionsClass { flexDirection = FlexDirection.column }
  *     }
- *     supports("(background-clip: text)") {
+ *     supports(
+ *         supportsDeclaration(PropertyName.backgroundClip, BackgroundClip.text) or
+ *             supportsDeclaration(webkitBackgroundClipName, BackgroundClip.text),
+ *     ) {
  *         titleClass { backgroundClip = BackgroundClip.text }
  *     }
  * }
  * ```
  */
 fun <T : Any> RuleBuilder<T>.supports(
-    condition: String,
+    query: SupportsQuery,
     block: T.() -> Unit,
 ) {
-    "${AtRules.supports} $condition"(block)
+    "${AtRules.supports} $query"(block)
 }

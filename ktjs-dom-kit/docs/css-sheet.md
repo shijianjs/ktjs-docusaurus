@@ -76,7 +76,12 @@ cssSheet { cardClass { … } }
 
 ```kotlin
 `@media`(MediaType.screen and maxWidth(576.px)) { … }   // csstype.RuleBuilder.@media
-supports("(background-clip: text)") { … }                // dom-kit 的 supports()，关键字取 AtRules.supports
+
+// SupportsQuery 仿 web.cssom.MediaQuery：声明两侧都类型化，and/or/not 组合
+supports(
+    supportsDeclaration(webkitBackgroundClipName, BackgroundClip.text) or
+        supportsDeclaration(PropertyName.backgroundClip, BackgroundClip.text),
+) { … }
 ```
 
 官方已经给的（IDE 里查符号时优先找这些，别再自己拼）：
@@ -90,8 +95,9 @@ supports("(background-clip: text)") { … }                // dom-kit 的 suppor
 | `maxWidth / minWidth / width / height / orientation / prefersColorScheme / prefersReducedMotion / …` | `web.cssom.atrule/*.fun.kt` | 媒体特性（一整个目录，约 30 个） |
 | `var / env / rgb / many / array / important / linearGradient / stop / Content() / NamedColor / PropertyName / translatex` | `web.cssom` 的 `*.functions.kt`、`*.ext.kt`、`*.fun.kt` | 取值与函数 |
 
-**目前确实还是字符串的**：伪类/伪元素键（等 #2933）、`:host` 与 `*` 这类选择器、应用级自定义属性名、
-`@supports` 的条件（cssom 没有 supports 条件类型，且我们的条件里就有 `-webkit-background-clip`）。
+**目前确实还是字符串的**：伪类/伪元素键（等 #2933）、`:host` 与 `*` 这类选择器、应用级自定义属性名。
+`@supports` 的条件已经不再是字符串——cssom 只缺类型，我们在 `css/Supports.kt` 里照 `MediaQuery` 补了一层
+（见 3.4）。
 
 ### 3.2 自定义属性：具名常量 + `var(name, fallback)`
 
@@ -129,8 +135,10 @@ cssom 没有应用级属性名的常量，字符串在这里出现一次；具�
 | --- | --- | --- |
 | `radial-gradient(…)` | `css/Gradients.kt` | `radialGradient(RadialGradientShape.Circle, colorStop(glow), stop(Color.transparent, 70.pct))` |
 | 无位置的颜色停靠点 | `css/Gradients.kt` | `colorStop(color)`——cssom 的 `stop` 总要带位置 |
-| `-webkit-background-clip` | `css/VendorProperties.kt` | `webkitBackgroundClip(BackgroundClip.text)` |
+| `-webkit-background-clip`（属性 + 名字） | `css/VendorProperties.kt` | `webkitBackgroundClip(BackgroundClip.text)`、`webkitBackgroundClipName` 给 supports 条件用 |
 | `pointer-events: none` | `css/Values.kt` | `pointerEventsNone`（`PointerEvents` 生成出来只有 SVG 那批值） |
+| `@supports` 条件类型 | `css/Supports.kt` | `SupportsQuery` + `supportsDeclaration(PropertyName<T>, T)` + `and/or/not`，照 `web.cssom.MediaQuery` 的形态 |
+| `@supports` 块（唯一缺的 at-rule helper） | `css/AtRules.kt` | `supports(query) { … }`，关键字取 `AtRules.supports` |
 
 补的规矩：**值仍然类型化**（枚举、工具类型、`Length`），只有「属性名」这种没法类型化的东西才写成字符串；
 一个缺口一个函数或常量，不要提供 `putRaw(name, value)` 这类通用逃生口——那等于把字符串又请回来。

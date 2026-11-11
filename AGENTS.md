@@ -214,8 +214,10 @@ duckfn 站点一致。
       `before {}` 糖**——它们写的键是 `:hover` / `::before`，stylis 会拼成**后代**选择器（上游缺陷
       <https://github.com/JetBrains/kotlin-wrappers/issues/2933>，修好后可换回）。at-rule 别写字符串：
       `` `@media`(MediaType.screen and maxWidth(576.px)) `` 是 csstype `RuleBuilder` 自带的 helper，
-      `supports(condition)` 取 `AtRules.supports` 关键字（dom-kit）；条件里 `MediaQuery.and/or/not`、
-      `MediaType`、`web.cssom.atrule` 里约 30 个媒体特性工厂都是类型化的。
+      `supports(query)` 取 `AtRules.supports` 关键字（dom-kit）；条件里 `MediaQuery.and/or/not`、
+      `MediaType`、`web.cssom.atrule` 里约 30 个媒体特性工厂都是类型化的。`@supports` 的条件同样类型化：
+      `SupportsQuery`（dom-kit `css/Supports.kt` 仿 `MediaQuery` 补的）配
+      `supportsDeclaration(PropertyName<T>, T)` 与 `and/or/not`，别再传条件字符串。
     ③ 值全走类型：`NamedColor.white`（命名色就是 `Color`，别写 `"#fff"`）、`rgb(r, g, b, a)`、
       `1.5.rem`、`BoxShadow(0.px, 10.px, 24.px, …)`、`var(hook, fallback)`、`fallback(grid, flex)`、
       `Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease)` 配 `many(…)` 拼多值。

@@ -1,15 +1,21 @@
 package io.github.shijianjs.ktjs.dom.css
 
 import csstype.PropertiesBuilder
+import js.reflect.unsafeCast
 import web.cssom.BackgroundClip
+import web.cssom.PropertyName
 
 /**
- * `-webkit-background-clip` — cssom models `background-clip` but not the prefixed property, and
- * `background-clip: text` is still prefixed-only in Safari, so a gradient-text rule needs both.
- *
- * The declaration goes into the rules object under its kebab-case name; `@emotion/serialize`
- * hyphenates camelCase keys and leaves a key that already starts with `-` alone, so this serializes
- * exactly as written:
+ * `-webkit-background-clip` as a typed property name. cssom models `background-clip` but not the
+ * prefixed property, and `background-clip: text` is still prefixed-only in Safari — the gradient
+ * text needs both the declaration and the supports condition, so the name is shared with
+ * `supportsDeclaration`.
+ */
+val webkitBackgroundClipName: PropertyName<BackgroundClip> = unsafeCast("-webkit-background-clip")
+
+/**
+ * `-webkit-background-clip` in a rules object; `@emotion/serialize` hyphenates camelCase keys and
+ * leaves a key that already starts with `-` alone, so this serializes exactly as written:
  *
  * ```kotlin
  * cssSheet {
@@ -26,5 +32,5 @@ import web.cssom.BackgroundClip
  * `putRaw(name, value)` at call sites would put the strings back that `cssSheet` exists to remove.
  */
 fun PropertiesBuilder.webkitBackgroundClip(value: BackgroundClip) {
-    asDynamic()["-webkit-background-clip"] = value
+    asDynamic()["$webkitBackgroundClipName"] = value
 }

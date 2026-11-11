@@ -4,9 +4,14 @@ import csstype.fallback
 import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
 import io.github.shijianjs.ktjs.dom.css.colorStop
 import io.github.shijianjs.ktjs.dom.css.pointerEventsNone
+import io.github.shijianjs.ktjs.dom.css.and as supportsAnd
+import io.github.shijianjs.ktjs.dom.css.not as supportsNot
+import io.github.shijianjs.ktjs.dom.css.or as supportsOr
 import io.github.shijianjs.ktjs.dom.css.radialGradient
 import io.github.shijianjs.ktjs.dom.css.supports
+import io.github.shijianjs.ktjs.dom.css.supportsDeclaration
 import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClip
+import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClipName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,6 +21,7 @@ import web.cssom.Color
 import web.cssom.Display
 import web.cssom.NamedColor
 import web.cssom.Position
+import web.cssom.PropertyName
 import web.cssom.and
 import web.cssom.atrule.MediaType
 import web.cssom.atrule.maxWidth
@@ -57,15 +63,42 @@ class CssSheetTest {
             `@media`(MediaType.screen and maxWidth(576.px)) {
                 cardClass { display = Display.block }
             }
-            // dom-kit's supports() takes the keyword from web.cssom.AtRules.supports.
-            supports("(background-clip: text)") {
+            // SupportsQuery mirrors MediaQuery: typed declarations, typed composition.
+            supports(
+                supportsDeclaration(webkitBackgroundClipName, BackgroundClip.text) supportsOr
+                    supportsDeclaration(PropertyName.backgroundClip, BackgroundClip.text),
+            ) {
                 cardClass { backgroundClip = BackgroundClip.text }
             }
         }
 
         assertTrue(text.contains(".card::before{content:'';}"), text)
         assertTrue(text.contains("@media screen and (max-width:576px){.card{display:block;}}"), text)
-        assertTrue(text.contains("@supports (background-clip: text){.card{background-clip:text;}}"), text)
+        assertTrue(
+            text.contains(
+                "@supports (-webkit-background-clip:text) or (background-clip:text)" +
+                    "{.card{background-clip:text;}}",
+            ),
+            text,
+        )
+    }
+
+    @Test
+    fun supportsConditionsComposeLikeMediaQueries() {
+        val query = supportsDeclaration(PropertyName.backgroundClip, BackgroundClip.text) supportsAnd
+            supportsNot(
+                supportsDeclaration(PropertyName.backgroundClip, BackgroundClip.borderBox),
+            )
+
+        val text = cssText {
+            supports(query) { cardClass { display = Display.block } }
+        }
+
+        assertEquals(
+            "@supports (background-clip:text) and not (background-clip:border-box)" +
+                "{.card{display:block;}}",
+            text,
+        )
     }
 
     @Test

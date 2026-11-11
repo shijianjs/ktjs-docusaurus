@@ -8,7 +8,10 @@ import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
 import io.github.shijianjs.ktjs.dom.css.colorStop
 import io.github.shijianjs.ktjs.dom.css.radialGradient
 import io.github.shijianjs.ktjs.dom.css.pointerEventsNone
+import io.github.shijianjs.ktjs.dom.css.or
 import io.github.shijianjs.ktjs.dom.css.supports
+import io.github.shijianjs.ktjs.dom.css.supportsDeclaration
+import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClipName
 import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClip
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.dom.inlineStyle
@@ -31,6 +34,7 @@ import web.cssom.Margin
 import web.cssom.Overflow
 import web.cssom.Padding
 import web.cssom.Position
+import web.cssom.PropertyName
 import web.cssom.TextAlign
 import web.cssom.atrule.MediaType
 import web.cssom.atrule.maxWidth
@@ -262,7 +266,10 @@ class KtjsHero : CustomElementAdapter() {
                 color = `var`(accentHook, `var`(primaryColorHook))
             }
 
-            supports("(-webkit-background-clip: text) or (background-clip: text)") {
+            supports(
+                supportsDeclaration(webkitBackgroundClipName, BackgroundClip.text) or
+                    supportsDeclaration(PropertyName.backgroundClip, BackgroundClip.text),
+            ) {
                 TITLE {
                     backgroundImage = linearGradient(
                         120.deg,
