@@ -200,7 +200,7 @@ duckfn 站点一致。
                 Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
                 Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
             )
-            "&:hover" { borderColor = `var`(accentHook, `var`(primaryColorHook)) }
+            pseudo(Pseudos.hover) { borderColor = `var`(accentHook, `var`(primaryColorHook)) }
         }
     }
     ```
@@ -210,9 +210,11 @@ duckfn 站点一致。
     ① 选择器用 `ClassName` + `invoke`（点号由它补）。Kotlin 的解析规则要注意：`ClassName("x") { … }`
       会被读成「调用工厂 + 尾随 lambda 当第二个实参」，一次性用加括号 `(ClassName("x")) { … }`，
       要复用就存 `val` 再 `cardClass { … }`。
-    ② 伪类 / 伪元素写字符串，但**必须带 `&`**：`"&:hover"`、`"&::before"`。**不要用 `hover {}` /
-      `before {}` 糖**——它们写的键是 `:hover` / `::before`，stylis 会拼成**后代**选择器（上游缺陷
-      <https://github.com/JetBrains/kotlin-wrappers/issues/2933>，修好后可换回）。at-rule 别写字符串：
+    ② 伪类 / 伪元素用 `ktjs-dom-kit` 的 `css/Pseudos.kt`：`Pseudos` 列全 64 个选择器（每个带 `&`），
+      `pseudo(Pseudos.hover) { … }` 或 `pseudos(Pseudos.hover, Pseudos.focusVisible) { … }`（后者用
+      `many` 拼成一个块）。不要用 `hover {}` 糖：它缺 `&` 会被 stylis 当成后代选择器，而且就算上游
+      <https://github.com/JetBrains/kotlin-wrappers/issues/2933> 修好，也表达不了「多个状态共用一个块」；
+      所以不等它，自建一层（`TagName` + `HtmlTagName` 的形态）。at-rule 别写字符串：
       `` `@media`(MediaType.screen and maxWidth(576.px)) `` 是 csstype `RuleBuilder` 自带的 helper，
       `supports(query)` 取 `AtRules.supports` 关键字（dom-kit）；条件里 `MediaQuery.and/or/not`、
       `MediaType`、`web.cssom.atrule` 里约 30 个媒体特性工厂都是类型化的。`@supports` 的条件同样类型化：
@@ -230,7 +232,7 @@ duckfn 站点一致。
       `none`）。补的时候值仍然类型化，一个缺口一个函数，不要提供通用的 `putRaw(name, value)`。
 
     同一段卡片规则：手写约 455 个字符的 CSS，这套写法里手写 CSS 文本 0、cast 0，只剩自定义属性名和
-    一个 `"&:hover"` 键。判断值不值得用这套，看的是「还剩多少 CSS 文本要手写」，不是源码行数。
+    零个伪类键（走 `Pseudos`）。判断值不值得用这套，看的是「还剩多少 CSS 文本要手写」，不是源码行数。
     对照实验（三条写法并排 + 字符数报表）留在 `probes/web-components` 的 `example.CssSheetExperiment`：
     `./gradlew :probes-web-components:jsBrowserDevelopmentRun`。另两套已否决：`kotlin-css`
     （`kotlinx.css`）的旧 DSL（值不校验、`transition` 补 `0s`、`&` 不解析）、逐条 `insertRule` 灌 CSSOM

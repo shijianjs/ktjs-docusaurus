@@ -5,6 +5,9 @@ import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.createElement
+import io.github.shijianjs.ktjs.dom.css.Pseudos
+import io.github.shijianjs.ktjs.dom.css.pseudo
+import io.github.shijianjs.ktjs.dom.css.pseudos
 import io.github.shijianjs.ktjs.dom.cssSheet
 import io.github.shijianjs.ktjs.dom.enumAttributeCodec
 import io.github.shijianjs.ktjs.dom.inlineStyle
@@ -173,7 +176,7 @@ class KtjsAction : CustomElementAdapter() {
                 borderColor = `var`(accentHook, `var`(primaryColorHook))
                 color = NamedColor.white
 
-                "&:hover, &:focus-visible" {
+                pseudos(Pseudos.hover, Pseudos.focusVisible) {
                     backgroundColor = `var`(accentStrongHook, rgb(26, 95, 208))
                     borderColor = `var`(accentStrongHook, rgb(26, 95, 208))
                     color = NamedColor.white
@@ -189,7 +192,7 @@ class KtjsAction : CustomElementAdapter() {
                 borderColor = `var`(outlineBorderHook, rgb(127, 127, 127, 0.35))
                 color = `var`(accentHook, `var`(primaryColorHook))
 
-                "&:hover, &:focus-visible" {
+                pseudos(Pseudos.hover, Pseudos.focusVisible) {
                     backgroundColor = `var`(accentSoftHook, rgb(31, 111, 235, 0.1))
                     borderColor = `var`(accentHook, `var`(primaryColorHook))
                     color = `var`(accentHook, `var`(primaryColorHook))

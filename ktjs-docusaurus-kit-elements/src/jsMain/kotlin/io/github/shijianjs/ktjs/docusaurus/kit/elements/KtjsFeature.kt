@@ -3,6 +3,9 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
+import io.github.shijianjs.ktjs.dom.css.Pseudos
+import io.github.shijianjs.ktjs.dom.css.pseudo
+import io.github.shijianjs.ktjs.dom.css.pseudos
 import io.github.shijianjs.ktjs.dom.cssSheet
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.dom.inlineStyle
@@ -140,7 +143,7 @@ class KtjsFeature : CustomElementAdapter() {
                     Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
                     Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
                 )
-                "&:hover" {
+                pseudo(Pseudos.hover) {
                     borderColor = `var`(accentHook, `var`(primaryColorHook))
                     boxShadow = `var`(
                         shadowHook,

@@ -19,13 +19,13 @@ internal val CARD_SHEET: CSSStyleSheet = cssSheet {
     cardClass {                                   // 选择器用 ClassName，见 3.1
         border = Border(1.px, LineStyle.solid, var(cardBorderHook, NamedColor.black))
         transition = many(Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease))
-        "&:hover" { borderColor = var(accentHook, var(primaryColorHook)) }
+        pseudo(Pseudos.hover) { borderColor = var(accentHook, var(primaryColorHook)) }
     }
 }
 ```
 
 同一段规则手写约 455 个字符的 CSS；上面这种写法里手写的 CSS 文本是 0，剩下的字符串只有自定义属性名
-（主题契约）和一个 `"&:hover"` 键（等上游 issue 修复，见 4.1）。
+（主题契约）；伪类变体由 `Pseudos` 给出，没有手写键（见 4.1）。
 
 ## 2. 管线与契约
 
@@ -41,7 +41,7 @@ PropertiesBuilder (= JSO)
 
 要点：
 
-- **顶层是选择器映射**，不是声明集合。`cardClass { … }` / `"&:hover" { … }` / `":host" { … }` /
+- **顶层是选择器映射**，不是声明集合。`cardClass { … }` / `pseudo(Pseudos.hover) { … }` / `":host" { … }` /
   `"@media …" { … }` 是 key；写在列表里的属性属于最近一次 `{}` 的那条规则。
 - `serializeStyles` 的参数是**数组**（emotion 里是 tagged template 的 `strings`）：`serializeStyles([rules])`。
   传对象本身会去读 `args[0]`，结果是空串。
@@ -64,12 +64,15 @@ cssSheet { cardClass { … } }
 坑：`ClassName("card") { … }` **编译不过**——会被解析成「调用工厂 + 尾随 lambda 当第二个实参」。
 一次性用可以加括号 `(ClassName("card")) { … }`；要复用就存成 `val`。
 
-伪类、伪元素没有类型化常量（上游的 `hover {}` 糖缺 `&`，见 4.1），直接写字符串 key 但**必须带 `&`**：
+伪类、伪元素用 `css/Pseudos.kt` 自建的常量（`TagName` + `HtmlTagName` 那套形态）：
+`Pseudos` 列全 `csstype.SimplePseudosRuleBuilder` 的 64 个选择器，每个都带 `&`；`pseudo` / `pseudos`
+两个 `RuleBuilder` 方法把它转成 `Selector`，后者用 `many` 把多个变体拼成一个块（见 4.1）：
 
 ```kotlin
-"&:hover" { … }
-"&:hover, &:focus-visible" { … }        // 逗号列表 stylis 会展开
-"&::before" { … }
+pseudo(Pseudos.hover) { … }
+pseudos(Pseudos.hover, Pseudos.focusVisible) { … }   // "&:hover,&:focus-visible" 一个块
+pseudo(Pseudos.before) { … }
+many(Pseudos.hover, Pseudos.focusVisible)             // 也可直接拼 Pseudo
 ```
 
 **at-rule 有官方入口，不要手写 `"@media …"` / `"@supports …"` 字符串**：
@@ -95,9 +98,9 @@ supports(
 | `maxWidth / minWidth / width / height / orientation / prefersColorScheme / prefersReducedMotion / …` | `web.cssom.atrule/*.fun.kt` | 媒体特性（一整个目录，约 30 个） |
 | `var / env / rgb / many / array / important / linearGradient / stop / Content() / NamedColor / PropertyName / translatex` | `web.cssom` 的 `*.functions.kt`、`*.ext.kt`、`*.fun.kt` | 取值与函数 |
 
-**目前确实还是字符串的**：伪类/伪元素键（等 #2933）、`:host` 与 `*` 这类选择器、应用级自定义属性名。
-`@supports` 的条件已经不再是字符串——cssom 只缺类型，我们在 `css/Supports.kt` 里照 `MediaQuery` 补了一层
-（见 3.4）。
+**目前确实还是字符串的**：`:host` 与 `*` 这类顶层选择器、应用级自定义属性名。伪类键和 `@supports`
+条件都已经不再手写——前者由 `Pseudos` + `pseudo/pseudos` 覆盖，后者由 `css/Supports.kt` 照 `MediaQuery`
+补的 `SupportsQuery` 覆盖（见 3.4、4.1）。
 
 ### 3.2 自定义属性：具名常量 + `var(name, fallback)`
 
@@ -139,13 +142,14 @@ cssom 没有应用级属性名的常量，字符串在这里出现一次；具�
 | `pointer-events: none` | `css/Values.kt` | `pointerEventsNone`（`PointerEvents` 生成出来只有 SVG 那批值） |
 | `@supports` 条件类型 | `css/Supports.kt` | `SupportsQuery` + `supportsDeclaration(PropertyName<T>, T)` + `and/or/not`，照 `web.cssom.MediaQuery` 的形态 |
 | `@supports` 块（唯一缺的 at-rule helper） | `css/AtRules.kt` | `supports(query) { … }`，关键字取 `AtRules.supports` |
+| 伪类/伪元素常量 + 组合态 | `css/Pseudos.kt` | `Pseudos.hover` / `pseudo(…)` / `pseudos(…)`（64 个常量，见 4.1） |
 
 补的规矩：**值仍然类型化**（枚举、工具类型、`Length`），只有「属性名」这种没法类型化的东西才写成字符串；
 一个缺口一个函数或常量，不要提供 `putRaw(name, value)` 这类通用逃生口——那等于把字符串又请回来。
 
 ## 4. 坑（都是实测过的）
 
-### 4.1 伪类糖缺 `&`，不要用
+### 4.1 伪类糖缺 `&`，而且表达不了组合态 —— 自建 `Pseudos`
 
 `SimplePseudosRuleBuilder.hover` / `before` / `after` 写出的 key 是 `":hover"`、`"::before"`，没有 `&`。
 stylis 会把它当成**后代**选择器：
@@ -157,8 +161,21 @@ hover {}      -> .probe-sugar :hover{…}     ← 不是 .probe-sugar:hover
 
 根因在 kotlin-wrappers 的生成器：`karakum/csstype/Pseudos.kt` 的 `convertSimplePseudo` 把 csstype TS
 联合里的字符串原样写进方法体，而同一套 API 里手写的 `RuleBuilder.and` 会加 `&`、`kotlin-css` 的
-`CssBuilder.hover` 也一直写 `"&:hover"`。已报 <https://github.com/JetBrains/kotlin-wrappers/issues/2933>，
-修好后这里的 `"&:hover"` 可以换成 `hover {}`。
+`CssBuilder.hover` 也一直写 `"&:hover"`。已报 <https://github.com/JetBrains/kotlin-wrappers/issues/2933>。
+
+**但不必等它修**：这个糖是「一个方法一个伪类」，就算补上 `&` 也写不出
+`"&:hover, &:focus-visible"` 这种「多个状态共用一个块」的形式（站点里 `KtjsStep`、`KtjsAction` 都要）。
+所以 `css/Pseudos.kt` 自建一层，形态照 `web.dom.TagName` + `web.html.HtmlTagName`：
+
+- `external interface Pseudo` + `Pseudo(value)` 工厂；
+- `object Pseudos` 列全 `SimplePseudosRuleBuilder` 的 64 个字符串，每个带 `&`（`Pseudos.hover` = `"&:hover"`）；
+- `Pseudo.asSelector(): Selector` 转成 `Selector`；
+- `RuleBuilder.pseudo(pseudo, block)` 与 `RuleBuilder.pseudos(vararg pseudos, block)` 两个方法，后者用
+  `web.cssom.many` 把多个 `Selector` 拼成一条；`many` 也可以直接拼多个 `Pseudo`。
+- 列表外的选择器用工厂：`Pseudo("&:not(…)")`、`Pseudo("&::part(…)")`。
+
+对照实验 `probes/web-components` 第 8f 节里仍写着 `hover {}` 与 `"&:hover"` 两种字符串 —— 那是这项
+缺陷本身的证据，不是产品代码；产品代码一律用 `Pseudos`。
 
 ### 4.2 不要用 CSSOM 逐条 `insertRule` 代替序列化
 

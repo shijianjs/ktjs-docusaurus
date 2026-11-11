@@ -3,6 +3,9 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
+import io.github.shijianjs.ktjs.dom.css.Pseudos
+import io.github.shijianjs.ktjs.dom.css.pseudo
+import io.github.shijianjs.ktjs.dom.css.pseudos
 import io.github.shijianjs.ktjs.dom.cssSheet
 import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
 import io.github.shijianjs.ktjs.dom.css.colorStop
@@ -228,7 +231,7 @@ class KtjsHero : CustomElementAdapter() {
          */
         private val SHEET: CSSStyleSheet = cssSheet {
             HERO {
-                "&::before, &::after" {
+                pseudos(Pseudos.before, Pseudos.after) {
                     content = Content()
                     position = Position.absolute
                     zIndex = integer(-1)
@@ -236,7 +239,7 @@ class KtjsHero : CustomElementAdapter() {
                     pointerEvents = pointerEventsNone
                 }
 
-                "&::before" {
+                pseudo(Pseudos.before) {
                     top = (-18).rem
                     left = 50.pct
                     width = 52.rem
@@ -249,7 +252,7 @@ class KtjsHero : CustomElementAdapter() {
                     )
                 }
 
-                "&::after" {
+                pseudo(Pseudos.after) {
                     right = (-10).rem
                     bottom = (-14).rem
                     width = 34.rem

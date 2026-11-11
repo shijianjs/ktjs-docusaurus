@@ -26,7 +26,7 @@ import web.cssom.CSSStyleSheet
  *     cardClass {
  *         border = Border(1.px, LineStyle.solid, var(CustomPropertyName<Color>("--card-border"), NamedColor.black))
  *         transition = many(Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease))
- *         "&:hover" { borderColor = NamedColor.white }
+ *         pseudo(Pseudos.hover) { borderColor = NamedColor.white }
  *     }
  * }
  * ```
@@ -37,7 +37,8 @@ import web.cssom.CSSStyleSheet
  * declarations. The whole pipeline, including what does *not* work and why, is documented in
  * `docs/css-sheet.md` inside this module.
  *
- * The top level is a map of **selectors** (`ClassName`, `"&:hover"`, `":host"`); at-rules come from
+ * The top level is a map of **selectors** (`ClassName`, `":host"`); state variants are written with
+ * `pseudo` / `pseudos` (see `css/Pseudos.kt`), and at-rules come from
  * the wrappers' own helpers — `` `@media`(MediaType.screen and maxWidth(576.px)) `` and
  * [supports][io.github.shijianjs.ktjs.dom.css.supports] — rather than a hand-written `"@media …"` key.
  * A rules object that carries only declarations is not a sheet. One sheet per component class,

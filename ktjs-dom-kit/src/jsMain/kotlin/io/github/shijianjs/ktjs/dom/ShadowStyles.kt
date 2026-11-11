@@ -46,7 +46,7 @@ fun HTMLElement.attachShadowRoot(
  *
  *         private val SHEET: CSSStyleSheet = cssSheet {
  *             cardClass {
- *                 "&:hover" { borderColor = `var`(accentHook, `var`(primaryColorHook)) }
+ *                 pseudo(Pseudos.hover) { borderColor = `var`(accentHook, `var`(primaryColorHook)) }
  *             }
  *         }
  *     }
@@ -54,7 +54,7 @@ fun HTMLElement.attachShadowRoot(
  * ```
  *
  * See `docs/css-sheet.md` for the serializer, the typed values and the traps (in particular the
- * `"&:hover"` spelling, and `@media` / `@supports` built from the wrappers' own keywords).
+ * `Pseudos` + `pseudo`/`pseudos` variants, and `@media` / `@supports` built from the wrappers' own keywords).
  */
 fun HTMLElement.attachStyledShadow(
     vararg styles: CSSStyleSheet,

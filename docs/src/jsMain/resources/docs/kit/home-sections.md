@@ -205,7 +205,7 @@ private val SHEET: CSSStyleSheet = cssSheet {
     cardClass {
         border = Border(1.px, LineStyle.solid, var(cardBorderHook, rgb(127, 127, 127, 0.24)))
         transition = many(Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease))
-        "&:hover" { borderColor = var(accentHook, var(primaryColorHook)) }
+        pseudo(Pseudos.hover) { borderColor = var(accentHook, var(primaryColorHook)) }
     }
 }
 ```
@@ -213,7 +213,7 @@ private val SHEET: CSSStyleSheet = cssSheet {
 `ktjs-dom-kit` serializes that object through the same two packages emotion's cache uses
 (`@emotion/serialize` + `stylis`), so what lands in the sheet is what emotion would emit. Property
 names, values, units and pseudo-class structure come from types; the only strings left are the theme's
-custom property names and the `"&:hover"` key.
+custom property names; state variants come from `Pseudos` + `pseudo` / `pseudos` in the same package.
 
 What cssom does not model lives in `ktjs-dom-kit`'s own `css` package instead of back in a string:
 `radialGradient` / `colorStop` (cssom ships the linear and angular shapes only),

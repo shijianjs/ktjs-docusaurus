@@ -1,7 +1,11 @@
 package io.github.shijianjs.ktjs.dom
 
 import csstype.fallback
+import io.github.shijianjs.ktjs.dom.css.Pseudo
+import io.github.shijianjs.ktjs.dom.css.Pseudos
 import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
+import io.github.shijianjs.ktjs.dom.css.pseudo
+import io.github.shijianjs.ktjs.dom.css.pseudos
 import io.github.shijianjs.ktjs.dom.css.colorStop
 import io.github.shijianjs.ktjs.dom.css.pointerEventsNone
 import io.github.shijianjs.ktjs.dom.css.and as supportsAnd
@@ -25,6 +29,7 @@ import web.cssom.PropertyName
 import web.cssom.and
 import web.cssom.atrule.MediaType
 import web.cssom.atrule.maxWidth
+import web.cssom.many
 import web.cssom.pct
 import web.cssom.px
 import web.cssom.stop
@@ -46,7 +51,7 @@ class CssSheetTest {
         val text = cssText {
             cardClass {
                 display = Display.block
-                "&:hover" { display = fallback(Display.grid, Display.flex) }
+                pseudo(Pseudos.hover) { display = fallback(Display.grid, Display.flex) }
             }
         }
 
@@ -57,7 +62,7 @@ class CssSheetTest {
     fun atRulesUseTheWrappersOwnKeywordsAndQueries() {
         val text = cssText {
             cardClass {
-                "&::before" { content = web.cssom.Content() }
+                pseudo(Pseudos.before) { content = web.cssom.Content() }
             }
             // csstype.RuleBuilder.@media + cssom's typed media query pieces; no "@media" literal.
             `@media`(MediaType.screen and maxWidth(576.px)) {
@@ -81,6 +86,30 @@ class CssSheetTest {
             ),
             text,
         )
+    }
+
+    @Test
+    fun severalStatesShareOneBlock() {
+        val text = cssText {
+            cardClass {
+                pseudos(Pseudos.hover, Pseudos.focusVisible) { display = Display.block }
+            }
+        }
+
+        assertEquals(".card:hover,.card:focus-visible{display:block;}", text)
+    }
+
+    @Test
+    fun manyJoinsPseudoVariantsAsWellAsSelectors() {
+        val variant: Pseudo = many(Pseudos.hover, Pseudos.focusVisible)
+        val text = cssText {
+            cardClass {
+                pseudo(variant) { display = Display.block }
+            }
+        }
+
+        assertEquals(".card:hover,.card:focus-visible{display:block;}", text)
+        assertEquals("&:hover,&:focus-visible", "$variant")
     }
 
     @Test

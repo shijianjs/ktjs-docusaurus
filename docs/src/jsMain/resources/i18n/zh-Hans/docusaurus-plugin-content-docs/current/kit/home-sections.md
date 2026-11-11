@@ -192,14 +192,15 @@ private val SHEET: CSSStyleSheet = cssSheet {
     cardClass {
         border = Border(1.px, LineStyle.solid, var(cardBorderHook, rgb(127, 127, 127, 0.24)))
         transition = many(Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease))
-        "&:hover" { borderColor = var(accentHook, var(primaryColorHook)) }
+        pseudo(Pseudos.hover) { borderColor = var(accentHook, var(primaryColorHook)) }
     }
 }
 ```
 
 `ktjs-dom-kit` 用 emotion 缓存自己那条管线（`@emotion/serialize` + `stylis`）把它序列化，所以进 sheet 的
-就是 emotion 会产出的东西：属性名、取值、单位、伪类结构都来自类型，剩下的字符串只有主题的自定义属性名和
-`"&:hover"` 这个键。cssom 没建模的东西放在 `ktjs-dom-kit` 自己的 `css` 包里，而不是退回字符串：
+就是 emotion 会产出的东西：属性名、取值、单位、伪类结构都来自类型，剩下的字符串只有主题的自定义属性名；
+伪类变体走同一个 `css` 包的 `Pseudos` + `pseudo` / `pseudos`。cssom 没建模的东西也放在这个包里，
+而不是退回字符串：
 `radialGradient` / `colorStop`（cssom 只有线性与角度渐变）、`webkitBackgroundClip`（前缀属性缺失）、
 `pointerEventsNone`（取值联合里只有 SVG 那批）。包括 hero 在内，每个元素都用同一种方式写 sheet。
 
