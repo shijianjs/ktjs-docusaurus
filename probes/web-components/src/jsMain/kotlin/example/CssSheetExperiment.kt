@@ -15,12 +15,12 @@ import web.cssom.BoxShadow
 import web.cssom.CSSStyleRule
 import web.cssom.CSSStyleSheet
 import web.cssom.ClassName
+import web.cssom.PropertyName
 import web.cssom.Color
 import web.cssom.CustomPropertyName
 import web.cssom.Display
 import web.cssom.LineStyle
 import web.cssom.Transition
-import web.cssom.TransitionProperty
 import web.cssom.TransitionTimingFunction
 import web.cssom.many
 import web.cssom.px
@@ -50,10 +50,10 @@ import web.html.HTMLElement
  *
  * - `&:hover`, not the `hover {}` sugar — the sugar writes the key `:hover`, which stylis reads as a
  *   *descendant* selector (`.parent :hover`).
- * - `unsafeCast(String)` only for a `TransitionProperty` name: csstype's generated interface exposes
- *   `all` and nothing else, and the unions drop TypeScript's `(string & {})` escape hatch. The
- *   transition itself is typed (`Transition(property, 0.2.s, TransitionTimingFunction.ease)`, joined
- *   by cssom's `many`).
+ * - `Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease)` needs no cast even
+ *   though `TransitionProperty` only exposes `all`: every `PropertyName<T>` is an `Ident`, and
+ *   `IdentType` inherits `TransitionProperty`, so a typed property name doubles as a transition
+ *   property. Two of them are joined by cssom's `many`.
  * - `var(name, fallback)` from cssom takes a `CustomPropertyName` plus a **typed** fallback, so
  *   `var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff))` is three typed calls rather
  *   than one string.
@@ -95,12 +95,6 @@ class CssSheetExperiment {
         "--ktjs-shadow",
     )
 
-    /** Property names for `Transition`: the generated `TransitionProperty` only exposes `all`. */
-    private val transitionPropertyNames = listOf("border-color", "box-shadow")
-
-    /** The one cast left: csstype's `TransitionProperty` has no `String` factory. */
-    private fun transitionProperty(name: String): TransitionProperty = unsafeCast(name)
-
     /** The selector as a typed class name: `ClassName.invoke` writes the leading dot (RuleBuilder.kt). */
     private val cardClass = ClassName("ktjs-feature-card")
 
@@ -118,8 +112,8 @@ class CssSheetExperiment {
             )
             // `many` is cssom's comma joiner: two typed Transition values, one declaration.
             transition = many(
-                Transition(transitionProperty(transitionPropertyNames[0]), 0.2.s, TransitionTimingFunction.ease),
-                Transition(transitionProperty(transitionPropertyNames[1]), 0.2.s, TransitionTimingFunction.ease),
+                Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
+                Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
             )
             // A fallback ladder is a JS array; the serializer expands it into two declarations.
             display = fallback(Display.grid, Display.flex)
@@ -184,19 +178,17 @@ class CssSheetExperiment {
     /** The metric that matters: how much CSS syntax is still spelled by hand in each form. */
     val rawCssReport: String = buildString {
         append("text form: ").append(text.length).append(" characters of hand-written CSS, names included\n")
-        append("DSL form:  0 characters of CSS text — no declaration is spelled by hand any more\n")
-        append("           names only: ").append(transitionPropertyNames.size)
-            .append(" transition properties (").append(transitionPropertyNames.sumOf { it.length })
-            .append(" characters) + ").append(customPropertyNames.size).append(" custom properties (")
+        append("DSL form:  no CSS text, no selector string, no cast — only names: ")
+            .append(customPropertyNames.size).append(" custom properties (")
             .append(customPropertyNames.sumOf { it.length })
-            .append(") + the \"&:hover\" key (see 8f)\n")
+            .append(" characters) + the \"&:hover\" key (see 8f)\n")
         append('\n')
         append("Typed values: Border(1.px, LineStyle.solid, …), rgb(127, 127, 127, 0.24),\n")
         append("BoxShadow(0.px, 10.px, 24.px, …), var(name, fallback), fallback(grid, flex), 1.5.rem,\n")
-        append("Transition(property, 0.2.s, TransitionTimingFunction.ease), many(…).\n")
-        append("One unsafeCast survives, inside transitionProperty(): the generated TransitionProperty\n")
-        append("exposes `all` as its only value. Source length is not the measure — both forms emit the\n")
-        append("same declarations.")
+        append("Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease) joined by many(…).\n")
+        append("PropertyName doubles as a TransitionProperty: every PropertyName is an Ident, and\n")
+        append("IdentType inherits TransitionProperty. Source length is not the measure — both forms emit\n")
+        append("the same declarations.")
     }
 
     /** Renders every form, plus a card that adopts the CSSOM one, into the probe page. */
