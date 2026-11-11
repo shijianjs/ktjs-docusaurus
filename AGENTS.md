@@ -210,9 +210,12 @@ duckfn 站点一致。
     ① 选择器用 `ClassName` + `invoke`（点号由它补）。Kotlin 的解析规则要注意：`ClassName("x") { … }`
       会被读成「调用工厂 + 尾随 lambda 当第二个实参」，一次性用加括号 `(ClassName("x")) { … }`，
       要复用就存 `val` 再 `cardClass { … }`。
-    ② 伪类 / 伪元素 / at-rule 写字符串，但**必须带 `&`**：`"&:hover"`、`"&::before"`、`"@media …"`。
-      **不要用 `hover {}` / `before {}` 糖**——它们写的键是 `:hover` / `::before`，stylis 会拼成**后代**
-      选择器（上游缺陷 <https://github.com/JetBrains/kotlin-wrappers/issues/2933>，修好后可换回）。
+    ② 伪类 / 伪元素写字符串，但**必须带 `&`**：`"&:hover"`、`"&::before"`。**不要用 `hover {}` /
+      `before {}` 糖**——它们写的键是 `:hover` / `::before`，stylis 会拼成**后代**选择器（上游缺陷
+      <https://github.com/JetBrains/kotlin-wrappers/issues/2933>，修好后可换回）。at-rule 别写字符串：
+      `` `@media`(MediaType.screen and maxWidth(576.px)) `` 是 csstype `RuleBuilder` 自带的 helper，
+      `supports(condition)` 取 `AtRules.supports` 关键字（dom-kit）；条件里 `MediaQuery.and/or/not`、
+      `MediaType`、`web.cssom.atrule` 里约 30 个媒体特性工厂都是类型化的。
     ③ 值全走类型：`NamedColor.white`（命名色就是 `Color`，别写 `"#fff"`）、`rgb(r, g, b, a)`、
       `1.5.rem`、`BoxShadow(0.px, 10.px, 24.px, …)`、`var(hook, fallback)`、`fallback(grid, flex)`、
       `Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease)` 配 `many(…)` 拼多值。

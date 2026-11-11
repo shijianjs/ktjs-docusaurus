@@ -5,10 +5,10 @@ import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
 import io.github.shijianjs.ktjs.dom.css.colorStop
 import io.github.shijianjs.ktjs.dom.css.pointerEventsNone
 import io.github.shijianjs.ktjs.dom.css.radialGradient
+import io.github.shijianjs.ktjs.dom.css.supports
 import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClip
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import web.cssom.BackgroundClip
 import web.cssom.ClassName
@@ -16,7 +16,11 @@ import web.cssom.Color
 import web.cssom.Display
 import web.cssom.NamedColor
 import web.cssom.Position
+import web.cssom.and
+import web.cssom.atrule.MediaType
+import web.cssom.atrule.maxWidth
 import web.cssom.pct
+import web.cssom.px
 import web.cssom.stop
 import web.cssom.`var`
 import web.cssom.CustomPropertyName
@@ -44,18 +48,24 @@ class CssSheetTest {
     }
 
     @Test
-    fun topLevelAtRulesAndPseudoElementsSurvive() {
+    fun atRulesUseTheWrappersOwnKeywordsAndQueries() {
         val text = cssText {
             cardClass {
                 "&::before" { content = web.cssom.Content() }
             }
-            "@media (max-width: 576px)" {
+            // csstype.RuleBuilder.@media + cssom's typed media query pieces; no "@media" literal.
+            `@media`(MediaType.screen and maxWidth(576.px)) {
                 cardClass { display = Display.block }
+            }
+            // dom-kit's supports() takes the keyword from web.cssom.AtRules.supports.
+            supports("(background-clip: text)") {
+                cardClass { backgroundClip = BackgroundClip.text }
             }
         }
 
         assertTrue(text.contains(".card::before{content:'';}"), text)
-        assertTrue(text.contains("@media (max-width: 576px){.card{display:block;}}"), text)
+        assertTrue(text.contains("@media screen and (max-width:576px){.card{display:block;}}"), text)
+        assertTrue(text.contains("@supports (background-clip: text){.card{background-clip:text;}}"), text)
     }
 
     @Test

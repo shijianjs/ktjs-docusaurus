@@ -39,17 +39,22 @@ fun HTMLElement.attachShadowRoot(
  *
  * ```kotlin
  * class Card : CustomElementAdapter() {
- *     private val shadow = attachStyledShadow(RESET, CARD_SHEET)
+ *     private val shadow = attachStyledShadow(RESET, SHEET)
  *
  *     companion object {
- *         private val CSS: String = """
- *             .card:hover { border-color: var(--accent); }
- *         """.trimIndent()
+ *         private val cardClass = ClassName("card")
  *
- *         private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CSS) }
+ *         private val SHEET: CSSStyleSheet = cssSheet {
+ *             cardClass {
+ *                 "&:hover" { borderColor = `var`(accentHook, `var`(primaryColorHook)) }
+ *             }
+ *         }
  *     }
  * }
  * ```
+ *
+ * See `docs/css-sheet.md` for the serializer, the typed values and the traps (in particular the
+ * `"&:hover"` spelling, and `@media` / `@supports` built from the wrappers' own keywords).
  */
 fun HTMLElement.attachStyledShadow(
     vararg styles: CSSStyleSheet,

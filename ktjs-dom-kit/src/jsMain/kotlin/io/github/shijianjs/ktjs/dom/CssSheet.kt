@@ -37,9 +37,11 @@ import web.cssom.CSSStyleSheet
  * declarations. The whole pipeline, including what does *not* work and why, is documented in
  * `docs/css-sheet.md` inside this module.
  *
- * The top level is a map of **selectors** (`ClassName`, `"&:hover"`, `":host"`, `"@media …"`); a rules
- * object that carries only declarations is not a sheet. One sheet per component class, adopted by
- * every instance through [attachStyledShadow] — never one per instance.
+ * The top level is a map of **selectors** (`ClassName`, `"&:hover"`, `":host"`); at-rules come from
+ * the wrappers' own helpers — `` `@media`(MediaType.screen and maxWidth(576.px)) `` and
+ * [supports][io.github.shijianjs.ktjs.dom.css.supports] — rather than a hand-written `"@media …"` key.
+ * A rules object that carries only declarations is not a sheet. One sheet per component class,
+ * adopted by every instance through [attachStyledShadow] — never one per instance.
  */
 fun cssSheet(block: PropertiesBuilder.() -> Unit): CSSStyleSheet =
     CSSStyleSheet().apply { replaceSync(cssText(rulesObject(block))) }

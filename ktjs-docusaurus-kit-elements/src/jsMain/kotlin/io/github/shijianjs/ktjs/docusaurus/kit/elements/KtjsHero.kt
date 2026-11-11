@@ -8,6 +8,7 @@ import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
 import io.github.shijianjs.ktjs.dom.css.colorStop
 import io.github.shijianjs.ktjs.dom.css.radialGradient
 import io.github.shijianjs.ktjs.dom.css.pointerEventsNone
+import io.github.shijianjs.ktjs.dom.css.supports
 import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClip
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.dom.inlineStyle
@@ -27,11 +28,12 @@ import web.cssom.FlexWrap
 import web.cssom.Isolation
 import web.cssom.JustifyContent
 import web.cssom.Margin
-import web.cssom.MediaQuery
 import web.cssom.Overflow
 import web.cssom.Padding
 import web.cssom.Position
 import web.cssom.TextAlign
+import web.cssom.atrule.MediaType
+import web.cssom.atrule.maxWidth
 import web.cssom.clamp
 import web.cssom.deg
 import web.cssom.dropShadow
@@ -47,6 +49,7 @@ import web.cssom.rgb
 import web.cssom.stop
 import web.cssom.translatex
 import web.cssom.`var`
+import web.cssom.and
 import web.cssom.vw
 import web.dom.TagName
 import web.html.HTMLDivElement
@@ -259,7 +262,7 @@ class KtjsHero : CustomElementAdapter() {
                 color = `var`(accentHook, `var`(primaryColorHook))
             }
 
-            "@supports (-webkit-background-clip: text) or (background-clip: text)" {
+            supports("(-webkit-background-clip: text) or (background-clip: text)") {
                 TITLE {
                     backgroundImage = linearGradient(
                         120.deg,
@@ -275,7 +278,7 @@ class KtjsHero : CustomElementAdapter() {
                 }
             }
 
-            "@media ${MediaQuery("screen and (max-width: 576px)")}" {
+            `@media`(MediaType.screen and maxWidth(576.px)) {
                 ACTIONS {
                     flexDirection = FlexDirection.column
                     alignItems = AlignItems.stretch

@@ -64,15 +64,34 @@ cssSheet { cardClass { … } }
 坑：`ClassName("card") { … }` **编译不过**——会被解析成「调用工厂 + 尾随 lambda 当第二个实参」。
 一次性用可以加括号 `(ClassName("card")) { … }`；要复用就存成 `val`。
 
-伪类、伪元素、at-rule 没有类型化入口，直接写字符串 key，但**必须带 `&`**（见 4.1）：
+伪类、伪元素没有类型化常量（上游的 `hover {}` 糖缺 `&`，见 4.1），直接写字符串 key 但**必须带 `&`**：
 
 ```kotlin
 "&:hover" { … }
 "&:hover, &:focus-visible" { … }        // 逗号列表 stylis 会展开
 "&::before" { … }
-"@media screen and (max-width: 576px)" { … }
-"@supports (background-clip: text)" { … }
 ```
+
+**at-rule 有官方入口，不要手写 `"@media …"` / `"@supports …"` 字符串**：
+
+```kotlin
+`@media`(MediaType.screen and maxWidth(576.px)) { … }   // csstype.RuleBuilder.@media
+supports("(background-clip: text)") { … }                // dom-kit 的 supports()，关键字取 AtRules.supports
+```
+
+官方已经给的（IDE 里查符号时优先找这些，别再自己拼）：
+
+| 入口 | 在哪 | 用途 |
+| --- | --- | --- |
+| `RuleBuilder.@media / @container / @font-face / @view-transition` | `kotlin-csstype/.../RuleBuilder.kt` | at-rule 块，`@media(query)` 收 `MediaQuery` |
+| `AtRules.media / supports / layer / page / scope / …` | `web.cssom.AtRules` | 所有 at-rule 关键字常量（`@JsValue("@media")` 等） |
+| `MediaQuery.and / or / not` | `web.cssom.MediaQuery.kt` | 组合条件 |
+| `MediaType.screen / print / all` | `web.cssom.atrule.MediaType` | 媒体类型 |
+| `maxWidth / minWidth / width / height / orientation / prefersColorScheme / prefersReducedMotion / …` | `web.cssom.atrule/*.fun.kt` | 媒体特性（一整个目录，约 30 个） |
+| `var / env / rgb / many / array / important / linearGradient / stop / Content() / NamedColor / PropertyName / translatex` | `web.cssom` 的 `*.functions.kt`、`*.ext.kt`、`*.fun.kt` | 取值与函数 |
+
+**目前确实还是字符串的**：伪类/伪元素键（等 #2933）、`:host` 与 `*` 这类选择器、应用级自定义属性名、
+`@supports` 的条件（cssom 没有 supports 条件类型，且我们的条件里就有 `-webkit-background-clip`）。
 
 ### 3.2 自定义属性：具名常量 + `var(name, fallback)`
 
