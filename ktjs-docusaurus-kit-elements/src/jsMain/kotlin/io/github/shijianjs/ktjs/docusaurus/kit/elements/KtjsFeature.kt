@@ -32,7 +32,7 @@ import web.html.HtmlTagName
  * [`KtjsFeatures`] grid.
  *
  * Renders itself into a shadow root, so the parent only lays the cards out. Border and background
- * are in [FEATURE_CSS] rather than inline because the card's `:hover` changes them.
+ * are in [CSS] rather than inline because the card's `:hover` changes them.
  *
  * `icon` and `title` are `attr` delegates; the card body is the element's own text.
  */
@@ -50,7 +50,7 @@ class KtjsFeature : CustomElementAdapter() {
     var titleText: String by attr("title") { change -> headingElement.textContent = change.newValue }
 
     init {
-        val shadow = attachStyledShadow(HOME_RESET, FEATURE_SHEET)
+        val shadow = attachStyledShadow(HOME_RESET, SHEET)
 
         iconElement = IconifyIconTagName.iconifyIcon.createElement {
             inlineStyle.fontSize = 1.375.rem
@@ -111,7 +111,7 @@ class KtjsFeature : CustomElementAdapter() {
         val NAME: TagName<KtjsFeature> = TagName(HomeMarkup.FEATURE)
 
         /** The card's surface and its `:hover` lift. */
-        private val FEATURE_CSS: String = """
+        private val CSS: String = """
             .ktjs-feature-card {
               border: 1px solid var(--ktjs-card-border, rgba(127, 127, 127, 0.24));
               background-color: var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff));
@@ -124,7 +124,7 @@ class KtjsFeature : CustomElementAdapter() {
             }
         """.trimIndent()
 
-        /** [FEATURE_CSS] parsed once; every `<ktjs-feature>` adopts this one sheet. */
-        private val FEATURE_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(FEATURE_CSS) }
+        /** [CSS] parsed once; every `<ktjs-feature>` adopts this one sheet. */
+        private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CSS) }
     }
 }

@@ -174,8 +174,9 @@ duckfn 站点一致。
     `::after`、`@media`、`@supports`、`@keyframes`。
 
     这部分规则写成**该组件类的一份 `CSSStyleSheet`**，放在**该类的 `companion object` 里**
-    （`private val X_SHEET`，与 `NAME` 并列，第一次用到时 `replaceSync` 一次），由该组件的**所有实例**
-    adopt：`attachStyledShadow(HOME_RESET, X_SHEET)`。这是 Lit `static styles` 的做法（Kotlin 没有
+    （统一叫 `private val CSS` + `private val SHEET`，与 `NAME` 并列，第一次用到时 `replaceSync` 一次），
+    由该组件的**所有实例** adopt：`attachStyledShadow(HOME_RESET, SHEET)`。因为名字在各自 companion 里，
+    每个元素类都可以用同一对名字，不必带 `FEATURE_` / `HERO_` 之类前缀。这是 Lit `static styles` 的做法（Kotlin 没有
     `static`，companion 就是类的静态成员所在处），也是唯一该用的做法——**不要每个实例建一个 `<style>`
     节点**（20×20 的单元格就是 400 份重复文本 + 400 次解析）。CSS 文本用缩进写的 `"""` 加 `.trimIndent()`
     （companion 里的 `const val` 不能调 `trimIndent()`，所以用 `private val`）。类名只留给这些规则选中的节点。
@@ -184,6 +185,12 @@ duckfn 站点一致。
     （`display` 不能写在构造函数里——给 `this` 赋 `style` 会加属性，`document.createElement("ktjs-…")` 会抛错），
     主题色这类跨组件常量放 `HomeTheme.kt`。`ktjs-features` / `ktjs-next-steps` 共用的分区外壳
     （`HomeSection.kt`）属于「父容器统一控制子组件布局」，是允许提取的那一类。
+
+    **不要再试 `kotlin-css`（`kotlinx.css`）那套 CSS DSL**（2026-11-11 实测过，别重复投入）：它不给
+    值做校验（`Color`/`LinearDimension` 只是 `String` 包装，`var(--x, …)` 照写），`transition` 会强制补
+    `0s` 延迟，`box-shadow: var(--ktjs-shadow, …)` 这种整值兜底只能退回 `put("box-shadow", "…")`，
+    `hover` / `before` / `media` 的糖不解析 `&`（原样输出 `&:hover {}` 嵌套，等于要求 CSS Nesting），
+    并且带进第二套取值词汇（`kotlinx.css.Color` 与 `web.cssom.Color` 并存）。纯文本 CSS 更短也更准。
 
    不要往 kit 里加 `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。
 

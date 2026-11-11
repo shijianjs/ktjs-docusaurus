@@ -46,7 +46,7 @@ enum class ActionKind(internal val className: String) {
  * is dropped when `icon` is empty. All three attributes are `attr` delegates, so the pill follows
  * them: the shadow tree is re-rendered from the new value, wherever the change came from.
  *
- * The pill's box is inline on the anchor; its colours live in [ACTION_CSS] because `:hover` has to
+ * The pill's box is inline on the anchor; its colours live in [CSS] because `:hover` has to
  * change them, and an inline value would win over the hover rule.
  */
 class KtjsAction : CustomElementAdapter() {
@@ -77,7 +77,7 @@ class KtjsAction : CustomElementAdapter() {
     }
 
     init {
-        val shadow = attachStyledShadow(HOME_RESET, ACTION_SHEET)
+        val shadow = attachStyledShadow(HOME_RESET, SHEET)
 
         labelElement = HtmlTagName.span.createElement()
         iconElement = IconifyIconTagName.iconifyIcon.createElement {
@@ -142,7 +142,7 @@ class KtjsAction : CustomElementAdapter() {
          * transition that animates it, and the two colour schemes with their `:hover` /
          * `:focus-visible` states.
          */
-        private val ACTION_CSS: String = """
+        private val CSS: String = """
             :host > a {
               border: 1px solid transparent;
               transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
@@ -176,7 +176,7 @@ class KtjsAction : CustomElementAdapter() {
             }
         """.trimIndent()
 
-        /** [ACTION_CSS] parsed once; every `<ktjs-action>` adopts this one sheet. */
-        private val ACTION_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(ACTION_CSS) }
+        /** [CSS] parsed once; every `<ktjs-action>` adopts this one sheet. */
+        private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CSS) }
     }
 }

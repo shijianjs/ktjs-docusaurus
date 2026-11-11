@@ -174,7 +174,7 @@ headTags = arrayOf(
 | 位置 | 放什么 | 例子 |
 | --- | --- | --- |
 | 元素构造函数里的 `inlineStyle.apply { … }` | 一条普通声明能表达的全部 | `display = Display.flex`、`padding = Padding(1.5.rem)`、`color = accent` |
-| 该组件自己的一份 sheet（`private val X_SHEET`，放在它的 `companion object` 里） | 内联表达不了的：`:hover`、`::before`、`@media`、`@supports` | 按钮的悬停配色、hero 的两个光斑 |
+| 该组件自己的一份 sheet（`private val SHEET`，放在它的 `companion object` 里） | 内联表达不了的：`:hover`、`::before`、`@media`、`@supports` | 按钮的悬停配色、hero 的两个光斑 |
 | 所有元素都 adopt 的 sheet | 所有元素都需要、或好几个确实共享的 | `HomeReset.kt` 里的 `box-sizing` 与 `:host { display: block }` |
 
 取值都是有类型的（`Display.flex`、`1.5.rem`、`Color("var(--ktjs-accent, …)")`、`clamp(…)`），不手拼字符串。

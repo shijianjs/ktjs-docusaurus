@@ -184,7 +184,7 @@ Styles live where the element is written, in three grades:
 | Where | What goes there | Example |
 | --- | --- | --- |
 | `inlineStyle.apply { … }` in the element's constructor | everything a plain declaration can say | `display = Display.flex`, `padding = Padding(1.5.rem)`, `color = accent` |
-| one sheet of that element's own (`private val X_SHEET` in its `companion object`) | what inline styles cannot: `:hover`, `::before`, `@media`, `@supports` | the button's hover colours, the hero's glow blobs |
+| one sheet of that element's own (`private val SHEET` in its `companion object`) | what inline styles cannot: `:hover`, `::before`, `@media`, `@supports` | the button's hover colours, the hero's glow blobs |
 | the sheet every element adopts | what all of them need, or what several genuinely share | `box-sizing` and `:host { display: block }` in `HomeReset.kt` |
 
 Values are typed (`Display.flex`, `1.5.rem`, `Color("var(--ktjs-accent, …)")`, `clamp(…)`), never

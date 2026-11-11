@@ -79,7 +79,7 @@ class KtjsHero : CustomElementAdapter() {
     var tagline: String by attr { change -> taglineElement.textContent = change.newValue }
 
     init {
-        val shadow = attachStyledShadow(HOME_RESET, HERO_SHEET)
+        val shadow = attachStyledShadow(HOME_RESET, SHEET)
 
         logoElement = HtmlTagName.img.createElement {
             inlineStyle.apply {
@@ -92,7 +92,7 @@ class KtjsHero : CustomElementAdapter() {
             alt = ""
         }
         headingElement = HtmlTagName.h1.createElement {
-            // The gradient title is a `@supports` block, so it needs this hook (see HERO_CSS).
+            // The gradient title is a `@supports` block, so it needs this hook (see CSS).
             classList.add("ktjs-title")
             inlineStyle.apply {
                 margin = Margin(1.5.rem, 0.px, 0.px)
@@ -154,7 +154,7 @@ class KtjsHero : CustomElementAdapter() {
         }
 
         val section = HtmlTagName.section.createElement<HTMLElement> {
-            // The two glow blobs are `::before` / `::after` (see HERO_CSS).
+            // The two glow blobs are `::before` / `::after` (see CSS).
             classList.add("ktjs-hero")
             inlineStyle.apply {
                 position = Position.relative
@@ -197,7 +197,7 @@ class KtjsHero : CustomElementAdapter() {
          * `@supports`-guarded gradient text (inline colour would beat a descendant rule), and the
          * small-screen stacking of the action row. The host's own `display` lives in `HOME_RESET`.
          */
-        private val HERO_CSS: String = """
+        private val CSS: String = """
             .ktjs-hero::before,
             .ktjs-hero::after {
               content: '';
@@ -249,7 +249,7 @@ class KtjsHero : CustomElementAdapter() {
             }
         """.trimIndent()
 
-        /** [HERO_CSS] parsed once; every `<ktjs-hero>` adopts this one sheet. */
-        private val HERO_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(HERO_CSS) }
+        /** [CSS] parsed once; every `<ktjs-hero>` adopts this one sheet. */
+        private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CSS) }
     }
 }

@@ -42,11 +42,11 @@ fun HTMLElement.attachShadowRoot(
  *     private val shadow = attachStyledShadow(RESET, CARD_SHEET)
  *
  *     companion object {
- *         private val CARD_CSS: String = """
+ *         private val CSS: String = """
  *             .card:hover { border-color: var(--accent); }
  *         """.trimIndent()
  *
- *         private val CARD_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CARD_CSS) }
+ *         private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CSS) }
  *     }
  * }
  * ```

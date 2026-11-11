@@ -30,7 +30,7 @@ import web.html.HtmlTagName
  * `<ktjs-step href="…" title="…">details</ktjs-step>` — one link card in a [`KtjsNextSteps`] grid.
  *
  * The whole card is the anchor, so it renders itself into a shadow root and the parent only lays it
- * out. Border and background are in [STEP_CSS] because `:hover` / `:focus-visible` change them.
+ * out. Border and background are in [CSS] because `:hover` / `:focus-visible` change them.
  *
  * `href` and `title` are `attr` delegates; the card body is the element's own text.
  */
@@ -55,7 +55,7 @@ class KtjsStep : CustomElementAdapter() {
     var titleText: String by attr("title") { change -> headingElement.textContent = change.newValue }
 
     init {
-        val shadow = attachStyledShadow(HOME_RESET, STEP_SHEET)
+        val shadow = attachStyledShadow(HOME_RESET, SHEET)
 
         headingElement = HtmlTagName.span.createElement {
             inlineStyle.apply {
@@ -119,7 +119,7 @@ class KtjsStep : CustomElementAdapter() {
         val NAME: TagName<KtjsStep> = TagName(HomeMarkup.STEP)
 
         /** The card's surface and its `:hover` / `:focus-visible` lift. */
-        private val STEP_CSS: String = """
+        private val CSS: String = """
             .ktjs-next-card {
               border: 1px solid var(--ktjs-card-border, rgba(127, 127, 127, 0.24));
               background-color: var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff));
@@ -133,7 +133,7 @@ class KtjsStep : CustomElementAdapter() {
             }
         """.trimIndent()
 
-        /** [STEP_CSS] parsed once; every `<ktjs-step>` adopts this one sheet. */
-        private val STEP_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(STEP_CSS) }
+        /** [CSS] parsed once; every `<ktjs-step>` adopts this one sheet. */
+        private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CSS) }
     }
 }
