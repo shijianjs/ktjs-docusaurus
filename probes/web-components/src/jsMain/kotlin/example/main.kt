@@ -3,6 +3,7 @@ package example
 import web.components.customElements
 import web.components.define
 import web.console.console
+import web.dom.document
 
 fun main() {
     console.log("Web Components example app is running!")
@@ -20,4 +21,6 @@ fun main() {
     defineAdapterPanel()
     // Empty superclass + the interface bundle without Element (which is a class).
     defineMixedPanel()
+    // One sheet written three ways: CSS text, csstype's rules DSL, and the DSL replayed into CSSOM.
+    CssSheetExperiment().renderInto(document.body)
 }

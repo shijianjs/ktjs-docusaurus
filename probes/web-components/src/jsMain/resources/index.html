@@ -5,7 +5,6 @@
     <title>Web Components example</title>
 </head>
 <body>
-<script src="probes-web-components.js"></script>
 
 <h3>1. The published example (override val connectedCallback)</h3>
 <my-panel></my-panel>
@@ -34,5 +33,8 @@
 <h3>7. Official HTMLElement spelling through a super-forwarding adapter</h3>
 <my-panel-adapter data-x="42"></my-panel-adapter>
 <p>All DOM calls go through `…Super` methods (or an overridable `remove()`); no JS bridge.</p>
+
+<!-- Section 8 (the CSS sheet experiment) is rendered by `CssSheetExperiment.renderInto`. -->
+<script src="probes-web-components.js"></script>
 </body>
 </html>

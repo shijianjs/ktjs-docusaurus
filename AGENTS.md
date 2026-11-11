@@ -202,6 +202,12 @@ duckfn 站点一致。
       结论：源码不更短（12 行 vs 10 行 + 8 个 import）、要养一层自研序列化，收益只落在少数属性的
       拼装上。真要做，方向是「JSO 灌进真正的 CSSOM（`insertRule` + `rule.style`）」而不是自写文本序列化。
 
+    **可运行的证据保留在 `probes/web-components` 的 `example.CssSheetExperiment`**（三种写法 + 两种适配层
+    + 一张 adopt 了 CSSOM 版本的卡片）：`./gradlew :probes-web-components:jsBrowserDevelopmentRun` 打开
+    页面底部看三种产物，`...:jsBrowserTest` 跑 `CssSheetExperimentTest`（文本版带 fallback 阶梯、
+    CSSOM 版只剩最后一条、`hover {}` 解析到父选择器）。
+
+
    不要往 kit 里加 `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。
 
    自查：`grep 'HTMLElement.call' <bundle>.mjs` 应为 0；`grep 'querySelector(selectors) {' <bundle>`

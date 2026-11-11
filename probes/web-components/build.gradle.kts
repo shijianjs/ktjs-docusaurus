@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalJsTestDsl
+
 plugins {
     kotlin("multiplatform")
 }
@@ -19,7 +21,14 @@ plugins {
  */
 kotlin {
     js {
-        browser()
+        browser {
+            // The CSS-sheet experiment needs a real CSSOM (`CSSStyleSheet`, `insertRule`),
+            // so its assertions run in Playwright's Chromium like the elements module's do.
+            @OptIn(ExperimentalJsTestDsl::class)
+            test {
+                chromium()
+            }
+        }
         binaries.executable()
 
         compilerOptions {
@@ -39,6 +48,10 @@ kotlin {
     sourceSets {
         jsMain.dependencies {
             implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.0")
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-csstype:2026.11.0-3.2.3")
+        }
+        jsTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }
