@@ -11,14 +11,18 @@ import web.components.ShadowRootInit
 import web.components.ShadowRootMode
 import web.components.open
 import web.cssom.Border
+import web.cssom.BoxShadow
 import web.cssom.CSSStyleRule
 import web.cssom.CSSStyleSheet
 import web.cssom.ClassName
 import web.cssom.Color
+import web.cssom.CustomPropertyName
 import web.cssom.Display
 import web.cssom.LineStyle
 import web.cssom.px
 import web.cssom.rem
+import web.cssom.rgb
+import web.cssom.`var`
 import web.dom.document
 import web.html.HTMLElement
 
@@ -37,12 +41,15 @@ import web.html.HTMLElement
  * 3. [dslAsStyleSheet] — the same rules object replayed into real CSSOM rules (`insertRule` +
  *    `rule.style`), which leaves value serialization to the browser.
  *
- * Two things the DSL still needs spelled out, both shown below:
+ * What the DSL still needs spelled out, all of it visible below:
  *
  * - `&:hover`, not the `hover {}` sugar — the sugar writes the key `:hover`, which stylis reads as a
  *   *descendant* selector (`.parent :hover`).
- * - `unsafeCast(String)` for a multi-item `transition` and a whole-value `var()`: Kotlin's generated
- *   unions drop TypeScript's `(string & {})` escape hatch. Two casts here, nothing else.
+ * - `unsafeCast(String)` for a multi-item `transition`: csstype's `TransitionProperty` only exposes
+ *   `all`, and the generated unions drop TypeScript's `(string & {})` escape hatch. One cast here.
+ * - `var(name, fallback)` from cssom takes a `CustomPropertyName` plus a **typed** fallback, so
+ *   `var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff))` is three typed calls rather
+ *   than one string.
  *
  * The size of that trade is [rawCssReport] — how much CSS has to be typed as a string at all — not
  * source length: jOOQ is longer than the SQL it replaces, and that is not the point either.
@@ -66,29 +73,48 @@ class CssSheetExperiment {
         }
     """.trimIndent()
 
-    /** The strings the DSL form still spells by hand — its whole remaining "unsafe" surface. */
-    private val dslLiterals = listOf(
-        "var(--ktjs-card-border, rgba(127, 127, 127, 0.24))",
-        "var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff))",
-        "border-color 0.2s ease, box-shadow 0.2s ease",
-        "var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18))",
-        "var(--ktjs-accent, var(--ifm-color-primary))",
+    /**
+     * Custom property names — the contract with the theme, not CSS syntax. `var()` takes one, so the
+     * fallback becomes a typed value instead of a hand-written `var(--x, …)` string.
+     */
+    private val customPropertyNames = listOf(
+        "--ktjs-card-border",
+        "--ktjs-card-bg",
+        "--ifm-background-surface-color",
+        "--ktjs-accent",
+        "--ifm-color-primary",
+        "--ktjs-shadow",
     )
+
+    /** The only CSS text the DSL form still spells by hand. */
+    private val transitionList = "border-color 0.2s ease, box-shadow 0.2s ease"
 
     /** Form 2 and 3 — the same rules, built with csstype's DSL. */
     private val rules: PropertiesBuilder = unsafeJso {
         ".ktjs-feature-card" {
-            border = Border(1.px, LineStyle.solid, Color(dslLiterals[0]))
-            backgroundColor = Color(dslLiterals[1])
-            // Typed property, stringly value: the generated Kotlin unions have no "any string".
-            transition = unsafeCast(dslLiterals[2])
+            border = Border(
+                1.px,
+                LineStyle.solid,
+                `var`(CustomPropertyName(customPropertyNames[0]), rgb(127, 127, 127, 0.24)),
+            )
+            backgroundColor = `var`(
+                CustomPropertyName(customPropertyNames[1]),
+                `var`(CustomPropertyName(customPropertyNames[2]), Color("#fff")),
+            )
+            // No typed `TransitionProperty` beyond `all`: the shorthand list stays text — the one cast.
+            transition = unsafeCast(transitionList)
             // A fallback ladder is a JS array; the serializer expands it into two declarations.
             display = fallback(Display.grid, Display.flex)
             padding = 1.5.rem
             "&:hover" {
-                borderColor = Color(dslLiterals[4])
-                // `BoxShadow` has no String overload: a whole-value var() needs a cast as well.
-                boxShadow = unsafeCast(dslLiterals[3])
+                borderColor = `var`(
+                    CustomPropertyName(customPropertyNames[3]),
+                    `var`(CustomPropertyName(customPropertyNames[4])),
+                )
+                boxShadow = `var`(
+                    CustomPropertyName(customPropertyNames[5]),
+                    BoxShadow(0.px, 10.px, 24.px, rgb(31, 111, 235, 0.18)),
+                )
             }
         }
     }
@@ -115,14 +141,19 @@ class CssSheetExperiment {
 
     /** The metric that matters: how much CSS syntax is still spelled by hand in each form. */
     val rawCssReport: String = buildString {
-        append("text form: ").append(text.length).append(" characters of hand-written CSS\n")
-        append("DSL form:  ").append(dslLiterals.sumOf { it.length })
-            .append(" characters (").append(dslLiterals.size).append(" string literals)\n")
+        append("text form: ").append(text.length).append(" characters of hand-written CSS, ");
+        append("custom property names included\n")
+        append("DSL form:  ").append(transitionList.length)
+            .append(" characters of CSS text — one string, the transition list\n")
+        append("           + ").append(customPropertyNames.size).append(" custom property names (")
+            .append(customPropertyNames.sumOf { it.length })
+            .append(" characters), the same names the text form spells\n")
         append('\n')
-        append("Property names, numeric values and the pseudo-class structure come from types and\n")
-        append("constants in the DSL form. What is left as text: a whole-value var() fallback and the\n")
-        append("comma-joined shorthand — the two cases where csstype's Kotlin unions have no escape.\n")
-        append("Source length is not the measure: both forms emit the same declarations.")
+        append("Everything else is a typed value: Border(1.px, LineStyle.solid, …), rgb(127, 127, 127, 0.24),\n")
+        append("BoxShadow(0.px, 10.px, 24.px, …), var(name, fallback), fallback(grid, flex), 1.5.rem.\n")
+        append("One unsafeCast survives: `transition` takes a TransitionProperty, which the generated\n")
+        append("Kotlin only exposes as `all`. Source length is not the measure — both forms emit the\n")
+        append("same declarations.")
     }
 
     /** Renders every form, plus a card that adopts the CSSOM one, into the probe page. */

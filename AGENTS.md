@@ -194,12 +194,14 @@ duckfn 站点一致。
     - **csstype DSL**：`unsafeJso<PropertiesBuilder> { ".selector" { border = Border(1.px, LineStyle.solid, …);
       "&:hover" { … } } }` → `@emotion/serialize` 的 `serializeStyles([rules])` 出声明（自动连字符化、
       把 `fallback(a, b)` 摊成多条）→ `stylis` 的 `serialize(compile("selector{…}"), middleware([stringify]))`
-      （把 `&:hover` 拍平成 `.selector:hover`、规范化取值）→ `replaceSync`。同一段卡片规则：手写要约
-      455 个字符的 CSS 文本，DSL 只剩约 256 个字符的字符串（5 个整值 `var()` / 简写），属性名、数值、
-      伪类结构全由类型和常量给出。
+      （把 `&:hover` 拍平成 `.selector:hover`、规范化取值）→ `replaceSync`。同一段卡片规则：手写要
+      455 个字符的 CSS 文本，DSL 只剩 **44 个字符的 CSS 文本**（只有 `transition` 简写一条字符串）
+      + 6 个自定义属性名（文本版同样要写这些名字）；`var(--x, fallback)` 用 cssom 的
+      `var(CustomPropertyName("--x"), fallback)` 把兜底值也类型化，颜色用 `rgb(r,g,b,a)`、阴影用
+      `BoxShadow(0.px, 10.px, 24.px, …)`、阶梯用 `fallback(grid, flex)`。
     - 三条实测约束：① 用 `&:hover`，`hover {}` 糖写的是 `:hover`，stylis 会解释成**后代**选择器；
-      ② 多值 `transition`、整值 `var()` 兜底仍需 `unsafeCast(String)`（Kotlin 侧没有 TS 的
-      `(string & {})` 逃生口，`TransitionProperty` 只暴露 `all`），少量 cast 是可接受的代价；
+      ② 只有多值 `transition` 仍需 `unsafeCast(String)`（`TransitionProperty` 在生成代码里只暴露
+      `all`，Kotlin 侧也没有 TS 的 `(string & {})` 逃生口），少量 cast 是可接受的代价；
       ③ 只声明用到的两个包（`@emotion/serialize` + `stylis`），不要写全 wrapper。
     - **别用 `kotlin-css`（`kotlinx.css`）那套**：值不做校验（`Color`/`LinearDimension` 只是 `String`
       包装），`transition` 强制补 `0s` 延迟，整值 `var()` 只能退回 `put("box-shadow", "…")`，`hover` /
