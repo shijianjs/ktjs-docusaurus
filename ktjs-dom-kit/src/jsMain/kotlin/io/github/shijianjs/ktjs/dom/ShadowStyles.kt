@@ -46,7 +46,7 @@ fun HTMLElement.attachShadowRoot(
  *
  *         private val SHEET: CSSStyleSheet = cssSheet {
  *             cardClass {
- *                 pseudo(Pseudos.hover) { borderColor = `var`(accentHook, `var`(primaryColorHook)) }
+ *                 Pseudos.hover { borderColor = `var`(accentHook, `var`(primaryColorHook)) }
  *             }
  *         }
  *     }

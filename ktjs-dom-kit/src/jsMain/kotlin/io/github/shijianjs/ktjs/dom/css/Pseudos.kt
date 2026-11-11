@@ -20,15 +20,20 @@ import web.cssom.many
  * ```kotlin
  * cssSheet {
  *     cardClass {
- *         pseudo(Pseudos.hover) { borderColor = accent }
+ *         Pseudos.hover { borderColor = accent }                         // same shape as the wrapper's hover {}
  *         pseudos(Pseudos.hover, Pseudos.focusVisible) { borderColor = accent }
  *     }
  * }
  * ```
  *
- * `many` joins either `Selector`s or `Pseudo`s: `many(Pseudos.hover, Pseudos.focusVisible)` is a
- * `Pseudo` (`"&:hover,&:focus-visible"`), and `many(Selector("&:hover"), Selector("&:focus-visible"))`
- * is a `Selector`. `Pseudo("&:not(...)")` covers selectors that are not in the list below.
+ * The short form is [Pseudo.invoke]: a context parameter picks up the enclosing `RuleBuilder` (the
+ * `PropertiesBuilder` that `cssSheet { … }` provides), so a `Pseudo` value can be invoked just like
+ * `csstype`'s `hover {}` — except that ours carries `&` and can be combined. `many` joins either
+ * `Selector`s or `Pseudo`s: `many(Pseudos.hover, Pseudos.focusVisible)` is a `Pseudo`
+ * (`"&:hover,&:focus-visible"`), and `many(Selector("&:hover"), Selector("&:focus-visible"))` is a
+ * `Selector`. Invoking that result needs parentheses — `(many(…)) { … }` — because `many` itself has
+ * a `vararg`; for readability prefer `pseudos(…)`. `Pseudo("&:not(...)")` covers selectors outside
+ * the list below.
  */
 external interface Pseudo
 
@@ -43,6 +48,22 @@ fun <T : Any> RuleBuilder<T>.pseudo(
     block: T.() -> Unit,
 ) {
     pseudo.asSelector()(block)
+}
+/**
+ * One state of the enclosing rule, spelled the way the wrappers' own pseudo helpers are:
+ * `Pseudos.hover { … }`. The context parameter is the `RuleBuilder` in scope (`cssSheet`'s
+ * `PropertiesBuilder`); the `&` is already part of the [Pseudo] value.
+ *
+ * Requires Kotlin 2.2+ context parameters (no compiler flag in 2.4). Import `…dom.css.invoke` at
+ * call sites, as with any operator extension.
+ */
+context(builder: RuleBuilder<T>)
+inline operator fun <T : Any> Pseudo.invoke(
+    block: T.() -> Unit,
+) {
+    builder.apply {
+        this@invoke.asSelector()(block)
+    }
 }
 
 /** Several states sharing one block — `many` joins the selectors with commas. */

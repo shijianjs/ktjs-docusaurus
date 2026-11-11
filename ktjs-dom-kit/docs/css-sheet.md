@@ -19,7 +19,7 @@ internal val CARD_SHEET: CSSStyleSheet = cssSheet {
     cardClass {                                   // 选择器用 ClassName，见 3.1
         border = Border(1.px, LineStyle.solid, var(cardBorderHook, NamedColor.black))
         transition = many(Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease))
-        pseudo(Pseudos.hover) { borderColor = var(accentHook, var(primaryColorHook)) }
+        Pseudos.hover { borderColor = var(accentHook, var(primaryColorHook)) }
     }
 }
 ```
@@ -41,7 +41,7 @@ PropertiesBuilder (= JSO)
 
 要点：
 
-- **顶层是选择器映射**，不是声明集合。`cardClass { … }` / `pseudo(Pseudos.hover) { … }` / `":host" { … }` /
+- **顶层是选择器映射**，不是声明集合。`cardClass { … }` / `Pseudos.hover { … }` / `":host" { … }` /
   `"@media …" { … }` 是 key；写在列表里的属性属于最近一次 `{}` 的那条规则。
 - `serializeStyles` 的参数是**数组**（emotion 里是 tagged template 的 `strings`）：`serializeStyles([rules])`。
   传对象本身会去读 `args[0]`，结果是空串。
@@ -65,15 +65,21 @@ cssSheet { cardClass { … } }
 一次性用可以加括号 `(ClassName("card")) { … }`；要复用就存成 `val`。
 
 伪类、伪元素用 `css/Pseudos.kt` 自建的常量（`TagName` + `HtmlTagName` 那套形态）：
-`Pseudos` 列全 `csstype.SimplePseudosRuleBuilder` 的 64 个选择器，每个都带 `&`；`pseudo` / `pseudos`
-两个 `RuleBuilder` 方法把它转成 `Selector`，后者用 `many` 把多个变体拼成一个块（见 4.1）：
+`Pseudos` 列全 `csstype.SimplePseudosRuleBuilder` 的 64 个选择器，每个都带 `&`（见 4.1）：
 
 ```kotlin
-pseudo(Pseudos.hover) { … }
+Pseudos.hover { … }                                  // 和官方 hover { } 一样的写法
 pseudos(Pseudos.hover, Pseudos.focusVisible) { … }   // "&:hover,&:focus-visible" 一个块
-pseudo(Pseudos.before) { … }
-many(Pseudos.hover, Pseudos.focusVisible)             // 也可直接拼 Pseudo
+Pseudos.before { … }
+many(Pseudos.hover, Pseudos.focusVisible)             // 也可直接拼成一个 Pseudo
 ```
+
+短写法来自 `context(builder: RuleBuilder<T>) operator fun Pseudo.invoke(...)`：context 参数自动取
+`cssSheet { … }` 作用域里的 `PropertiesBuilder`（Kotlin 2.2+ context parameters，本仓库 2.4 无需开关），
+调用点需要 `import io.github.shijianjs.ktjs.dom.css.invoke`。和官方糖的差别是：我们带 `&`、能组合。
+`many(…)` 的结果也是 `Pseudo`，可以直接 `(many(Pseudos.hover, Pseudos.focusVisible)) { … }`——括号不能省
+（`many` 是 `vararg`，不加括号尾随 lambda 会被当成 vararg 实参），所以组合态更推荐 `pseudos(…)`。
+显式的 `pseudo(value) { … }` 仍在，适合拿到一个 `Pseudo` 变量时用。
 
 **at-rule 有官方入口，不要手写 `"@media …"` / `"@supports …"` 字符串**：
 
@@ -170,8 +176,10 @@ hover {}      -> .probe-sugar :hover{…}     ← 不是 .probe-sugar:hover
 - `external interface Pseudo` + `Pseudo(value)` 工厂；
 - `object Pseudos` 列全 `SimplePseudosRuleBuilder` 的 64 个字符串，每个带 `&`（`Pseudos.hover` = `"&:hover"`）；
 - `Pseudo.asSelector(): Selector` 转成 `Selector`；
-- `RuleBuilder.pseudo(pseudo, block)` 与 `RuleBuilder.pseudos(vararg pseudos, block)` 两个方法，后者用
-  `web.cssom.many` 把多个 `Selector` 拼成一条；`many` 也可以直接拼多个 `Pseudo`。
+- `context(RuleBuilder<T>) operator fun Pseudo.invoke(block)` —— 于是 `Pseudos.hover { … }` 的写法和
+  官方 `hover { … }` 一样，但带 `&`（见 3.1 的 context 参数说明）；
+- `RuleBuilder.pseudo(pseudo, block)`（显式形式）与 `RuleBuilder.pseudos(vararg pseudos, block)`
+  （后者用 `web.cssom.many` 把多个 `Selector` 拼成一条）；`many` 也可以直接拼多个 `Pseudo`。
 - 列表外的选择器用工厂：`Pseudo("&:not(…)")`、`Pseudo("&::part(…)")`。
 
 对照实验 `probes/web-components` 第 8f 节里仍写着 `hover {}` 与 `"&:hover"` 两种字符串 —— 那是这项

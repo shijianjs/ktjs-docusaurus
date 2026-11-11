@@ -4,7 +4,7 @@ import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.css.Pseudos
-import io.github.shijianjs.ktjs.dom.css.pseudo
+import io.github.shijianjs.ktjs.dom.css.invoke
 import io.github.shijianjs.ktjs.dom.css.pseudos
 import io.github.shijianjs.ktjs.dom.cssSheet
 import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
@@ -239,7 +239,7 @@ class KtjsHero : CustomElementAdapter() {
                     pointerEvents = pointerEventsNone
                 }
 
-                pseudo(Pseudos.before) {
+                Pseudos.before {
                     top = (-18).rem
                     left = 50.pct
                     width = 52.rem
@@ -252,7 +252,7 @@ class KtjsHero : CustomElementAdapter() {
                     )
                 }
 
-                pseudo(Pseudos.after) {
+                Pseudos.after {
                     right = (-10).rem
                     bottom = (-14).rem
                     width = 34.rem

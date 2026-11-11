@@ -9,6 +9,7 @@ import io.github.shijianjs.ktjs.dom.css.pseudos
 import io.github.shijianjs.ktjs.dom.css.colorStop
 import io.github.shijianjs.ktjs.dom.css.pointerEventsNone
 import io.github.shijianjs.ktjs.dom.css.and as supportsAnd
+import io.github.shijianjs.ktjs.dom.css.invoke
 import io.github.shijianjs.ktjs.dom.css.not as supportsNot
 import io.github.shijianjs.ktjs.dom.css.or as supportsOr
 import io.github.shijianjs.ktjs.dom.css.radialGradient
@@ -86,6 +87,20 @@ class CssSheetTest {
             ),
             text,
         )
+    }
+
+    @Test
+    fun pseudoValuesInvokeLikeTheWrappersOwnHelpers() {
+        val text = cssText {
+            cardClass {
+                Pseudos.hover { display = Display.block }
+                // Parentheses: the trailing lambda has to bind to Pseudo.invoke, not to many's vararg.
+                (many(Pseudos.hover, Pseudos.focusVisible)) { display = Display.flex }
+            }
+        }
+
+        assertTrue(text.contains(".card:hover{display:block;}"), text)
+        assertTrue(text.contains(".card:hover,.card:focus-visible{display:flex;}"), text)
     }
 
     @Test

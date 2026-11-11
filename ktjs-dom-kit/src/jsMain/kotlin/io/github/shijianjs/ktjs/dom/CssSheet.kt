@@ -26,7 +26,7 @@ import web.cssom.CSSStyleSheet
  *     cardClass {
  *         border = Border(1.px, LineStyle.solid, var(CustomPropertyName<Color>("--card-border"), NamedColor.black))
  *         transition = many(Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease))
- *         pseudo(Pseudos.hover) { borderColor = NamedColor.white }
+ *         Pseudos.hover { borderColor = NamedColor.white }
  *     }
  * }
  * ```

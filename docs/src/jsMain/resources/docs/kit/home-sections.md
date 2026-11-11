@@ -205,7 +205,7 @@ private val SHEET: CSSStyleSheet = cssSheet {
     cardClass {
         border = Border(1.px, LineStyle.solid, var(cardBorderHook, rgb(127, 127, 127, 0.24)))
         transition = many(Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease))
-        pseudo(Pseudos.hover) { borderColor = var(accentHook, var(primaryColorHook)) }
+        Pseudos.hover { borderColor = var(accentHook, var(primaryColorHook)) }
     }
 }
 ```
