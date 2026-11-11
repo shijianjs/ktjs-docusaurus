@@ -1,4 +1,4 @@
-name: Deploy demo and API reference
+name: Deploy site and API reference
 
 on:
   # Deploying is a manual decision now: run this after the commits worth publishing are on main.
@@ -30,8 +30,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      # pagesSite assembles build/pages: the demo at the root, Dokka output under /api/.
-      - name: Build demo and API reference
+      # pagesSite assembles build/pages: the docs site at the root, Dokka output under /api/.
+      - name: Build site and API reference
         run: ./gradlew pagesSite
 
       - name: Configure Pages

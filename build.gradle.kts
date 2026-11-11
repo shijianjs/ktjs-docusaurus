@@ -31,7 +31,7 @@ val unpublishedModules = setOf(
 // version, so it is not looked up in wrapper-revisions.properties.
 val wrapperModules = setOf("ktjs-docusaurus")
 
-// Dokka aggregates every published module into one API reference. `demo` is not part of the
+// Dokka aggregates every published module into one API reference. `docs` is not part of the
 // published API surface, so it is excluded by the prefix filter.
 dependencies {
     subprojects
@@ -87,7 +87,7 @@ plugins.withType<NodeJsRootPlugin> {
 // what is reachable from that module's own `@JsExport` roots. A wrapper module has no such roots, so
 // its `.mjs` output would be empty and any cross-module reference would resolve to `undefined`.
 // Turning it off keeps the public API of each module in its output. It is applied to every KMP
-// module — including the demo — because each module is linked separately.
+// module — including the docs site — because each module is linked separately.
 subprojects {
     plugins.withId("org.jetbrains.kotlin.multiplatform") {
         extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
@@ -122,7 +122,7 @@ subprojects {
         source.setFrom(files("src"))
     }
 
-    // Only wrapper modules are published and documented; `demo` is the GitHub Pages site.
+    // Only wrapper modules are published and documented; `docs` is the GitHub Pages site.
     if (name.startsWith(publishedPrefix) && name !in unpublishedModules) {
         apply(plugin = "org.jetbrains.dokka")
     }
@@ -255,13 +255,13 @@ tasks.register("printPublishedVersions") {
     }
 }
 
-// Assembles the GitHub Pages site: the demo Docusaurus build at the root and the API reference
+// Assembles the GitHub Pages site: the Docusaurus build of `docs` at the root and the API reference
 // under /api/. The site is assembled inside the npm workspace (see the Gradle plugin), which is why
 // the built pages live under `build/js/docusaurus/<module>/build`.
 tasks.register<Sync>("pagesSite") {
-    dependsOn(":demo:docusaurusBuild", "dokkaGeneratePublicationHtml")
+    dependsOn(":docs:docusaurusBuild", "dokkaGeneratePublicationHtml")
     into(layout.buildDirectory.dir("pages"))
-    from(layout.buildDirectory.dir("js/docusaurus/demo/build"))
+    from(layout.buildDirectory.dir("js/docusaurus/docs/build"))
     from(layout.buildDirectory.dir("dokka/html")) {
         into("api")
     }

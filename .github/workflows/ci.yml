@@ -45,7 +45,7 @@ jobs:
       - name: Build and test
         run: ./gradlew build --stacktrace
 
-      # Builds the demo site through the Gradle plugin and assembles the Pages layout: the static
+      # Builds the docs site through the Gradle plugin and assembles the Pages layout: the static
       # site at the root, the Dokka reference under /api/. This is the only place the whole
       # Kotlin/JS-configuration -> Docusaurus pipeline runs in CI.
       - name: Assemble Pages site

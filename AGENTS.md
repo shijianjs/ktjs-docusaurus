@@ -20,9 +20,10 @@ Gradle 插件驱动。Kotlin/JS 模块名、`wrapper-revisions.properties` 的 k
 - `ktjs-docusaurus`：发布模块。Docusaurus 的每个 npm 包在这里只是一个 Kotlin 包（`config`、`theme`、
   `sidebars`、`presets`、`plugins/contentdocs` …），不按 npm 包拆 Gradle 模块。
 - `ktjs-docusaurus-gradle-plugin`：Gradle 插件 `io.github.shijianjs.ktjs.docusaurus`，是**独立构建**，由
-  `settings.gradle.kts` 的 `pluginManagement { includeBuild(...) }` 接入，所以 `demo` 能把它当普通插件用。
+  `settings.gradle.kts` 的 `pluginManagement { includeBuild(...) }` 接入，所以 `docs` 能把它当普通插件用。
   它不在 root 构建的子项目里：`./gradlew build` 不编译它，`includeBuild` 在配置阶段按需编译。
-- `demo`：示例站点（Markdown + Kotlin 配置），不发布、不进 Dokka，是 GitHub Pages 的内容。
+- `docs`：本项目的文档站（Markdown + Kotlin 配置），不发布、不进 Dokka，是 GitHub Pages 的内容。
+  站点内容在 `src/jsMain/resources/docs`，分三块：用户指南、文档工具箱（kit）、开发文档（本仓库自己的）。
 - `scaffold/module`：模板骨架，保留占位符，不参与构建。
 
 Docusaurus 全部包 lockstep 发版（`3.10.2` 一次发齐），所以整个生态只产生一个 Maven 版本；这也是不按
@@ -103,7 +104,7 @@ npm 包拆模块的原因。
 ### 页面用 MDX，不用 tsx
 
 首页这类「静态为主 + 少量动态」的页面用 `src/jsMain/resources/pages/index.mdx`，标签是**真正的自定义
-元素**：`<ktjs-hero>` / `<ktjs-features>` / `<ktjs-next-steps>`，类在 `:demo-client` 里，
+元素**：`<ktjs-hero>` / `<ktjs-features>` / `<ktjs-next-steps>`，类在 `ktjs-docusaurus-kit-elements` 里，
 `connectedCallback` 读属性与子标签、建一次分区、丢掉声明式子节点（`data-ktjs-read` 防重）。做法与
 duckfn 站点一致。
 
@@ -146,7 +147,7 @@ duckfn 站点一致。
      `ktjs-badge` / `ktjs-features` / `ktjs-feature` / `ktjs-next-steps` / `ktjs-step`。每个元素
      都渲染进自己的 shadow root：父级负责框架和 `<slot>` 布局，子级自己渲染卡片，子标签是真元素，
      不再被解析成数据后丢弃。顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进
-     demo 的依赖图。**不发布**：这是本站的 UI，不是通用契约，其他项目通过 kit 分发的 bundle 使用。
+     `docs` 站的依赖图。**不发布**：这是本站的 UI，不是通用契约，其他项目通过 kit 分发的 bundle 使用。
    - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`）、挂 shadow root 的 `attachShadowRoot` /
      `attachStyledShadow(vararg CSSStyleSheet)`，以及 `HTMLElement.inlineStyle`（`csstype.Properties`
      视图），与 Docusaurus 无关。模块名不以 `ktjs-docusaurus` 开头，因此不参与发布和 Dokka；元素包用
@@ -245,7 +246,7 @@ Kotlin/JS 的 library 链接**默认开 IR DCE，入口只有该模块自己的 
 | `-Xir-dce=false` | 45,725 B | 是 |
 
 所以根构建给**每个 KMP 子模块**统一加 `freeCompilerArgs.add("-Xir-dce=false")`。必须逐个模块加：每个模块
-独立链接，只给 wrapper 加而 demo 不加，demo 自己的 public 声明仍会被削掉。库无法保证自己一定被打进
+独立链接，只给 wrapper 加而 `docs` 不加，`docs` 自己的 public 声明仍会被削掉。库无法保证自己一定被打进
 bundle，而消费方打包时本来就会摇树，所以这个开关对 `executable` 消费方没有体积代价。
 
 两个连带约束：
@@ -338,8 +339,8 @@ wrapper 的目标是让上游 npm 包暴露的公开 API 在 Kotlin/JS 侧都能
 1. 复制 `scaffold/module` 为 `ktjs-<name>`，替换文件里的所有占位符（包名、npm 包名、项目名）。
 2. `settings.gradle.kts` 加 `include(":ktjs-<name>")`。
 3. `package.json` 的 `dependencies` 加 npm 包版本；`wrapper-revisions.properties` 加 `ktjs-<name>=1`。
-4. `demo/build.gradle.kts` 的 `jsMain.dependencies` 加 `implementation(project(":ktjs-<name>"))`，
-   并在 demo 里实际使用它。
+4. `docs/build.gradle.kts` 的 `jsMain.dependencies` 加 `implementation(project(":ktjs-<name>"))`，
+   并在 `docs` 站里实际使用它。
 5. 全局替换时同步检查 `detekt`、Dependabot 分组、README 模块表与 Dokka（Dokka 按前缀自动收集，无需改）。
 
 模块名、`wrapper-revisions.properties` 的 key、目录名三者必须完全一致，否则配置阶段会失败。
@@ -369,7 +370,7 @@ Gradle 9 / JDK 25。升级时注意 2.0 的插件 ID 是 `dev.detekt`，规则�
 ## Kotlin/JS 模块格式与测试运行时
 
 - 所有 `js` 目标统一 `useEsModules()`，新增模块沿用，不要退回 CommonJS/UMD。klib 不携带 moduleKind，
-  消费方在链接时自行选择格式；这里的选择只影响本仓库的测试产物与 demo bundle。
+  消费方在链接时自行选择格式；这里的选择只影响本仓库的测试产物与 `docs` 站的 bundle。
 - `@JsModule` 声明必须按 ESM 语义书写：`@file:JsModule` 的顶层函数/类会生成具名导入，安全；但顶层
   `external val` 配 `@JsName` 会生成 default import，对只有具名导出的包必须写成 `@JsModule` +
   `external object` + 具名属性。
@@ -384,12 +385,12 @@ Gradle 9 / JDK 25。升级时注意 2.0 的插件 ID 是 `dev.detekt`，规则�
   `kotlinInstallPlaywrightBrowsers` 是 `DefaultTask`、内部用 `ExecOperations` 起 node，任务本身不接受
   `environment` 配置，所以只能靠环境变量注入，不能用 `init.d` 脚本改任务。**只在本机生效，不要提交到仓库，
   也不要写进工作流——CI 走官方源。**
-- demo 的端到端套件用 **JVM 版 Playwright**（照 `ktjs-vaadin`）：`demo` 加 `jvm()` target，
+- `docs` 的端到端套件用 **JVM 版 Playwright**（照 `ktjs-vaadin`）：`docs` 加 `jvm()` target，
   `src/jvmTest` 里 `@UsePlaywright` + `OptionsFactory`，测试 JVM 内嵌静态服务器直接服务
-  `:demo:docusaurusBuild` 的产物。**不引入 TS/Node 测试层，也不给 Playwright 写 TS wrapper**；
+  `:docs:docusaurusBuild` 的产物。**不引入 TS/Node 测试层，也不给 Playwright 写 TS wrapper**；
   「不同步 duckfn 的 playwright 测试」当初说的是不搬它那套 TS 封装、其它轻量思路可参考，不是不做测试。
 - `e2eTest` 是 `verification` 组里的独立 `Test` 任务，`jvmTest` 置 `enabled = false`，所以
-  `build` / `check` 与 CI 都不跑 e2e；改完 demo 本地按需 `./gradlew :demo:e2eTest` 核对。
+  `build` / `check` 与 CI 都不跑 e2e；改完站点本地按需 `./gradlew :docs:e2eTest` 核对。
 - e2e 的静态服务器用 JDK `HttpServer` 自己控制 MIME：Docusaurus 的元素入口是 ES module，
   `.mjs` 返回 `application/octet-stream` 会被浏览器拒绝执行（症状是元素全部不升级、shadow 为空）。
   它同时剥掉 `/ktjs-docusaurus/` baseUrl 前缀，因此不必复制站点产物。
@@ -717,17 +718,22 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
 `kotlin-tooling-metadata.json`；POM 的 `url` 或 `scm.url` 是有效的 GitHub 仓库链接。改仓库地址时要同步
 修改根 `build.gradle.kts` 的 POM 配置。
 
-## 演示站点与 GitHub Pages
+## 文档站与 GitHub Pages
 
-- `demo` 只消费公共 API，不发布、也不进入 Dokka。根 `build.gradle.kts` 的发布与 Dokka 配置按
+- `docs` 只消费公共 API，不发布、也不进入 Dokka。根 `build.gradle.kts` 的发布与 Dokka 配置按
   `ktjs-docusaurus` 前缀过滤子模块，新增非发布模块时沿用该约定。
-- demo 就是文档站本身：`src/jsMain/resources/{docs,pages,css,static}` 是内容，`site/Config.kt` 是配置。
-  `./gradlew :demo:docusaurusBuild` 把它变成静态站点，产物在 `build/js/docusaurus/demo/build`（站点目录
+- `docs` 就是文档站本身：`src/jsMain/resources/{docs,pages,css,static}` 是内容，
+  `src/jsMain/kotlin/io/github/shijianjs/ktjs/docusaurus/docs/Config.kt` 是配置。
+  `./gradlew :docs:docusaurusBuild` 把它变成静态站点，产物在 `build/js/docusaurus/docs/build`（站点目录
   在 npm workspace 里的原因见上面的「Gradle 插件与站点组装」）。
-- 浏览器端 e2e 是 `:demo:e2eTest`（JVM Playwright，见「Kotlin/JS 模块格式与测试运行时」），改完 demo
+- 导航栏分三块，三块各自一个 `docSidebar` 条目、一个同名 sidebar：User guide（`userGuide`）与 Docs kit
+  （`docsKit`）面向站点使用者，Development（`development`）放本仓库自己的开发文档。Gradle 插件页在用户
+  指南里，不在 kit 里——wrapper 加插件才是完整的 Docusaurus，kit 只是本项目按自己的喜好加的增强。
+  开发文档只写中文，不建 `i18n/` 下的对应文件（`zh-Hans` 会回落到原文）。
+- 浏览器端 e2e 是 `:docs:e2eTest`（JVM Playwright，见「Kotlin/JS 模块格式与测试运行时」），改完站点
   本地按需核对；它不进 `build` / `check`，也不进 CI。CI 的链路验证仍是「构建成功 + Docusaurus 自己的
-  断链检查」：`onBrokenLinks = 'throw'`（demo 里显式设置）让断链变成构建失败。
-- `./gradlew pagesSite` 把 `build/js/docusaurus/demo/build` 与 `build/dokka/html` 组装到 `build/pages`：
+  断链检查」：`onBrokenLinks = 'throw'`（`docs` 里显式设置）让断链变成构建失败。
+- `./gradlew pagesSite` 把 `build/js/docusaurus/docs/build` 与 `build/dokka/html` 组装到 `build/pages`：
   站点在根目录，API 文档在 `api/`。
 - Dokka 2.2.0 同时应用到根项目和 wrapper 子模块；聚合入口是根项目的 `dependencies { dokka(...) }`，
   任务为 `dokkaGeneratePublicationHtml`（2.x 已移除旧的 `dokkaHtmlMultiModule`）。
@@ -735,7 +741,7 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
   `gh workflow run pages.yml`（或 Actions 页面点 Run workflow）。它每次都重新跑 `pagesSite`，所以线上
   内容始终对应触发时 `master` 的提交。仓库 Settings → Pages 的 Source 必须选 **GitHub Actions**。
 - 本地预览：执行 `./gradlew pagesSite` 后给 `build/pages` 起任意静态服务器。直接开 `file://` 会因相对
-  路径与 CORS 导致资源加载异常。要看 dev server 用 `./gradlew :demo:docusaurusStart`。
+  路径与 CORS 导致资源加载异常。要看 dev server 用 `./gradlew :docs:docusaurusStart`。
 - 右侧目录的折叠按钮由 kit 的 `TocToggle` 注入：按钮挂在 `<body>` 上（插进 React 子树里会被下次
   reconciliation 影响，而且收起目录列时会跟着 `display: none`）。收起靠 `body.ktjs-toc-collapsed`，
   同时给文章列加 `ktjs-doc-article` 加宽到整行——Docusaurus 在哈希 CSS module 里用
@@ -743,7 +749,9 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
 
 ## 文档约定
 
-- 长期任务（跨上下文）用根目录 `TODO.md` 记总览、`docs/development/roadmap.md` 记完整清单。状态只有
+- 长期任务（跨上下文）用根目录 `TODO.md` 记总览、
+  `docs/src/jsMain/resources/docs/development/roadmap.md` 记完整清单（同一份也发布在站点的 Development
+  分类下）。状态只有
   完成 / 明确不做 / 待完成三种，标「完成」前必须以源码和构建结果核对，不能凭对话里的声明。
 - 需要跨会话、跨上下文感知的信息（环境约定、构建方式、模块结构、容易踩的坑）记录在本文件。
 - 只与某个目录强相关、篇幅较长的说明，放在该目录下的 `AGENTS.md`，根文件只保留指向它的简短索引。

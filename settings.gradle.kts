@@ -1,8 +1,8 @@
 pluginManagement {
     // The Gradle plugin is a build of its own: the root build consumes it through this include, so
-    // `demo` applies it like any published plugin without a local publish step. Keeping it out of
-    // the root project also keeps `./gradlew build` from compiling a JVM project that only the demo
-    // needs; CI builds and publishes it separately.
+    // `docs` applies it like any published plugin without a local publish step. Keeping it out of
+    // the root project also keeps `./gradlew build` from compiling a JVM project that only the docs
+    // site needs; CI builds and publishes it separately.
     includeBuild("ktjs-docusaurus-gradle-plugin")
 
     repositories {
@@ -34,8 +34,9 @@ rootProject.name = "ktjs-docusaurus"
 // publishes all of them in lockstep, so splitting them would only produce redundant Maven versions.
 include(":ktjs-docusaurus")
 
-// Example documentation site: a Kotlin/JS project whose Markdown lives in `src/jsMain/resources`.
-include(":demo")
+// This project's documentation site: a Kotlin/JS project whose Markdown lives in
+// `src/jsMain/resources`. Published as the GitHub Pages site, never to Maven.
+include(":docs")
 
 
 // Runnable copy of kotlin-wrappers' web-components example (verification only, not published).

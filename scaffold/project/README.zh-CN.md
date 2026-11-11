@@ -32,7 +32,7 @@ Gradle 从这两份文件推导基础版本和 `npm(...)` 依赖：
 - JDK 17 或更高（构建使用 Gradle 9.4.1）。
 - Node.js 由 Kotlin Gradle 插件自动下载；`gradle.properties` 关闭了 Yarn，统一用 npm。
 - 首次跑浏览器测试时由 Playwright 下载 Chromium。
-- demo 的端到端测试是独立的 Node 脚本，因此 `PATH` 上还要有 `node`。
+- 文档站的端到端测试用 JVM 版 Playwright，不需要另外准备 Node.js。
 
 ## 构建与测试
 
@@ -42,10 +42,10 @@ Gradle 从这两份文件推导基础版本和 `npm(...)` 依赖：
 # 单个模块的测试
 ./gradlew :__PREFIX__-__MODULE__:jsBrowserTest
 
-# demo 打包页面的端到端检查（Playwright，需要 PATH 上有 node）
-./gradlew :demo:e2eTest
+# 构建产物上的端到端检查（JVM 版 Playwright）
+./gradlew :docs:e2eTest
 
-# GitHub Pages 站点（根目录是 demo，API 文档在 /api/）
+# GitHub Pages 站点（根目录是文档站，API 文档在 /api/）
 ./gradlew pagesSite
 ```
 

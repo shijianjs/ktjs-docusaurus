@@ -8,7 +8,8 @@
 - 保留：1
 - 待完成：7
 
-详细清单：[docs/development/roadmap.md](docs/development/roadmap.md)
+详细清单：[docs/src/jsMain/resources/docs/development/roadmap.md](docs/src/jsMain/resources/docs/development/roadmap.md)
+（同时发布在站点的「Development」分类下：<https://shijianjs.github.io/ktjs-docusaurus/docs/development/roadmap>）
 
 ## 当前待办
 

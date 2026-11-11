@@ -49,7 +49,7 @@ kotlin {
             implementation(npm("react-dom", npmVersions.getValue("react-dom")))
 
             // Declared here so the npm workspace installs them next to the wrapper: the generated
-            // configuration imports them at runtime and the demo site consumes them through it.
+            // configuration imports them at runtime and the docs site consumes them through it.
             implementation(npm("@docusaurus/core", docusaurusVersion))
             implementation(npm("@docusaurus/preset-classic", docusaurusVersion))
             implementation(npm("prism-react-renderer", prismReactRendererVersion))
