@@ -74,7 +74,7 @@ class CssSheetExperimentTest {
         assertTrue(report.contains("text form: ${experiment.text.length} characters"), report)
         // No declaration, no selector, no cast — only the custom property names and the pseudo key.
         assertTrue(report.contains("no CSS text, no selector string, no cast"), report)
-        assertTrue(report.contains("6 custom properties"), report)
+        assertTrue(report.contains("6 custom properties (107 characters)"), report)
         assertTrue(report.contains("PropertyName doubles as a TransitionProperty"), report)
     }
 }

@@ -201,7 +201,7 @@ duckfn 站点一致。
       `.selector:hover`、规范化取值）→ `replaceSync`。同一段卡片规则：手写要 **455 个字符的 CSS
       文本**，DSL 版本 **0 个字符**——没有一条声明、没有一个选择器字符串、没有一处 cast，只剩名字：
       6 个自定义属性名（文本版同样要写）+ 1 个 `"&:hover"` 键。
-      值的类型化路径：`var(CustomPropertyName("--x"), fallback)`（兜底值也是类型化的）、
+      值的类型化路径：自定义属性名各自声明成具名常量 `private val accentHook = CustomPropertyName<Color>("--ktjs-accent")`\n      （字符串每处只写一次），再用 `var(hook, fallback)`（兜底值也是类型化的）、
       `rgb(r,g,b,a)`、`NamedColor.white`（命名色是 `Color` 常量，别写 `"#fff"`）、
       `BoxShadow(0.px, 10.px, 24.px, …)`、`fallback(grid, flex)`、`1.5.rem`、
       `Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease)` 配 cssom 的

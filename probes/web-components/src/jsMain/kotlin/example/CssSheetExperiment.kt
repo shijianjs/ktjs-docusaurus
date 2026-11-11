@@ -84,16 +84,28 @@ class CssSheetExperiment {
     """.trimIndent()
 
     /**
-     * Custom property names — the contract with the theme, not CSS syntax. `var()` takes one, so the
-     * fallback becomes a typed value instead of a hand-written `var(--x, …)` string.
+     * The theme hooks, as typed names. `CustomPropertyName("--x")` is the only way to declare one —
+     * cssom has no constant for application-specific properties — but each hook is spelled exactly
+     * once here and then referenced by name, so a typo cannot reach a second call site.
+     *
+     * The type argument is the value the hook carries: `Color` for colours, `BoxShadow` for the
+     * shadow, which is what `var(name, fallback)` needs to type its fallback.
      */
-    private val customPropertyNames = listOf(
-        "--ktjs-card-border",
-        "--ktjs-card-bg",
-        "--ifm-background-surface-color",
-        "--ktjs-accent",
-        "--ifm-color-primary",
-        "--ktjs-shadow",
+    private val cardBorderHook = CustomPropertyName<Color>("--ktjs-card-border")
+    private val cardBackgroundHook = CustomPropertyName<Color>("--ktjs-card-bg")
+    private val surfaceColorHook = CustomPropertyName<Color>("--ifm-background-surface-color")
+    private val accentHook = CustomPropertyName<Color>("--ktjs-accent")
+    private val primaryColorHook = CustomPropertyName<Color>("--ifm-color-primary")
+    private val cardShadowHook = CustomPropertyName<BoxShadow>("--ktjs-shadow")
+
+    /** The hooks, for the report: a `CustomPropertyName` is its name at runtime, so this is the only\n     *  string content the sheet still carries. */
+    private val hooks: List<Any> = listOf(
+        cardBorderHook,
+        cardBackgroundHook,
+        surfaceColorHook,
+        accentHook,
+        primaryColorHook,
+        cardShadowHook,
     )
 
     /** The selector as a typed class name: `ClassName.invoke` writes the leading dot (RuleBuilder.kt). */
@@ -105,12 +117,9 @@ class CssSheetExperiment {
             border = Border(
                 1.px,
                 LineStyle.solid,
-                `var`(CustomPropertyName(customPropertyNames[0]), rgb(127, 127, 127, 0.24)),
+                `var`(cardBorderHook, rgb(127, 127, 127, 0.24)),
             )
-            backgroundColor = `var`(
-                CustomPropertyName(customPropertyNames[1]),
-                `var`(CustomPropertyName(customPropertyNames[2]), NamedColor.white),
-            )
+            backgroundColor = `var`(cardBackgroundHook, `var`(surfaceColorHook, NamedColor.white))
             // `many` is cssom's comma joiner: two typed Transition values, one declaration.
             transition = many(
                 Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
@@ -120,12 +129,9 @@ class CssSheetExperiment {
             display = fallback(Display.grid, Display.flex)
             padding = 1.5.rem
             "&:hover" {
-                borderColor = `var`(
-                    CustomPropertyName(customPropertyNames[3]),
-                    `var`(CustomPropertyName(customPropertyNames[4])),
-                )
+                borderColor = `var`(accentHook, `var`(primaryColorHook))
                 boxShadow = `var`(
-                    CustomPropertyName(customPropertyNames[5]),
+                    cardShadowHook,
                     BoxShadow(0.px, 10.px, 24.px, rgb(31, 111, 235, 0.18)),
                 )
             }
@@ -180,8 +186,8 @@ class CssSheetExperiment {
     val rawCssReport: String = buildString {
         append("text form: ").append(text.length).append(" characters of hand-written CSS, names included\n")
         append("DSL form:  no CSS text, no selector string, no cast — only names: ")
-            .append(customPropertyNames.size).append(" custom properties (")
-            .append(customPropertyNames.sumOf { it.length })
+            .append(hooks.size).append(" custom properties (")
+            .append(hooks.sumOf { "$it".length })
             .append(" characters) + the \"&:hover\" key (see 8f)\n")
         append('\n')
         append("Typed values: Border(1.px, LineStyle.solid, …), rgb(127, 127, 127, 0.24),\n")
