@@ -19,6 +19,7 @@ import web.cssom.PropertyName
 import web.cssom.Color
 import web.cssom.CustomPropertyName
 import web.cssom.Display
+import web.cssom.NamedColor
 import web.cssom.LineStyle
 import web.cssom.Transition
 import web.cssom.TransitionTimingFunction
@@ -108,7 +109,7 @@ class CssSheetExperiment {
             )
             backgroundColor = `var`(
                 CustomPropertyName(customPropertyNames[1]),
-                `var`(CustomPropertyName(customPropertyNames[2]), Color("#fff")),
+                `var`(CustomPropertyName(customPropertyNames[2]), NamedColor.white),
             )
             // `many` is cssom's comma joiner: two typed Transition values, one declaration.
             transition = many(
@@ -147,10 +148,10 @@ class CssSheetExperiment {
         val viaSugar: PropertiesBuilder = unsafeJso {
             // `ClassName("x") { … }` parses as a two-argument call to the factory; the parentheses
             // hand the expression to the `invoke` operator instead. A reused name can just be a val.
-            (ClassName("probe-sugar")) { hover { backgroundColor = Color("red") } }
+            (ClassName("probe-sugar")) { hover { backgroundColor = NamedColor.red } }
         }
         val viaAmpersand: PropertiesBuilder = unsafeJso {
-            (ClassName("probe-ampersand")) { "&:hover" { backgroundColor = Color("red") } }
+            (ClassName("probe-ampersand")) { "&:hover" { backgroundColor = NamedColor.red } }
         }
         append("hover {}      -> ").append(serialized(viaSugar)).append('\n')
         append("\"&:hover\" {}  -> ").append(serialized(viaAmpersand))

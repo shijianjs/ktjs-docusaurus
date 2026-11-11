@@ -28,7 +28,7 @@ class CssSheetExperimentTest {
 
         // `var(name, fallback)` is typed, so the fallback colour comes out as `rgb(…)`.
         assertTrue(css.startsWith(".ktjs-feature-card{border:1px solid var(--ktjs-card-border,rgb(127 127 127 / 0.24));"), css)
-        assertTrue(css.contains("background-color:var(--ktjs-card-bg,var(--ifm-background-surface-color,#fff));"), css)
+        assertTrue(css.contains("background-color:var(--ktjs-card-bg,var(--ifm-background-surface-color,#FFFFFF));"), css)
         assertTrue(css.contains("transition:border-color 0.2s ease,box-shadow 0.2s ease;"), css)
         assertTrue(css.contains("padding:1.5rem;"), css)
         // `fallback(Display.grid, Display.flex)` reaches the text as two declarations, in order.
@@ -63,9 +63,9 @@ class CssSheetExperimentTest {
         val report = experiment.pseudoSugarReport
 
         // `hover {}` writes the key `:hover`; stylis joins it as a descendant, not as the parent's state.
-        assertTrue(report.contains("hover {}      -> .probe-sugar :hover{background-color:red;}"), report)
+        assertTrue(report.contains("hover {}      -> .probe-sugar :hover{background-color:#FF0000;}"), report)
         // Writing `&:hover` is what produces the intended rule.
-        assertTrue(report.contains("\"&:hover\" {}  -> .probe-ampersand:hover{background-color:red;}"), report)
+        assertTrue(report.contains("\"&:hover\" {}  -> .probe-ampersand:hover{background-color:#FF0000;}"), report)
     }
 
     @Test
