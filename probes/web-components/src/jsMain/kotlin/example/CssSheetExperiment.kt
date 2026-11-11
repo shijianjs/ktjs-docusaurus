@@ -91,9 +91,16 @@ class CssSheetExperiment {
     /** The only CSS text the DSL form still spells by hand. */
     private val transitionList = "border-color 0.2s ease, box-shadow 0.2s ease"
 
+    /** The selector as a typed class name: `ClassName.invoke` writes the leading dot (RuleBuilder.kt). */
+    private val cardClass = ClassName("ktjs-feature-card")
+
+    private val sugarClass = ClassName("probe-sugar")
+
+    private val ampersandClass = ClassName("probe-ampersand")
+
     /** Form 2 and 3 — the same rules, built with csstype's DSL. */
     private val rules: PropertiesBuilder = unsafeJso {
-        ".ktjs-feature-card" {
+        cardClass {
             border = Border(
                 1.px,
                 LineStyle.solid,
@@ -132,10 +139,10 @@ class CssSheetExperiment {
      */
     val pseudoSugarReport: String = buildString {
         val viaSugar: PropertiesBuilder = unsafeJso {
-            ".probe-sugar" { hover { backgroundColor = Color("red") } }
+            sugarClass { hover { backgroundColor = Color("red") } }
         }
         val viaAmpersand: PropertiesBuilder = unsafeJso {
-            ".probe-ampersand" { "&:hover" { backgroundColor = Color("red") } }
+            ampersandClass { "&:hover" { backgroundColor = Color("red") } }
         }
         append("hover {}      -> ").append(serialized(viaSugar)).append('\n')
         append("\"&:hover\" {}  -> ").append(serialized(viaAmpersand))
@@ -235,7 +242,7 @@ class CssSheetExperiment {
 
     private fun sampleCard(): HTMLElement {
         val card = element("article") {
-            className = ClassName("ktjs-feature-card")
+            className = cardClass
             textContent = "Hover me: border and shadow come from the adopted sheet."
         }
         return element("div") {
