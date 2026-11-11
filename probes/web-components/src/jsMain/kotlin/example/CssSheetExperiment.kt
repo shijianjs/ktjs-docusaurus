@@ -23,30 +23,29 @@ import web.dom.document
 import web.html.HTMLElement
 
 /**
- * Probe: one element's stylesheet written three ways, so they can be compared side by side.
+ * Probe: one element's stylesheet written as CSS text and as a csstype rules object, side by side.
  *
  *     ./gradlew :probes-web-components:jsBrowserDevelopmentRun      (the page, bottom)
  *     ./gradlew :probes-web-components:jsBrowserTest                (assertions)
  *
  * 1. [text] — what `KtjsFeature`'s companion holds today: `CSSStyleSheet().replaceSync(…)`.
- * 2. [dslAsText] — kotlin-csstype's rules DSL, i.e. `unsafeJso<PropertiesBuilder>` with
- *    `RuleBuilder` / `SimplePseudosRuleBuilder` (the shape emotion, styled and MUI consume), pushed
- *    through [writeRules]. **That serializer is the adapter an adoption would have to own**:
- *    csstype's DSL builds a JSO, not CSS.
- * 3. [dslAsStyleSheet] — the same JSO replayed into real CSSOM rules (`insertRule` + `rule.style`),
- *    which leaves value serialization to the browser instead of a hand-written writer.
+ * 2. [dslAsText] — the csstype rules DSL through `@emotion/serialize` + `stylis`, i.e. the two calls
+ *    emotion's own cache makes: `serializeStyles([rules])` writes the declarations (hyphenating
+ *    names, expanding a `fallback(…)` array into repeated ones), then
+ *    `serialize(compile("selector{…}"), middleware([stringify]))` resolves nested selectors and
+ *    normalizes values. Only the declarations of the two packages actually used are declared here.
+ * 3. [dslAsStyleSheet] — the same rules object replayed into real CSSOM rules (`insertRule` +
+ *    `rule.style`), which leaves value serialization to the browser.
  *
- * Shared by all three: property names are typed (`border = Border(1.px, LineStyle.solid, …)`) and
- * `hover {}` resolves to the parent selector. Not shared: Kotlin's generated unions drop
- * TypeScript's `(string & {})` escape hatch, so a multi-item `transition` or a whole-value `var()`
- * still needs `unsafeCast(String)` — see the two casts in [rules]. A `fallback(…)` ladder is a JS
- * array, which only the text form keeps (CSSOM collapses it, see [dslAsStyleSheet]); that is why
- * `display` appears twice.
+ * Two things the DSL still needs spelled out, both shown below:
  *
- * The run also shows the two adapters drifting from the hand-written text: [writeRules] writes a
- * nested rule inside its parent's braces (CSS Nesting — current browsers accept it, older ones do
- * not), while CSSOM re-serializes values (`transition: border-color 0.2s ease` comes back as
- * `border-color 0.2s`).
+ * - `&:hover`, not the `hover {}` sugar — the sugar writes the key `:hover`, which stylis reads as a
+ *   *descendant* selector (`.parent :hover`).
+ * - `unsafeCast(String)` for a multi-item `transition` and a whole-value `var()`: Kotlin's generated
+ *   unions drop TypeScript's `(string & {})` escape hatch. Two casts here, nothing else.
+ *
+ * The size of that trade is [rawCssReport] — how much CSS has to be typed as a string at all — not
+ * source length: jOOQ is longer than the SQL it replaces, and that is not the point either.
  */
 class CssSheetExperiment {
 
@@ -67,101 +66,87 @@ class CssSheetExperiment {
         }
     """.trimIndent()
 
-    /** Forms 2 and 3 — the same rules, built with csstype's DSL. */
+    /** The strings the DSL form still spells by hand — its whole remaining "unsafe" surface. */
+    private val dslLiterals = listOf(
+        "var(--ktjs-card-border, rgba(127, 127, 127, 0.24))",
+        "var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff))",
+        "border-color 0.2s ease, box-shadow 0.2s ease",
+        "var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18))",
+        "var(--ktjs-accent, var(--ifm-color-primary))",
+    )
+
+    /** Form 2 and 3 — the same rules, built with csstype's DSL. */
     private val rules: PropertiesBuilder = unsafeJso {
         ".ktjs-feature-card" {
-            border = Border(
-                1.px,
-                LineStyle.solid,
-                Color("var(--ktjs-card-border, rgba(127, 127, 127, 0.24))"),
-            )
-            backgroundColor = Color("var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff))")
+            border = Border(1.px, LineStyle.solid, Color(dslLiterals[0]))
+            backgroundColor = Color(dslLiterals[1])
             // Typed property, stringly value: the generated Kotlin unions have no "any string".
-            transition = unsafeCast("border-color 0.2s ease, box-shadow 0.2s ease")
-            // A fallback ladder is a JS array — kept by the text form, collapsed by CSSOM.
+            transition = unsafeCast(dslLiterals[2])
+            // A fallback ladder is a JS array; the serializer expands it into two declarations.
             display = fallback(Display.grid, Display.flex)
             padding = 1.5.rem
-            hover {
-                borderColor = Color("var(--ktjs-accent, var(--ifm-color-primary))")
+            "&:hover" {
+                borderColor = Color(dslLiterals[4])
                 // `BoxShadow` has no String overload: a whole-value var() needs a cast as well.
-                boxShadow = unsafeCast("var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18))")
+                boxShadow = unsafeCast(dslLiterals[3])
             }
         }
     }
 
-    /** Form 2 — the JSO turned into CSS text. */
-    val dslAsText: String = buildString { writeRules(rules, parentSelector = null) }
+    /** Form 2 — the rules object turned into CSS text, using the packages emotion itself uses. */
+    val dslAsText: String = buildString {
+        val source = rules.asDynamic()
+        val keys = Object.keys(rules.unsafeCast<JsAny>())
+        val middlewares = middleware(jsArrayOf(stringify))
+        for (index in 0 until keys.length) {
+            val selector = keys[index].toString()
+            val declarations = serializeStyles(jsArrayOf<JsAny?>(source[selector] as JsAny?)).styles
+            // stylis resolves the nested `:hover{…}` against the selector and normalizes the rest.
+            append(serialize(compile("$selector{$declarations}"), middlewares))
+        }
+    }
 
-    /** Form 3 — the JSO replayed into a real stylesheet; the browser writes the values. */
+    /** Form 3 — the rules object replayed into a real stylesheet; the browser writes the values. */
     fun dslAsStyleSheet(): CSSStyleSheet {
         val sheet = CSSStyleSheet()
         writeInto(sheet, rules, selector = null)
         return sheet
     }
 
-    /** Renders all three forms, plus a card that adopts the CSSOM one, into the probe page. */
+    /** The metric that matters: how much CSS syntax is still spelled by hand in each form. */
+    val rawCssReport: String = buildString {
+        append("text form: ").append(text.length).append(" characters of hand-written CSS\n")
+        append("DSL form:  ").append(dslLiterals.sumOf { it.length })
+            .append(" characters (").append(dslLiterals.size).append(" string literals)\n")
+        append('\n')
+        append("Property names, numeric values and the pseudo-class structure come from types and\n")
+        append("constants in the DSL form. What is left as text: a whole-value var() fallback and the\n")
+        append("comma-joined shorthand — the two cases where csstype's Kotlin unions have no escape.\n")
+        append("Source length is not the measure: both forms emit the same declarations.")
+    }
+
+    /** Renders every form, plus a card that adopts the CSSOM one, into the probe page. */
     fun renderInto(host: HTMLElement) {
         host.appendChild(heading(2, "8. csstype rules DSL vs CSS text"))
         host.appendChild(heading(3, "8a. text (what KtjsFeature holds today)"))
         host.appendChild(block(text))
-        host.appendChild(heading(3, "8b. csstype DSL, serialized to text by the adapter below"))
+        host.appendChild(heading(3, "8b. csstype DSL -> text, @emotion/serialize + stylis"))
         host.appendChild(block(dslAsText))
-        host.appendChild(heading(3, "8c. csstype DSL, replayed into CSSOM (browser serialized)"))
+        host.appendChild(heading(3, "8c. csstype DSL -> CSSOM (browser serialized)"))
         host.appendChild(block(cssTextOf(dslAsStyleSheet())))
         host.appendChild(heading(3, "8d. a card adopting 8c — hover it"))
         host.appendChild(sampleCard())
+        host.appendChild(heading(3, "8e. how much CSS text is left to spell by hand"))
+        host.appendChild(block(rawCssReport))
     }
 
-    // --- adapter A: JSO -> text ------------------------------------------------------------------
+    // --- form 3: rules object -> CSSOM -----------------------------------------------------------
 
     /**
-     * Writes one level of a rules object: declarations first, then nested rules.
-     *
-     * The declaration/rule split is a **naming heuristic** (`&…`, `:…`, `@…`, everything else that is
-     * not a value is a selector). Nothing in the DSL marks the difference, and nothing expands a
-     * `fallback(…)` array into repeated declarations — that is stylis' job in the emotion world, and
-     * would be ours here.
-     */
-    private fun StringBuilder.writeRules(
-        node: JsAny?,
-        parentSelector: String?,
-    ) {
-        val source = node.asDynamic()
-        val keys = Object.keys(node.unsafeCast<JsAny>())
-
-        for (index in 0 until keys.length) {
-            val name = keys[index].toString()
-            val value: Any? = source[name] as Any?
-            if (isRuleValue(value)) continue
-            if (isArrayValue(value)) {
-                // `fallback(Display.grid, Display.flex)` -> two declarations, in order.
-                val items = value.asDynamic()
-                for (item in 0 until items.length) {
-                    append(hyphenized(name)).append(": ").append("${items[item]}").append(";\n")
-                }
-            } else {
-                append(hyphenized(name)).append(": ").append("$value").append(";\n")
-            }
-        }
-
-        for (index in 0 until keys.length) {
-            val name = keys[index].toString()
-            val value: Any? = source[name] as Any?
-            if (!isRuleValue(value)) continue
-            val selector = resolvedSelector(name, parentSelector)
-            append(selector).append(" {\n")
-            writeRules(value, selector)
-            append("}\n")
-        }
-    }
-
-    // --- adapter B: JSO -> CSSOM -----------------------------------------------------------------
-
-    /**
-     * [CSSStyleRule.style] is the same `CSSStyleDeclaration` that csstype's `Properties` describes, so
+     * `CSSStyleRule.style` is the same `CSSStyleDeclaration` csstype's `Properties` describes, so
      * values land verbatim and `var()` needs no attention. What CSSOM cannot do is hold two
-     * declarations of one property inside one rule: a `fallback(…)` ladder collapses to its last
-     * entry here, whereas the text form keeps both and lets the parser pick.
+     * declarations of one property inside one rule: the `fallback(…)` ladder collapses to its last
+     * entry, whereas the text form keeps both and lets the parser pick.
      */
     private fun writeInto(
         sheet: CSSStyleSheet,
@@ -192,7 +177,7 @@ class CssSheetExperiment {
         }
     }
 
-    // --- rendering -------------------------------------------------------------------------------
+    // --- rendering ---------------------------------------------------------------------------------
 
     private fun sampleCard(): HTMLElement {
         val card = element("article") {
@@ -234,9 +219,6 @@ private fun isArrayValue(value: Any?): Boolean =
 
 private fun isRuleValue(value: Any?): Boolean =
     jsTypeOf(value) == "object" && value != null && !isArrayValue(value)
-
-/** `background-color`, and `-webkit-transform` for a leading capital. */
-private fun hyphenized(name: String): String = name.replace(Regex("([A-Z])"), "-$1").lowercase()
 
 /** `:hover` / `&:hover` hang off the parent; anything else is a selector of its own. */
 private fun resolvedSelector(name: String, parent: String?): String = when {
