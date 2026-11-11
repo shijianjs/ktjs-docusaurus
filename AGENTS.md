@@ -203,7 +203,8 @@ duckfn 站点一致。
       **后代**选择器 `.parent :hover`（第 8f 节有对照）。根因是 kotlin-wrappers 的生成器
       `karakum/csstype/Pseudos.kt` 里 `convertSimplePseudo` 把 csstype TS 联合里的字符串
       （`":hover"`）原样当选择器写进方法体，而同一套 API 里手写的 `RuleBuilder.and` 会加 `&`、
-      `kotlin-css` 的 `CssBuilder.hover` 也是 `"&:hover"`——只有生成的伪类助手漏了 `&`，属于上游缺陷；
+      `kotlin-css` 的 `CssBuilder.hover` 也是 `"&:hover"`——只有生成的伪类助手漏了 `&`，属于上游缺陷，
+      已报 <https://github.com/JetBrains/kotlin-wrappers/issues/2933>（修好后第 8f 节会变）；
       ② 只有多值 `transition` 仍需 `unsafeCast(String)`（`TransitionProperty` 在生成代码里只暴露
       `all`，Kotlin 侧也没有 TS 的 `(string & {})` 逃生口），少量 cast 是可接受的代价；
       ③ 只声明用到的两个包（`@emotion/serialize` + `stylis`），不要写全 wrapper。
