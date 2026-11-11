@@ -6,17 +6,14 @@ import web.components.ShadowRootInit
 import web.components.ShadowRootMode
 import web.components.open
 import web.cssom.CSSStyleSheet
-import web.html.HTMLStyleElement
 import web.html.HTMLElement
-import web.html.HtmlTagName
 
 /**
  * Attaches a shadow root to this element. Attached open by default.
  *
- * Styling normally belongs on the nodes themselves (`element.style`): a component's own box, colours
- * and typography are its private state, not a resource. Reach for [attachStyledShadow] only when a
- * sheet is genuinely shared, and for [ShadowRoot.appendStyle] when a rule needs a selector that
- * inline styles cannot express (`:hover`, `::before`, `@media`).
+ * A component's own box, colours and typography belong on the nodes themselves
+ * ([HTMLElement.inlineStyle]) or in a sheet of its own ([attachStyledShadow]); this call is for the
+ * components that need neither.
  */
 fun HTMLElement.attachShadowRoot(
     mode: ShadowRootMode = ShadowRootMode.open,
@@ -25,17 +22,30 @@ fun HTMLElement.attachShadowRoot(
 /**
  * Attaches a shadow root that adopts [styles].
  *
- * Adoption is a **sharing** mechanism: one constructed sheet serves any number of shadow roots and
- * the browser parses it once. Use it for what really is common to several components — a reset, the
- * theme tokens, a layout a parent imposes on its children — not as the default home for a
- * component's own CSS, which stays next to the component (inline where possible, a local
- * [ShadowRoot.appendStyle] where not).
+ * Adoption is a **sharing** mechanism, and it works at two levels:
+ *
+ * - **One sheet per component class**, held in a module-level `val` and given to every instance of
+ *   that element. This is the normal case for a component that has any CSS rule at all: the rules are
+ *   static, so they are parsed once and one `CSSStyleSheet` object serves every instance — the model
+ *   Lit uses for `static styles`. Never create a `<style>` node per instance: a page with four
+ *   hundred cells would carry four hundred copies of the same text and pay parse cost four hundred
+ *   times.
+ * - **One sheet across components**, for what genuinely must change together: a reset, the theme
+ *   tokens, a layout a parent imposes on its children.
+ *
+ * Everything a plain declaration can express stays inline ([HTMLElement.inlineStyle]); a sheet only
+ * holds what inline cannot say — `:hover` / `:focus-visible`, `::before` / `::after`, `@media`,
+ * `@supports`, `@keyframes`.
  *
  * ```kotlin
- * internal val RESET = CSSStyleSheet().apply { replaceSync("*, *::before, *::after { box-sizing: border-box }") }
+ * private val CARD_CSS: String = """
+ * .card:hover { border-color: var(--accent); }
+ * """
  *
- * class Panel : CustomElementAdapter() {
- *     private val shadow = attachStyledShadow(RESET)
+ * private val CARD_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CARD_CSS) }
+ *
+ * class Card : CustomElementAdapter() {
+ *     private val shadow = attachStyledShadow(RESET, CARD_SHEET)
  * }
  * ```
  */
@@ -49,15 +59,3 @@ fun HTMLElement.attachStyledShadow(
     }
     return root
 }
-
-/**
- * Appends a `<style>` whose text is [css] to this shadow tree.
- *
- * For the rules inline styles cannot carry: `:hover` / `:focus-visible` states, `::before` /
- * `::after`, media queries, `@keyframes`. Keep the text next to the component that owns it — this is
- * that component's own stylesheet, not a place to collect other components' rules.
- */
-fun ShadowRoot.appendStyle(css: String): HTMLStyleElement =
-    HtmlTagName.style.createElement<HTMLStyleElement> {
-        textContent = css
-    }.also(::appendChild)

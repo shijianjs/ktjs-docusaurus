@@ -170,12 +170,17 @@ duckfn 站点一致。
     `inlineStyle.apply { display = Display.flex; padding = Padding(1.5.rem) }` 写在渲染它的那段代码旁，
     类型是 kotlin-csstype/cssom 的值（`Display.flex`、`1.5.rem`、`Color("var(--ktjs-accent, …)")`、
     `clamp(…)`），不拼字符串。只有内联表达不了的才写 CSS——`:hover` / `:focus-visible`、`::before` /
-    `::after`、`@media`、`@supports`、`@keyframes`；这部分是该组件自己的 `<style>`，放在同一个 `.kt` 文件里
-    用 `shadow.appendStyle(XXX_CSS)` 注入，类名只留给这些规则选中。**不要**再把各组件样式堆成一个大字符串，
-    也不要为了「每个元素一份」去 adopt sheet：`adoptedStyleSheets` 是共享机制，只有真正跨组件复用的
-    （目前只有 `HomeReset.kt` 的 `box-sizing` reset）才走 `attachStyledShadow`，主题色这类跨组件常量放
-    `HomeTheme.kt`。`ktjs-features` / `ktjs-next-steps` 共用的分区外壳（`HomeSection.kt`）属于「父容器统一
-    控制子组件布局」，是允许提取的那一类。
+    `::after`、`@media`、`@supports`、`@keyframes`。
+
+    这部分规则写成**该组件类的一份 `CSSStyleSheet`**（`private val X_SHEET`，模块级、第一次用到时
+    `replaceSync` 一次），由该组件的**所有实例** adopt：`attachStyledShadow(HOME_RESET, X_SHEET)`。这是
+    Lit `static styles` 的做法，也是唯一该用的做法——**不要每个实例建一个 `<style>` 节点**（20×20 的单元格
+    就是 400 份重复文本 + 400 次解析）。类名只留给这些规则选中的节点。
+
+    跨组件真正共享的也走同一份 sheet：目前是 `HomeReset.kt` 的 `box-sizing` 与 `:host { display: block }`
+    （`display` 不能写在构造函数里——给 `this` 赋 `style` 会加属性，`document.createElement("ktjs-…")` 会抛错），
+    主题色这类跨组件常量放 `HomeTheme.kt`。`ktjs-features` / `ktjs-next-steps` 共用的分区外壳
+    （`HomeSection.kt`）属于「父容器统一控制子组件布局」，是允许提取的那一类。
 
    不要往 kit 里加 `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。
 

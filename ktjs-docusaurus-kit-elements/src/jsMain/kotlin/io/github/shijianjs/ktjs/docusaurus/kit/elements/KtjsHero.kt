@@ -1,7 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
-import io.github.shijianjs.ktjs.dom.appendStyle
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.createElement
@@ -10,6 +9,7 @@ import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.components.HTMLSlotElement
 import web.cssom.AlignItems
+import web.cssom.CSSStyleSheet
 import web.cssom.Auto
 import web.cssom.Color
 import web.cssom.Display
@@ -79,8 +79,7 @@ class KtjsHero : CustomElementAdapter() {
     var tagline: String by attr { change -> taglineElement.textContent = change.newValue }
 
     init {
-        val shadow = attachStyledShadow(HOME_RESET)
-        shadow.appendStyle(HERO_CSS)
+        val shadow = attachStyledShadow(HOME_RESET, HERO_SHEET)
 
         logoElement = HtmlTagName.img.createElement {
             inlineStyle.apply {
@@ -198,15 +197,9 @@ private const val GLOW: String = "var(--ktjs-glow, rgba(31, 111, 235, 0.16))"
 /**
  * Everything in the hero that inline styles cannot say: two decorative pseudo-elements, the
  * `@supports`-guarded gradient text (inline colour would beat a descendant rule), and the small-screen
- * stacking of the action row.
+ * stacking of the action row. The host's own `display` lives in `HOME_RESET`.
  */
 private const val HERO_CSS: String = """
-/* The host itself: a custom element is inline by default, and this block cannot be set from the
-   constructor — a `style` attribute there makes `document.createElement("ktjs-hero")` throw. */
-:host {
-  display: block;
-}
-
 .ktjs-hero::before,
 .ktjs-hero::after {
   content: '';
@@ -256,3 +249,6 @@ private const val HERO_CSS: String = """
   }
 }
 """
+
+/** [HERO_CSS] parsed once at module load; every `<ktjs-hero>` adopts this one sheet. */
+private val HERO_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(HERO_CSS) }

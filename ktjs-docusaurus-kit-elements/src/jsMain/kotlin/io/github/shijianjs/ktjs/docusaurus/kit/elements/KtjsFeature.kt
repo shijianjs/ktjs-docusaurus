@@ -1,7 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
-import io.github.shijianjs.ktjs.dom.appendStyle
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.createElement
@@ -11,6 +10,7 @@ import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.cssom.AlignItems
+import web.cssom.CSSStyleSheet
 import web.cssom.Display
 import web.cssom.FlexDirection
 import web.cssom.JustifyContent
@@ -50,8 +50,7 @@ class KtjsFeature : CustomElementAdapter() {
     var titleText: String by attr("title") { change -> headingElement.textContent = change.newValue }
 
     init {
-        val shadow = attachStyledShadow(HOME_RESET)
-        shadow.appendStyle(FEATURE_CSS)
+        val shadow = attachStyledShadow(HOME_RESET, FEATURE_SHEET)
 
         iconElement = IconifyIconTagName.iconifyIcon.createElement {
             inlineStyle.fontSize = 1.375.rem
@@ -126,3 +125,6 @@ private const val FEATURE_CSS: String = """
   box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18));
 }
 """
+
+/** [FEATURE_CSS] parsed once at module load; every `<ktjs-feature>` adopts this one sheet. */
+private val FEATURE_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(FEATURE_CSS) }

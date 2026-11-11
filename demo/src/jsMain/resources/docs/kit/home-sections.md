@@ -95,7 +95,7 @@ deliberately not implemented: its `val connectedCallback` compiles to a getter t
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | yes, with the UI bundle | Node-safe helpers (`TocToggle`) + a `browser` artifact |
 | `ktjs-docusaurus-kit-elements` | no | all home elements and their shadows |
-| `ktjs-dom-kit` | no (moves to its own repository) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `appendStyle` |
+| `ktjs-dom-kit` | no (moves to its own repository) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle` |
 
 The home UI travels with the kit: the webpack bundle is attached to the kit's coordinate as a
 `browser` artifact, so another project needs one dependency and one copy:
@@ -184,14 +184,18 @@ Styles live where the element is written, in three grades:
 | Where | What goes there | Example |
 | --- | --- | --- |
 | `inlineStyle.apply { … }` in the element's constructor | everything a plain declaration can say | `display = Display.flex`, `padding = Padding(1.5.rem)`, `color = accent` |
-| a `<style>` in that element's own shadow root | what inline styles cannot: `:hover`, `::before`, `@media`, `@supports` | the button's hover colours, the hero's glow blobs |
-| an adopted sheet (`attachStyledShadow`) | what several elements genuinely share | the `box-sizing` reset in `HomeReset.kt` |
+| one sheet of that element's own (`private val X_SHEET`) | what inline styles cannot: `:hover`, `::before`, `@media`, `@supports` | the button's hover colours, the hero's glow blobs |
+| the sheet every element adopts | what all of them need, or what several genuinely share | `box-sizing` and `:host { display: block }` in `HomeReset.kt` |
 
 Values are typed (`Display.flex`, `1.5.rem`, `Color("var(--ktjs-accent, …)")`, `clamp(…)`), never
-strings built by hand. `ktjs-dom-kit` exposes the two mechanics: `HTMLElement.inlineStyle`, which is
-the element's own `CSSStyleDeclaration` seen as `csstype.Properties`, and `ShadowRoot.appendStyle`,
-which appends a `<style>` to that element's shadow tree. A component's rules therefore never travel
-into a shared file, and no element carries a stylesheet it does not paint with.
+strings built by hand. `ktjs-dom-kit` exposes the mechanics: `HTMLElement.inlineStyle`, the element's
+own `CSSStyleDeclaration` seen as `csstype.Properties`, and `attachStyledShadow(sheet…)`, which attaches
+the root and adopts the sheets it is given.
+
+A component's own rules are **one `CSSStyleSheet` per class**, built at module load and adopted by every
+instance — Lit's `static styles` model. That is why no `<style>` node is ever created: a hundred cards
+share one parsed sheet instead of carrying a hundred copies of the same text. A component's rules
+therefore never travel into a shared file, and no element carries a stylesheet it does not paint with.
 
 ## From Kotlin
 

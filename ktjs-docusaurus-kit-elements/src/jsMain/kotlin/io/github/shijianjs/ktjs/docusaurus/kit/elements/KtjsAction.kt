@@ -2,7 +2,6 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.AttributeCodec
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
-import io.github.shijianjs.ktjs.dom.appendStyle
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.createElement
@@ -13,6 +12,7 @@ import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.cssom.AlignItems
+import web.cssom.CSSStyleSheet
 import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.None
@@ -77,8 +77,7 @@ class KtjsAction : CustomElementAdapter() {
     }
 
     init {
-        val shadow = attachStyledShadow(HOME_RESET)
-        shadow.appendStyle(ACTION_CSS)
+        val shadow = attachStyledShadow(HOME_RESET, ACTION_SHEET)
 
         labelElement = HtmlTagName.span.createElement()
         iconElement = IconifyIconTagName.iconifyIcon.createElement {
@@ -177,3 +176,6 @@ private const val ACTION_CSS: String = """
   color: var(--ktjs-accent, var(--ifm-color-primary));
 }
 """
+
+/** [ACTION_CSS] parsed once at module load; every `<ktjs-action>` adopts this one sheet. */
+private val ACTION_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(ACTION_CSS) }

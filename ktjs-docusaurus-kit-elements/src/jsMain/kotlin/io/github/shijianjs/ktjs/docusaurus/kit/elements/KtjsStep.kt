@@ -1,7 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
-import io.github.shijianjs.ktjs.dom.appendStyle
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.createElement
@@ -11,6 +10,7 @@ import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.cssom.AlignItems
+import web.cssom.CSSStyleSheet
 import web.cssom.Color
 import web.cssom.Display
 import web.cssom.FlexDirection
@@ -55,8 +55,7 @@ class KtjsStep : CustomElementAdapter() {
     var titleText: String by attr("title") { change -> headingElement.textContent = change.newValue }
 
     init {
-        val shadow = attachStyledShadow(HOME_RESET)
-        shadow.appendStyle(STEP_CSS)
+        val shadow = attachStyledShadow(HOME_RESET, STEP_SHEET)
 
         headingElement = HtmlTagName.span.createElement {
             inlineStyle.apply {
@@ -135,3 +134,6 @@ private const val STEP_CSS: String = """
   box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18));
 }
 """
+
+/** [STEP_CSS] parsed once at module load; every `<ktjs-step>` adopts this one sheet. */
+private val STEP_SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(STEP_CSS) }
