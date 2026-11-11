@@ -198,19 +198,20 @@ duckfn 站点一致。
       Border(1.px, LineStyle.solid, …); "&:hover" { … } } }` → `@emotion/serialize` 的
       `serializeStyles([rules])` 出声明（自动连字符化、把 `fallback(a, b)` 摊成多条）→ `stylis` 的
       `serialize(compile("selector{…}"), middleware([stringify]))`（把 `&:hover` 拍平成
-      `.selector:hover`、规范化取值）→ `replaceSync`。同一段卡片规则：手写要
-      455 个字符的 CSS 文本，DSL 只剩 **44 个字符的 CSS 文本**（只有 `transition` 简写一条字符串）
-      + 6 个自定义属性名（文本版同样要写这些名字）；`var(--x, fallback)` 用 cssom 的
-      `var(CustomPropertyName("--x"), fallback)` 把兜底值也类型化，颜色用 `rgb(r,g,b,a)`、阴影用
-      `BoxShadow(0.px, 10.px, 24.px, …)`、阶梯用 `fallback(grid, flex)`。
+      `.selector:hover`、规范化取值）→ `replaceSync`。同一段卡片规则：手写要 **455 个字符的 CSS
+      文本**，DSL 版本 **0 个字符**——没有一条声明是手写的，只剩名字：2 个过渡属性名
+      （`border-color` / `box-shadow`）、6 个自定义属性名（文本版同样要写）、1 个 `"&:hover"` 键。
+      值的类型化路径：`var(CustomPropertyName("--x"), fallback)`（兜底值也是类型化的）、
+      `rgb(r,g,b,a)`、`BoxShadow(0.px, 10.px, 24.px, …)`、`fallback(grid, flex)`、`1.5.rem`、
+      `Transition(property, 0.2.s, TransitionTimingFunction.ease)` 配 cssom 的 `many(…)` 拼多值。
     - 三条实测约束：① 用 `&:hover`，**不要用 `hover {}` 糖**——它写的是键 `:hover`，stylis 会拼成
       **后代**选择器 `.parent :hover`（第 8f 节有对照）。根因是 kotlin-wrappers 的生成器
       `karakum/csstype/Pseudos.kt` 里 `convertSimplePseudo` 把 csstype TS 联合里的字符串
       （`":hover"`）原样当选择器写进方法体，而同一套 API 里手写的 `RuleBuilder.and` 会加 `&`、
       `kotlin-css` 的 `CssBuilder.hover` 也是 `"&:hover"`——只有生成的伪类助手漏了 `&`，属于上游缺陷，
       已报 <https://github.com/JetBrains/kotlin-wrappers/issues/2933>（修好后第 8f 节会变）；
-      ② 只有多值 `transition` 仍需 `unsafeCast(String)`（`TransitionProperty` 在生成代码里只暴露
-      `all`，Kotlin 侧也没有 TS 的 `(string & {})` 逃生口），少量 cast 是可接受的代价；
+      ② 唯一需要 `unsafeCast` 的是 `TransitionProperty` 的值（生成代码里只有 `all`，也没有 TS 的
+      `(string & {})` 逃生口），封装成一行 `transitionProperty(name)` 即可，别把它扩散到整条声明；
       ③ 只声明用到的两个包（`@emotion/serialize` + `stylis`），不要写全 wrapper。
     - **别用 `kotlin-css`（`kotlinx.css`）那套**：值不做校验（`Color`/`LinearDimension` 只是 `String`
       包装），`transition` 强制补 `0s` 延迟，整值 `var()` 只能退回 `put("box-shadow", "…")`，`hover` /

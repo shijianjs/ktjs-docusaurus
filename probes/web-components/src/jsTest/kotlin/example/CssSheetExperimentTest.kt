@@ -69,12 +69,14 @@ class CssSheetExperimentTest {
     }
 
     @Test
-    fun theDslLeavesOneStringAndThePropertyNames() {
+    fun theDslLeavesNoDeclarationToSpell() {
         val report = experiment.rawCssReport
         assertTrue(report.contains("text form: ${experiment.text.length} characters"), report)
-        assertTrue(report.contains("one string, the transition list"), report)
-        assertTrue(report.contains("6 custom property names"), report)
-        // The one cast that survives is the transition list, and the report says so.
+        // Not one declaration is spelled as CSS text any more: only names remain.
+        assertTrue(report.contains("0 characters of CSS text"), report)
+        assertTrue(report.contains("2 transition properties"), report)
+        assertTrue(report.contains("6 custom properties"), report)
+        // The one cast left is a TransitionProperty name, and the report says so.
         assertTrue(report.contains("One unsafeCast survives"), report)
     }
 }
