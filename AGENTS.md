@@ -192,8 +192,9 @@ duckfn 站点一致。
     - **手写文本**：`private val CSS` + `replaceSync`。规则只有十几行、且以 `:hover` 为主时最省事，
       当前 `ktjs-*` 元素都是这么写的。
     - **csstype DSL**：选择器也用类型——`private val cardClass = ClassName("ktjs-feature-card")`，
-      配 `RuleBuilder` 的 `operator fun ClassName.invoke` 补点号（注意 `ClassName("x") { … }` 会被解析成
-      工厂函数调用、编译不过，必须先存成 `val`）。`unsafeJso<PropertiesBuilder> { cardClass { border =
+      配 `RuleBuilder` 的 `operator fun ClassName.invoke` 补点号。注意 Kotlin 的解析规则：
+      `ClassName("x") { … }` 会被读成「调用工厂 + 尾随 lambda 当第二个实参」而编译不过，要么加括号
+      `(ClassName("x")) { … }`（一次性用），要么先存 `val` 再 `cardClass { … }`（要复用）。`unsafeJso<PropertiesBuilder> { cardClass { border =
       Border(1.px, LineStyle.solid, …); "&:hover" { … } } }` → `@emotion/serialize` 的
       `serializeStyles([rules])` 出声明（自动连字符化、把 `fallback(a, b)` 摊成多条）→ `stylis` 的
       `serialize(compile("selector{…}"), middleware([stringify]))`（把 `&:hover` 拍平成

@@ -94,10 +94,6 @@ class CssSheetExperiment {
     /** The selector as a typed class name: `ClassName.invoke` writes the leading dot (RuleBuilder.kt). */
     private val cardClass = ClassName("ktjs-feature-card")
 
-    private val sugarClass = ClassName("probe-sugar")
-
-    private val ampersandClass = ClassName("probe-ampersand")
-
     /** Form 2 and 3 — the same rules, built with csstype's DSL. */
     private val rules: PropertiesBuilder = unsafeJso {
         cardClass {
@@ -126,6 +122,9 @@ class CssSheetExperiment {
                 )
             }
         }
+        (ClassName("ktjs-feature-card-22")){
+
+        }
     }
 
     /** Form 2 — the rules object turned into CSS text, using the packages emotion itself uses. */
@@ -139,10 +138,12 @@ class CssSheetExperiment {
      */
     val pseudoSugarReport: String = buildString {
         val viaSugar: PropertiesBuilder = unsafeJso {
-            sugarClass { hover { backgroundColor = Color("red") } }
+            // `ClassName("x") { … }` parses as a two-argument call to the factory; the parentheses
+            // hand the expression to the `invoke` operator instead. A reused name can just be a val.
+            (ClassName("probe-sugar")) { hover { backgroundColor = Color("red") } }
         }
         val viaAmpersand: PropertiesBuilder = unsafeJso {
-            ampersandClass { "&:hover" { backgroundColor = Color("red") } }
+            (ClassName("probe-ampersand")) { "&:hover" { backgroundColor = Color("red") } }
         }
         append("hover {}      -> ").append(serialized(viaSugar)).append('\n')
         append("\"&:hover\" {}  -> ").append(serialized(viaAmpersand))
