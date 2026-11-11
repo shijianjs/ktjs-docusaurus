@@ -50,6 +50,8 @@ import web.html.HTMLElement
  * - `var(name, fallback)` from cssom takes a `CustomPropertyName` plus a **typed** fallback, so
  *   `var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff))` is three typed calls rather
  *   than one string.
+ * - `"&:hover"` rather than the `hover {}` sugar — see [pseudoSugarReport]: the sugar emits the key
+ *   `:hover`, which every `&`-convention consumer (stylis included) reads as a descendant rule.
  *
  * The size of that trade is [rawCssReport] — how much CSS has to be typed as a string at all — not
  * source length: jOOQ is longer than the SQL it replaces, and that is not the point either.
@@ -120,14 +122,33 @@ class CssSheetExperiment {
     }
 
     /** Form 2 — the rules object turned into CSS text, using the packages emotion itself uses. */
-    val dslAsText: String = buildString {
+    val dslAsText: String = serialized(rules)
+
+    /**
+     * The `hover {}` sugar from csstype's `SimplePseudosRuleBuilder` against writing `"&:hover"`
+     * by hand — same declarations, different selector. The sugar writes the key `:hover` (that is
+     * how csstype's TS union spells it, and karakum copies it verbatim), so everything downstream
+     * that only understands the `&` convention — stylis included — reads it as a descendant rule.
+     */
+    val pseudoSugarReport: String = buildString {
+        val viaSugar: PropertiesBuilder = unsafeJso {
+            ".probe-sugar" { hover { backgroundColor = Color("red") } }
+        }
+        val viaAmpersand: PropertiesBuilder = unsafeJso {
+            ".probe-ampersand" { "&:hover" { backgroundColor = Color("red") } }
+        }
+        append("hover {}      -> ").append(serialized(viaSugar)).append('\n')
+        append("\"&:hover\" {}  -> ").append(serialized(viaAmpersand))
+    }
+
+    /** The emotion pipeline: declarations first, then stylis for the nested selectors. */
+    private fun serialized(rules: PropertiesBuilder): String = buildString {
         val source = rules.asDynamic()
         val keys = Object.keys(rules.unsafeCast<JsAny>())
         val middlewares = middleware(jsArrayOf(stringify))
         for (index in 0 until keys.length) {
             val selector = keys[index].toString()
             val declarations = serializeStyles(jsArrayOf<JsAny?>(source[selector] as JsAny?)).styles
-            // stylis resolves the nested `:hover{…}` against the selector and normalizes the rest.
             append(serialize(compile("$selector{$declarations}"), middlewares))
         }
     }
@@ -169,6 +190,8 @@ class CssSheetExperiment {
         host.appendChild(sampleCard())
         host.appendChild(heading(3, "8e. how much CSS text is left to spell by hand"))
         host.appendChild(block(rawCssReport))
+        host.appendChild(heading(3, "8f. csstype's hover {} sugar vs \"&:hover\" (wrapper defect)"))
+        host.appendChild(block(pseudoSugarReport))
     }
 
     // --- form 3: rules object -> CSSOM -----------------------------------------------------------

@@ -59,6 +59,16 @@ class CssSheetExperimentTest {
     }
 
     @Test
+    fun thePseudoSugarEmitsADescendantSelector() {
+        val report = experiment.pseudoSugarReport
+
+        // `hover {}` writes the key `:hover`; stylis joins it as a descendant, not as the parent's state.
+        assertTrue(report.contains("hover {}      -> .probe-sugar :hover{background-color:red;}"), report)
+        // Writing `&:hover` is what produces the intended rule.
+        assertTrue(report.contains("\"&:hover\" {}  -> .probe-ampersand:hover{background-color:red;}"), report)
+    }
+
+    @Test
     fun theDslLeavesOneStringAndThePropertyNames() {
         val report = experiment.rawCssReport
         assertTrue(report.contains("text form: ${experiment.text.length} characters"), report)

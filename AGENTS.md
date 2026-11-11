@@ -199,7 +199,11 @@ duckfn 站点一致。
       + 6 个自定义属性名（文本版同样要写这些名字）；`var(--x, fallback)` 用 cssom 的
       `var(CustomPropertyName("--x"), fallback)` 把兜底值也类型化，颜色用 `rgb(r,g,b,a)`、阴影用
       `BoxShadow(0.px, 10.px, 24.px, …)`、阶梯用 `fallback(grid, flex)`。
-    - 三条实测约束：① 用 `&:hover`，`hover {}` 糖写的是 `:hover`，stylis 会解释成**后代**选择器；
+    - 三条实测约束：① 用 `&:hover`，**不要用 `hover {}` 糖**——它写的是键 `:hover`，stylis 会拼成
+      **后代**选择器 `.parent :hover`（第 8f 节有对照）。根因是 kotlin-wrappers 的生成器
+      `karakum/csstype/Pseudos.kt` 里 `convertSimplePseudo` 把 csstype TS 联合里的字符串
+      （`":hover"`）原样当选择器写进方法体，而同一套 API 里手写的 `RuleBuilder.and` 会加 `&`、
+      `kotlin-css` 的 `CssBuilder.hover` 也是 `"&:hover"`——只有生成的伪类助手漏了 `&`，属于上游缺陷；
       ② 只有多值 `transition` 仍需 `unsafeCast(String)`（`TransitionProperty` 在生成代码里只暴露
       `all`，Kotlin 侧也没有 TS 的 `(string & {})` 逃生口），少量 cast 是可接受的代价；
       ③ 只声明用到的两个包（`@emotion/serialize` + `stylis`），不要写全 wrapper。
