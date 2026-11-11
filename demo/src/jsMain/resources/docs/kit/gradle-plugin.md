@@ -31,6 +31,12 @@ docusaurus {
 | `docs/`, `blog/`, `src/`, `static/`, `i18n/` | the module's resources |
 | `generated/` | the compiled Kotlin/JS output |
 
+`client-module.mjs` is what `clientModules` points at. It reads the generated site config and calls
+the exported function with the `baseUrl` Docusaurus resolved for the bundle's locale — `/my-site/`
+for the default locale, `/my-site/zh-Hans/` for the others, in the built site and in
+`docusaurus start --locale` alike — followed by Docusaurus' own arguments. An absolute URL for a file
+under `static/` has to be built from that value: the locale prefix is not knowable at compile time.
+
 ## Tasks
 
 | Task | Effect |

@@ -185,20 +185,25 @@ duckfn 站点一致。
 2. **注册放在 hydration 之后**：静态 `<script>` 写在 `<head>` 会早于 hydration，元素先升级就让 React 报
    hydration error #418。现在由 `ClientModule.onRouteDidUpdate` 动态插入一次
    `<script type="module" src="<baseUrl>ktjs-client/index.mjs">`，脚本延迟到 hydration 后才加载并调用
-   `registerHomeElements()`。
+   `registerHomeElements()`。这里的 `<baseUrl>` 必须是 **Docusaurus 为当前 locale 解析出来的那个**
+   （默认语言 `/my-site/`、中文 `/my-site/zh-Hans/`）：插件生成的 `client-module.mjs` 从
+   `@generated/docusaurus.config` 读它并作为第一个参数传给 `clientModuleFunction`。写成编译期常量时
+   `docusaurus start --locale zh-Hans` 会踩坑——dev server 只按该 locale 的前缀伺服，脚本 404，整页
+   元素都不升级（构建产物里反而不炸，因为 `static/` 同时也拷在站点根）。
 
 插件两条通道：
 
 | 通道 | 生成 | 谁加载 | 能放什么 |
 | --- | --- | --- | --- |
-| `clientModuleFunction` | `client-module.mjs` | `clientModules`（浏览器 + Node prerender） | 不继承 DOM 的代码 |
+| `clientModuleFunction` | `client-module.mjs` | `clientModules`（浏览器 + Node prerender） | 不继承 DOM 的代码；第一个参数是当前 locale 的 `baseUrl` |
 | `browserBundle` + `browserBundleEntry` + `browserBundleFiles` | `static/ktjs-client/index.mjs` | hydration 后动态插入的 `<script>` | 自定义元素等浏览器专属代码 |
 
 - `browserBundleFiles` 必须与 `additionalJs` 分开：后者也会拷进 `generated/`，若浏览器包里带了共享模块
   的副本，会覆盖 config bundle 的那份，webpack 报 `'X…' is not exported from …`。
 - `docusaurusSite` 必须显式 `dependsOn(":ktjs-docusaurus-kit-elements:jsProductionLibraryCompileSync")`。
 - 浏览器入口的 `<script src>` 要写**带 baseUrl 的绝对路径**（`/my-site/ktjs-client/index.mjs`），
-  相对路径在深页面上会解析到 `.../docs/intro/ktjs-client/...`。
+  相对路径在深页面上会解析到 `.../docs/intro/ktjs-client/...`；这个 baseUrl 取
+  `clientModuleFunction` 的第一个参数，不要用编译期常量。
 - `href` 写**相对页面**的路径（`docs/intro`），中英文 locale 前缀都能解析；不要写 `/docs/intro`。
 - 文案在 MDX 里，翻译放 `i18n/<locale>/docusaurus-plugin-content-pages/index.mdx`；不要为了 i18n 把
   文案塞回 Kotlin。

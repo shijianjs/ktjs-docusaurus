@@ -33,11 +33,18 @@ private val loadBrowserBundle: (String) -> Unit = js(
     """,
 )
 
-/** Called by Docusaurus after every route change. */
+/**
+ * Called by Docusaurus after every route change.
+ *
+ * [siteBaseUrl] is the one Docusaurus resolved for this bundle's locale — `/ktjs-docusaurus/` for
+ * English, `/ktjs-docusaurus/zh-Hans/` for Chinese, in the built site *and* in the dev server, which
+ * serves a single locale under its own prefix. A compile-time constant cannot know that, and the
+ * bundle is served under the localized prefix, so the URL has to come from here.
+ */
 @JsExport
-fun onRouteDidUpdate() {
+fun onRouteDidUpdate(siteBaseUrl: String) {
     if (!isBrowser) return
-    loadBrowserBundle(SITE_BASE_URL + "ktjs-client/index.mjs")
+    loadBrowserBundle(siteBaseUrl + "ktjs-client/index.mjs")
     tocToggle.install()
     tocToggle.refresh()
 }

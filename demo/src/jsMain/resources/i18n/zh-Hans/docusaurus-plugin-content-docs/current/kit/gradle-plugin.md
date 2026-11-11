@@ -30,6 +30,11 @@ docusaurus {
 | `docs/`、`blog/`、`src/`、`static/`、`i18n/` | 模块的资源 |
 | `generated/` | 编译出的 Kotlin/JS 产物 |
 
+`client-module.mjs` 就是 `clientModules` 指向的文件。它会读取生成的站点配置，把 Docusaurus 为该 bundle
+所属 locale 解析出的 `baseUrl` 作为第一个参数传给导出的函数（默认语言是 `/my-site/`，其他语言是
+`/my-site/zh-Hans/`，构建产物与 `docusaurus start --locale` 都一样），后面再跟 Docusaurus 自己的参数。
+`static/` 下的文件要拼绝对 URL 时必须用这个值：locale 前缀在编译期是不知道的。
+
 ## 任务
 
 | 任务 | 作用 |
