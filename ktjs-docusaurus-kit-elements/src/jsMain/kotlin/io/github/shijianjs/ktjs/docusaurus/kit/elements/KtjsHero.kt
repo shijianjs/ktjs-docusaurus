@@ -196,8 +196,15 @@ class KtjsHero : CustomElementAdapter() {
          * Everything in the hero that inline styles cannot say: two decorative pseudo-elements, the
          * `@supports`-guarded gradient text (inline colour would beat a descendant rule), and the
          * small-screen stacking of the action row. The host's own `display` lives in `HOME_RESET`.
+         *
+         * **This is the one sheet in the module still written as CSS text** instead of through
+         * `cssSheet` (see `ktjs-dom-kit/docs/css-sheet.md`): cssom models `background-clip` but not
+         * the `-webkit-background-clip` the guard needs, so that declaration cannot be written as a
+         * typed property at all. The other two oddities would only need a cast — `content: ''` has no
+         * `Content` factory, and `radial-gradient(…)` has no factory (only `linearGradient`) — but a
+         * half-converted rule is harder to read than the text, so the block stays as it was.
          */
-        private val CSS: String = """
+        private val SHEET_TEXT: String = """
             .ktjs-hero::before,
             .ktjs-hero::after {
               content: '';
@@ -249,7 +256,7 @@ class KtjsHero : CustomElementAdapter() {
             }
         """.trimIndent()
 
-        /** [CSS] parsed once; every `<ktjs-hero>` adopts this one sheet. */
-        private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CSS) }
+        /** [SHEET_TEXT] parsed once; every `<ktjs-hero>` adopts this one sheet. */
+        private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(SHEET_TEXT) }
     }
 }

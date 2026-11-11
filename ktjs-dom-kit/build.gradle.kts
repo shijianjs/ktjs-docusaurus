@@ -42,6 +42,11 @@ kotlin {
             // and kotlin-csstype's `Properties`, the typed view of an element's inline style.
             api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.0")
             api("org.jetbrains.kotlin-wrappers:kotlin-csstype:2026.11.0-3.2.3")
+            // `cssSheet` serializes csstype rules with emotion's own text pipeline: serializeStyles
+            // writes declarations, stylis resolves the nested selectors. Same versions as
+            // @emotion/cache pins, and `implementation` since neither type is in the public API.
+            implementation(npm("@emotion/serialize", "1.3.3"))
+            implementation(npm("stylis", "4.2.0"))
         }
         jsTest.dependencies {
             implementation(kotlin("test"))

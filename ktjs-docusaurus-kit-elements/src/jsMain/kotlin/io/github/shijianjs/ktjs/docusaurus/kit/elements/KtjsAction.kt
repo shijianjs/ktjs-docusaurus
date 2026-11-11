@@ -5,6 +5,7 @@ import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
 import io.github.shijianjs.ktjs.dom.createElement
+import io.github.shijianjs.ktjs.dom.cssSheet
 import io.github.shijianjs.ktjs.dom.enumAttributeCodec
 import io.github.shijianjs.ktjs.dom.inlineStyle
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
@@ -12,14 +13,28 @@ import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.cssom.AlignItems
+import web.cssom.Border
+import web.cssom.BoxShadow
+import web.cssom.ClassName
+import web.cssom.Color
 import web.cssom.CSSStyleSheet
 import web.cssom.Display
 import web.cssom.JustifyContent
+import web.cssom.LineStyle
+import web.cssom.NamedColor
 import web.cssom.None
 import web.cssom.Padding
+import web.cssom.PropertyName
+import web.cssom.Transition
+import web.cssom.TransitionProperty
+import web.cssom.TransitionTimingFunction
+import web.cssom.many
 import web.cssom.integer
 import web.cssom.number
 import web.cssom.px
+import web.cssom.rgb
+import web.cssom.s
+import web.cssom.`var`
 import web.cssom.rem
 import web.dom.TagName
 import web.html.HTMLAnchorElement
@@ -34,9 +49,9 @@ import web.window._blank
  * The lower-cased constant name is what `kind="…"` matches; an unknown value reads as [Primary], the
  * same way any other unparsable attribute falls back to the delegate's default.
  */
-enum class ActionKind(internal val className: String) {
-    Primary("ktjs-button-primary"),
-    Secondary("ktjs-button-secondary"),
+enum class ActionKind(internal val className: ClassName) {
+    Primary(ClassName("ktjs-button-primary")),
+    Secondary(ClassName("ktjs-button-secondary")),
 }
 
 /**
@@ -46,7 +61,7 @@ enum class ActionKind(internal val className: String) {
  * is dropped when `icon` is empty. All three attributes are `attr` delegates, so the pill follows
  * them: the shadow tree is re-rendered from the new value, wherever the change came from.
  *
- * The pill's box is inline on the anchor; its colours live in [CSS] because `:hover` has to
+ * The pill's box is inline on the anchor; its colours live in [SHEET] because `:hover` has to
  * change them, and an inline value would win over the hover rule.
  */
 class KtjsAction : CustomElementAdapter() {
@@ -142,41 +157,44 @@ class KtjsAction : CustomElementAdapter() {
          * transition that animates it, and the two colour schemes with their `:hover` /
          * `:focus-visible` states.
          */
-        private val CSS: String = """
-            :host > a {
-              border: 1px solid transparent;
-              transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        private val SHEET: CSSStyleSheet = cssSheet {
+            ":host > a" {
+                border = Border(1.px, LineStyle.solid, Color.transparent)
+                transition = many(
+                    Transition(PropertyName.backgroundColor, 0.2.s, TransitionTimingFunction.ease),
+                    Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
+                    Transition(PropertyName.color, 0.2.s, TransitionTimingFunction.ease),
+                    Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
+                )
             }
 
-            .ktjs-button-primary {
-              background-color: var(--ktjs-accent, var(--ifm-color-primary));
-              border-color: var(--ktjs-accent, var(--ifm-color-primary));
-              color: #fff;
+            ActionKind.Primary.className {
+                backgroundColor = `var`(accentHook, `var`(primaryColorHook))
+                borderColor = `var`(accentHook, `var`(primaryColorHook))
+                color = NamedColor.white
+
+                "&:hover, &:focus-visible" {
+                    backgroundColor = `var`(accentStrongHook, rgb(26, 95, 208))
+                    borderColor = `var`(accentStrongHook, rgb(26, 95, 208))
+                    color = NamedColor.white
+                    boxShadow = `var`(
+                        shadowHook,
+                        BoxShadow(0.px, 10.px, 24.px, rgb(31, 111, 235, 0.24)),
+                    )
+                }
             }
 
-            .ktjs-button-primary:hover,
-            .ktjs-button-primary:focus-visible {
-              background-color: var(--ktjs-accent-strong, #1a5fd0);
-              border-color: var(--ktjs-accent-strong, #1a5fd0);
-              color: #fff;
-              box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.24));
-            }
+            ActionKind.Secondary.className {
+                backgroundColor = Color.transparent
+                borderColor = `var`(outlineBorderHook, rgb(127, 127, 127, 0.35))
+                color = `var`(accentHook, `var`(primaryColorHook))
 
-            .ktjs-button-secondary {
-              background-color: transparent;
-              border-color: var(--ktjs-outline-border, rgba(127, 127, 127, 0.35));
-              color: var(--ktjs-accent, var(--ifm-color-primary));
+                "&:hover, &:focus-visible" {
+                    backgroundColor = `var`(accentSoftHook, rgb(31, 111, 235, 0.1))
+                    borderColor = `var`(accentHook, `var`(primaryColorHook))
+                    color = `var`(accentHook, `var`(primaryColorHook))
+                }
             }
-
-            .ktjs-button-secondary:hover,
-            .ktjs-button-secondary:focus-visible {
-              background-color: var(--ktjs-accent-soft, rgba(31, 111, 235, 0.10));
-              border-color: var(--ktjs-accent, var(--ifm-color-primary));
-              color: var(--ktjs-accent, var(--ifm-color-primary));
-            }
-        """.trimIndent()
-
-        /** [CSS] parsed once; every `<ktjs-action>` adopts this one sheet. */
-        private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CSS) }
+        }
     }
 }

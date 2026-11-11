@@ -1,6 +1,9 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
+import io.github.shijianjs.ktjs.dom.cssSheet
+import web.cssom.BoxSizing
 import web.cssom.CSSStyleSheet
+import web.cssom.Display
 
 /**
  * The one stylesheet all seven elements share, adopted alongside each element's own sheet.
@@ -16,16 +19,9 @@ import web.cssom.CSSStyleSheet
  * Everything else is owned by the element that paints it: inline where inline suffices, that
  * element's own sheet for `:hover` and friends.
  */
-private const val RESET_CSS: String = """
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+internal val HOME_RESET: CSSStyleSheet = cssSheet {
+    "*" { boxSizing = BoxSizing.borderBox }
+    "*::before" { boxSizing = BoxSizing.borderBox }
+    "*::after" { boxSizing = BoxSizing.borderBox }
+    ":host" { display = Display.block }
 }
-
-:host {
-  display: block;
-}
-"""
-
-internal val HOME_RESET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(RESET_CSS) }

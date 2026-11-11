@@ -86,7 +86,7 @@ override 它。定义标签之前，`defineIfMissing` 会调用 `stripBridgesFro
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | 是，带 UI bundle | Node 安全的辅助（`TocToggle`）+ 一个 `browser` 构件 |
 | `ktjs-docusaurus-kit-elements` | 否 | 全部首页元素及其 shadow |
-| `ktjs-dom-kit` | 否（以后搬到独立仓库） | `CustomElementAdapter`、`attr` 与 `AttributeCodec`、`defineIfMissing`、`createElement`、`attachShadowRoot`、`attachStyledShadow`、`inlineStyle` |
+| `ktjs-dom-kit` | 否（以后搬到独立仓库） | `CustomElementAdapter`、`attr` 与 `AttributeCodec`、`defineIfMissing`、`createElement`、`attachShadowRoot`、`attachStyledShadow`、`inlineStyle`、`cssSheet` / `cssText` |
 
 首页 UI 跟着 kit 走：webpack bundle 以 `browser` 构件的身份挂在 kit 的坐标上，所以另一个项目只要一个依赖、
 一份拷贝：
@@ -174,7 +174,7 @@ headTags = arrayOf(
 | 位置 | 放什么 | 例子 |
 | --- | --- | --- |
 | 元素构造函数里的 `inlineStyle.apply { … }` | 一条普通声明能表达的全部 | `display = Display.flex`、`padding = Padding(1.5.rem)`、`color = accent` |
-| 该组件自己的一份 sheet（`private val SHEET`，放在它的 `companion object` 里） | 内联表达不了的：`:hover`、`::before`、`@media`、`@supports` | 按钮的悬停配色、hero 的两个光斑 |
+| 该组件自己的一份 sheet（`cssSheet { … }`，放在它的 `companion object` 里） | 内联表达不了的：`:hover`、`::before`、`@media`、`@supports` | 按钮的悬停配色、hero 的两个光斑 |
 | 所有元素都 adopt 的 sheet | 所有元素都需要、或好几个确实共享的 | `HomeReset.kt` 里的 `box-sizing` 与 `:host { display: block }` |
 
 取值都是有类型的（`Display.flex`、`1.5.rem`、`Color("var(--ktjs-accent, …)")`、`clamp(…)`），不手拼字符串。
@@ -184,6 +184,23 @@ headTags = arrayOf(
 组件自己的规则是**每个类一份 `CSSStyleSheet`**，建在该类的 `companion object` 里、该组件的所有实例共用——
 就是 Lit 的 `static styles` 那套，只是放在 Kotlin 存类静态成员的地方。所以永远不会创建 `<style>` 节点：
 一百张卡片共用一份已解析的 sheet，而不是各自背一份同样的文本。组件的规则因此不会飘进公共文件，也没有哪个元素背着它并不使用的样式表。
+
+规则本身写成类型化对象，而不是 CSS 文本：
+
+```kotlin
+private val SHEET: CSSStyleSheet = cssSheet {
+    cardClass {
+        border = Border(1.px, LineStyle.solid, var(cardBorderHook, rgb(127, 127, 127, 0.24)))
+        transition = many(Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease))
+        "&:hover" { borderColor = var(accentHook, var(primaryColorHook)) }
+    }
+}
+```
+
+`ktjs-dom-kit` 用 emotion 缓存自己那条管线（`@emotion/serialize` + `stylis`）把它序列化，所以进 sheet 的
+就是 emotion 会产出的东西：属性名、取值、单位、伪类结构都来自类型，剩下的字符串只有主题的自定义属性名和
+`"&:hover"` 这个键。`KtjsHero` 是例外——cssom 有 `background-clip` 但没有 `-webkit-background-clip`，
+也没有 `radial-gradient` 工厂和写 `content: ''` 的路子，所以它那份 sheet 保持 CSS 文本。
 
 ## 从 Kotlin 用
 

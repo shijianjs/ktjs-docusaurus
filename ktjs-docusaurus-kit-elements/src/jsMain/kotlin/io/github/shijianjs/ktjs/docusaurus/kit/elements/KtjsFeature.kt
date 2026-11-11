@@ -3,6 +3,7 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 import io.github.shijianjs.ktjs.dom.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attr
+import io.github.shijianjs.ktjs.dom.cssSheet
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.dom.inlineStyle
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
@@ -10,15 +11,28 @@ import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.cssom.AlignItems
+import web.cssom.Border
+import web.cssom.BoxShadow
+import web.cssom.ClassName
 import web.cssom.CSSStyleSheet
 import web.cssom.Display
 import web.cssom.FlexDirection
+import web.cssom.LineStyle
+import web.cssom.NamedColor
+import web.cssom.PropertyName
 import web.cssom.JustifyContent
 import web.cssom.Margin
+import web.cssom.Transition
+import web.cssom.TransitionProperty
+import web.cssom.TransitionTimingFunction
+import web.cssom.many
 import web.cssom.integer
 import web.cssom.number
 import web.cssom.pct
 import web.cssom.px
+import web.cssom.rgb
+import web.cssom.s
+import web.cssom.`var`
 import web.cssom.rem
 import web.dom.TagName
 import web.html.HTMLHeadingElement
@@ -87,7 +101,7 @@ class KtjsFeature : CustomElementAdapter() {
         }
         val card = HtmlTagName.article.createElement<HTMLElement> {
             // Hover state only, hence the hook.
-            classList.add("ktjs-feature-card")
+            classList.add(CARD)
             inlineStyle.apply {
                 display = Display.flex
                 flexDirection = FlexDirection.column
@@ -110,21 +124,30 @@ class KtjsFeature : CustomElementAdapter() {
     companion object : CustomElementReference<KtjsFeature>(KtjsFeature::class.js) {
         val NAME: TagName<KtjsFeature> = TagName(HomeMarkup.FEATURE)
 
-        /** The card's surface and its `:hover` lift. */
-        private val CSS: String = """
-            .ktjs-feature-card {
-              border: 1px solid var(--ktjs-card-border, rgba(127, 127, 127, 0.24));
-              background-color: var(--ktjs-card-bg, var(--ifm-background-surface-color, #fff));
-              transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            }
+        /** The card, as a typed class name: the shadow markup and [SHEET] share it. */
+        private val CARD: ClassName = ClassName("ktjs-feature-card")
 
-            .ktjs-feature-card:hover {
-              border-color: var(--ktjs-accent, var(--ifm-color-primary));
-              box-shadow: var(--ktjs-shadow, 0 10px 24px rgba(31, 111, 235, 0.18));
+        /** The card's surface and its `:hover` lift — what inline styles cannot say. */
+        private val SHEET: CSSStyleSheet = cssSheet {
+            CARD {
+                border = Border(
+                    1.px,
+                    LineStyle.solid,
+                    `var`(cardBorderHook, rgb(127, 127, 127, 0.24)),
+                )
+                backgroundColor = `var`(cardBackgroundHook, `var`(surfaceColorHook, NamedColor.white))
+                transition = many(
+                    Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
+                    Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
+                )
+                "&:hover" {
+                    borderColor = `var`(accentHook, `var`(primaryColorHook))
+                    boxShadow = `var`(
+                        shadowHook,
+                        BoxShadow(0.px, 10.px, 24.px, rgb(31, 111, 235, 0.18)),
+                    )
+                }
             }
-        """.trimIndent()
-
-        /** [CSS] parsed once; every `<ktjs-feature>` adopts this one sheet. */
-        private val SHEET: CSSStyleSheet = CSSStyleSheet().apply { replaceSync(CSS) }
+        }
     }
 }

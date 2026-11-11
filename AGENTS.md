@@ -186,43 +186,49 @@ duckfn 站点一致。
     主题色这类跨组件常量放 `HomeTheme.kt`。`ktjs-features` / `ktjs-next-steps` 共用的分区外壳
     （`HomeSection.kt`）属于「父容器统一控制子组件布局」，是允许提取的那一类。
 
-    **CSS 有两条允许的写法，判断标准是「还剩多少 CSS 文本要手写」，不是源码行数**（2026-11-11 在
-    `probes/web-components` 的 `example.CssSheetExperiment` 里三条路都实测过，可运行）：
+    **组件自己的 CSS 用 `ktjs-dom-kit` 的 `cssSheet { … }` 写**：类型化的规则对象交给 emotion 的文本管线
+    序列化。写法、坑、参考与示例都在 `ktjs-dom-kit/docs/css-sheet.md`（跟着该模块走，将来它独立成库时
+    一起搬）。典型形态：
 
-    - **手写文本**：`private val CSS` + `replaceSync`。规则只有十几行、且以 `:hover` 为主时最省事，
-      当前 `ktjs-*` 元素都是这么写的。
-    - **csstype DSL**：选择器也用类型——`private val cardClass = ClassName("ktjs-feature-card")`，
-      配 `RuleBuilder` 的 `operator fun ClassName.invoke` 补点号。注意 Kotlin 的解析规则：
-      `ClassName("x") { … }` 会被读成「调用工厂 + 尾随 lambda 当第二个实参」而编译不过，要么加括号
-      `(ClassName("x")) { … }`（一次性用），要么先存 `val` 再 `cardClass { … }`（要复用）。`unsafeJso<PropertiesBuilder> { cardClass { border =
-      Border(1.px, LineStyle.solid, …); "&:hover" { … } } }` → `@emotion/serialize` 的
-      `serializeStyles([rules])` 出声明（自动连字符化、把 `fallback(a, b)` 摊成多条）→ `stylis` 的
-      `serialize(compile("selector{…}"), middleware([stringify]))`（把 `&:hover` 拍平成
-      `.selector:hover`、规范化取值）→ `replaceSync`。同一段卡片规则：手写要 **455 个字符的 CSS
-      文本**，DSL 版本 **0 个字符**——没有一条声明、没有一个选择器字符串、没有一处 cast，只剩名字：
-      6 个自定义属性名（文本版同样要写）+ 1 个 `"&:hover"` 键。
-      值的类型化路径：自定义属性名各自声明成具名常量 `private val accentHook = CustomPropertyName<Color>("--ktjs-accent")`\n      （字符串每处只写一次），再用 `var(hook, fallback)`（兜底值也是类型化的）、
-      `rgb(r,g,b,a)`、`NamedColor.white`（命名色是 `Color` 常量，别写 `"#fff"`）、
-      `BoxShadow(0.px, 10.px, 24.px, …)`、`fallback(grid, flex)`、`1.5.rem`、
-      `Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease)` 配 cssom 的
-      `many(…)` 拼多值。
-    - 三条实测约束：① 用 `&:hover`，**不要用 `hover {}` 糖**——它写的是键 `:hover`，stylis 会拼成
-      **后代**选择器 `.parent :hover`（第 8f 节有对照）。根因是 kotlin-wrappers 的生成器
-      `karakum/csstype/Pseudos.kt` 里 `convertSimplePseudo` 把 csstype TS 联合里的字符串
-      （`":hover"`）原样当选择器写进方法体，而同一套 API 里手写的 `RuleBuilder.and` 会加 `&`、
-      `kotlin-css` 的 `CssBuilder.hover` 也是 `"&:hover"`——只有生成的伪类助手漏了 `&`，属于上游缺陷，
-      已报 <https://github.com/JetBrains/kotlin-wrappers/issues/2933>（修好后第 8f 节会变）；
-      ② 过渡属性名不需要 cast：`TransitionProperty` 虽然只暴露 `all`，但 `PropertyName<T>` 继承
-      `Ident`、`IdentType` 里又包含 `TransitionProperty`，所以 `PropertyName.borderColor` 本身就合法；
-      ③ 只声明用到的两个包（`@emotion/serialize` + `stylis`），不要写全 wrapper。
-    - **别用 `kotlin-css`（`kotlinx.css`）那套**：值不做校验（`Color`/`LinearDimension` 只是 `String`
-      包装），`transition` 强制补 `0s` 延迟，整值 `var()` 只能退回 `put("box-shadow", "…")`，`hover` /
-      `before` 的糖不解析 `&`，还带进第二套取值词汇（`kotlinx.css.Color` 与 `web.cssom.Color` 并存）。
-    - **也别在浏览器里逐条 `insertRule` 灌 CSSOM**：同一条规则里同一属性只能留一个声明，
-      `fallback()` 阶梯会被压成最后一条（且浏览器会把 `0.2s ease` 规范化成 `0.2s`）。
+    ```kotlin
+    private val cardClass = ClassName("ktjs-feature-card")   // 与 shadow 里的 classList 共用
 
-    证据就跑这个探针：`./gradlew :probes-web-components:jsBrowserDevelopmentRun` 看页面第 8 节（三种产物 +
-    一张 adopt 了 sheet 的卡片），`...:jsBrowserTest` 跑 `CssSheetExperimentTest`。
+    private val SHEET: CSSStyleSheet = cssSheet {
+        cardClass {
+            border = Border(1.px, LineStyle.solid, `var`(cardBorderHook, rgb(127, 127, 127, 0.24)))
+            transition = many(
+                Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
+                Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
+            )
+            "&:hover" { borderColor = `var`(accentHook, `var`(primaryColorHook)) }
+        }
+    }
+    ```
+
+    四条规矩（都是实测踩出来的）：
+
+    ① 选择器用 `ClassName` + `invoke`（点号由它补）。Kotlin 的解析规则要注意：`ClassName("x") { … }`
+      会被读成「调用工厂 + 尾随 lambda 当第二个实参」，一次性用加括号 `(ClassName("x")) { … }`，
+      要复用就存 `val` 再 `cardClass { … }`。
+    ② 伪类 / 伪元素 / at-rule 写字符串，但**必须带 `&`**：`"&:hover"`、`"&::before"`、`"@media …"`。
+      **不要用 `hover {}` / `before {}` 糖**——它们写的键是 `:hover` / `::before`，stylis 会拼成**后代**
+      选择器（上游缺陷 <https://github.com/JetBrains/kotlin-wrappers/issues/2933>，修好后可换回）。
+    ③ 值全走类型：`NamedColor.white`（命名色就是 `Color`，别写 `"#fff"`）、`rgb(r, g, b, a)`、
+      `1.5.rem`、`BoxShadow(0.px, 10.px, 24.px, …)`、`var(hook, fallback)`、`fallback(grid, flex)`、
+      `Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease)` 配 `many(…)` 拼多值。
+      过渡属性名不需要 cast：`PropertyName<T>` 继承 `Ident`，而 `IdentType` 里包含 `TransitionProperty`。
+      自定义属性名（`--ktjs-*`、`--ifm-*`）在 `HomeTheme.kt` 里各是一个具名 `CustomPropertyName<T>` 常量，
+      字符串每处只写一次。
+    ④ 真表达不了才退回文本，并在注释里写明卡在哪。目前 `KtjsHero` 是唯一的例外：cssom 没有
+      `radial-gradient` 工厂、`Content` 没有字符串工厂、`-webkit-background-clip` 干脆没有属性，三段都
+      命中，所以它整块保留 CSS 文本。
+
+    同一段卡片规则：手写约 455 个字符的 CSS，这套写法里手写 CSS 文本 0、cast 0，只剩自定义属性名和
+    一个 `"&:hover"` 键。判断值不值得用这套，看的是「还剩多少 CSS 文本要手写」，不是源码行数。
+    对照实验（三条写法并排 + 字符数报表）留在 `probes/web-components` 的 `example.CssSheetExperiment`：
+    `./gradlew :probes-web-components:jsBrowserDevelopmentRun`。另两套已否决：`kotlin-css`
+    （`kotlinx.css`）的旧 DSL（值不校验、`transition` 补 `0s`、`&` 不解析）、逐条 `insertRule` 灌 CSSOM
+    （`fallback()` 阶梯会被压成最后一条）。
 
 
    不要往 kit 里加 `fillFrom` 这类解析方法，也不要为它引入 DOM 抽象接口。

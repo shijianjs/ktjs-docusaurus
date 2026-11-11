@@ -95,7 +95,7 @@ deliberately not implemented: its `val connectedCallback` compiles to a getter t
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | yes, with the UI bundle | Node-safe helpers (`TocToggle`) + a `browser` artifact |
 | `ktjs-docusaurus-kit-elements` | no | all home elements and their shadows |
-| `ktjs-dom-kit` | no (moves to its own repository) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle` |
+| `ktjs-dom-kit` | no (moves to its own repository) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `cssSheet` / `cssText` |
 
 The home UI travels with the kit: the webpack bundle is attached to the kit's coordinate as a
 `browser` artifact, so another project needs one dependency and one copy:
@@ -184,7 +184,7 @@ Styles live where the element is written, in three grades:
 | Where | What goes there | Example |
 | --- | --- | --- |
 | `inlineStyle.apply { … }` in the element's constructor | everything a plain declaration can say | `display = Display.flex`, `padding = Padding(1.5.rem)`, `color = accent` |
-| one sheet of that element's own (`private val SHEET` in its `companion object`) | what inline styles cannot: `:hover`, `::before`, `@media`, `@supports` | the button's hover colours, the hero's glow blobs |
+| one sheet of that element's own (`cssSheet { … }` in its `companion object`) | what inline styles cannot: `:hover`, `::before`, `@media`, `@supports` | the button's hover colours, the hero's glow blobs |
 | the sheet every element adopts | what all of them need, or what several genuinely share | `box-sizing` and `:host { display: block }` in `HomeReset.kt` |
 
 Values are typed (`Display.flex`, `1.5.rem`, `Color("var(--ktjs-accent, …)")`, `clamp(…)`), never
@@ -197,6 +197,25 @@ object and adopted by every instance — Lit's `static styles`, in the place Kot
 statics. That is why no `<style>` node is ever created: a hundred cards share one parsed sheet instead
 of carrying a hundred copies of the same text. A component's rules
 therefore never travel into a shared file, and no element carries a stylesheet it does not paint with.
+
+The rules themselves are written as a typed object, not as CSS text:
+
+```kotlin
+private val SHEET: CSSStyleSheet = cssSheet {
+    cardClass {
+        border = Border(1.px, LineStyle.solid, var(cardBorderHook, rgb(127, 127, 127, 0.24)))
+        transition = many(Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease))
+        "&:hover" { borderColor = var(accentHook, var(primaryColorHook)) }
+    }
+}
+```
+
+`ktjs-dom-kit` serializes that object through the same two packages emotion's cache uses
+(`@emotion/serialize` + `stylis`), so what lands in the sheet is what emotion would emit. Property
+names, values, units and pseudo-class structure come from types; the only strings left are the theme's
+custom property names and the `"&:hover"` key. `KtjsHero` is the exception: cssom models
+`background-clip` but not `-webkit-background-clip`, has no `radial-gradient` factory and no way to
+spell `content: ''`, so its one sheet stays CSS text.
 
 ## From Kotlin
 
