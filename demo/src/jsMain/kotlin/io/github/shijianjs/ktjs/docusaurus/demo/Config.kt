@@ -9,6 +9,7 @@ import io.github.shijianjs.ktjs.docusaurus.config.I18nLocaleConfig
 import io.github.shijianjs.ktjs.docusaurus.config.PluginConfig
 import io.github.shijianjs.ktjs.docusaurus.config.PresetConfig
 import io.github.shijianjs.ktjs.docusaurus.config.ReportingSeverities
+import io.github.shijianjs.ktjs.docusaurus.config.StringOrDouble
 import io.github.shijianjs.ktjs.docusaurus.config.StringOrFalse
 import io.github.shijianjs.ktjs.docusaurus.plugins.contentdocs.DocsOptions
 import io.github.shijianjs.ktjs.docusaurus.plugins.searchlocal.BooleanOrHashed
@@ -30,6 +31,7 @@ import io.github.shijianjs.ktjs.docusaurus.theme.FooterStyles
 import io.github.shijianjs.ktjs.docusaurus.theme.NavbarItem
 import io.github.shijianjs.ktjs.docusaurus.theme.NavbarItemPositions
 import io.github.shijianjs.ktjs.docusaurus.theme.NavbarItemTypes
+import io.github.shijianjs.ktjs.docusaurus.theme.NavbarLogo
 import io.github.shijianjs.ktjs.docusaurus.theme.PrismThemes
 import io.github.shijianjs.ktjs.docusaurus.theme.SimpleFooter
 import io.github.shijianjs.ktjs.docusaurus.theme.ThemeConfig
@@ -128,6 +130,13 @@ fun docusaurusConfig(): Config = unsafeJso {
     themeConfig = unsafeJso<ThemeConfig> {
         navbar = unsafeJso {
             title = "ktjs-docusaurus"
+            // The same file the favicon uses, so the navbar logo costs no extra download; `alt` is
+            // left out because Docusaurus marks it decorative when the navbar also shows the title.
+            logo = unsafeJso<NavbarLogo> {
+                src = "img/ktjs-docusaurus-logo.png"
+                width = StringOrDouble(32.0)
+                height = StringOrDouble(32.0)
+            }
             hideOnScroll = true
             items = arrayOf(
                 unsafeJso<NavbarItem> {
