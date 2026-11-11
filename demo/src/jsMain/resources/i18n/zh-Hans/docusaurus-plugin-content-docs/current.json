@@ -1,0 +1,42 @@
+{
+  "sidebar.userGuide.doc.Introduction": {
+    "message": "简介",
+    "description": "The label for the doc item 'Introduction' in sidebar 'userGuide', linking to the doc intro"
+  },
+  "sidebar.userGuide.category.Guide": {
+    "message": "指南",
+    "description": "The label for category 'Guide' in sidebar 'userGuide'"
+  },
+  "sidebar.userGuide.doc.Getting started": {
+    "message": "快速开始",
+    "description": "The label for the doc item 'Getting started' in sidebar 'userGuide', linking to the doc guide/getting-started"
+  },
+  "sidebar.userGuide.doc.Content and i18n": {
+    "message": "内容与 i18n",
+    "description": "The label for the doc item 'Content and i18n' in sidebar 'userGuide', linking to the doc guide/content"
+  },
+  "sidebar.userGuide.doc.Local search": {
+    "message": "本地搜索",
+    "description": "The label for the doc item 'Local search' in sidebar 'userGuide', linking to the doc guide/local-search"
+  },
+  "sidebar.docsKit.doc.Overview": {
+    "message": "工具箱",
+    "description": "The label for the doc item 'Overview' in sidebar 'docsKit', linking to the doc kit/overview"
+  },
+  "sidebar.docsKit.category.Building blocks": {
+    "message": "组成模块",
+    "description": "The label for category 'Building blocks' in sidebar 'docsKit'"
+  },
+  "sidebar.docsKit.doc.Home sections": {
+    "message": "首页分区",
+    "description": "The label for the doc item 'Home sections' in sidebar 'docsKit', linking to the doc kit/home-sections"
+  },
+  "sidebar.docsKit.doc.TOC toggle": {
+    "message": "目录折叠",
+    "description": "The label for the doc item 'TOC toggle' in sidebar 'docsKit', linking to the doc kit/toc-toggle"
+  },
+  "sidebar.docsKit.doc.Gradle plugin": {
+    "message": "Gradle 插件",
+    "description": "The label for the doc item 'Gradle plugin' in sidebar 'docsKit', linking to the doc kit/gradle-plugin"
+  }
+}
