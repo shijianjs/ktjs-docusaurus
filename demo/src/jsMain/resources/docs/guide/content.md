@@ -35,6 +35,11 @@ Page copy therefore stays in the page: two Markdown files, one per locale, and t
 exception. `code.json` under the same `i18n` directory is for the strings a *component* owns — the
 navbar, the footer, and anything a Kotlin page renders with `translate { id = …; message = "…" }`.
 
+Sidebar entries and the previous/next buttons take their labels from the page they point at — its
+heading, or a `sidebar_label` in its front matter — so a translated page brings its translated label
+along. A category has no page of its own, so its label lives in the docs plugin's own translation
+file, `i18n/<locale>/docusaurus-plugin-content-docs/current.json`.
+
 ## Why not MDX for prose
 
 MDX is available, and a page may use it. It is just not the default: a page that is only prose is

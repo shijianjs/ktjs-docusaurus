@@ -34,6 +34,10 @@ resources/i18n/zh-Hans/docusaurus-plugin-content-pages/index.md
 是给**组件**自己持有的字符串用的——导航栏、页脚，以及 Kotlin 页面用
 `translate { id = …; message = "…" }` 渲染出来的内容。
 
+侧边栏条目和「上一页 / 下一页」按钮的标签都取自它们指向的那个页面——页面标题，或 front matter 里的
+`sidebar_label`——所以译文页会连标签一起带过来。分类没有自己的页面，它的标签放在 docs 插件自己的翻译文件
+`i18n/<locale>/docusaurus-plugin-content-docs/current.json` 里。
+
 ## 正文为什么不用 MDX
 
 MDX 是可用的，页面也可以用。它只是不作为默认：只有正文的页面就是 `.md` 文件，这样它和 React 组件树

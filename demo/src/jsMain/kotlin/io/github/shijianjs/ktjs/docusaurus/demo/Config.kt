@@ -197,6 +197,10 @@ fun docusaurusConfig(): Config = unsafeJso {
  * The sidebars, imported by the generated `sidebars.mjs`.
  *
  * Two id-matched sidebars: the user guide and the kit. The navbar links to both.
+ *
+ * Only the categories carry a label here. A doc keeps its own: Docusaurus labels the sidebar entry
+ * and the previous/next buttons from the page's `sidebar_label` or its heading, so a translated page
+ * brings its translated label along, and a translated sidebar entry is not enough for the buttons.
  */
 @JsExport
 fun sidebars(): SidebarsConfig = unsafeJso<DemoSidebars> {
@@ -204,7 +208,6 @@ fun sidebars(): SidebarsConfig = unsafeJso<DemoSidebars> {
             unsafeJso {
                 type = SidebarItemTypes.doc
                 id = "intro"
-                label = "Introduction"
             },
             unsafeJso {
                 type = SidebarItemTypes.category
@@ -214,17 +217,14 @@ fun sidebars(): SidebarsConfig = unsafeJso<DemoSidebars> {
                     unsafeJso {
                         type = SidebarItemTypes.doc
                         id = "guide/getting-started"
-                        label = "Getting started"
                     },
                     unsafeJso {
                         type = SidebarItemTypes.doc
                         id = "guide/content"
-                        label = "Content and i18n"
                     },
                     unsafeJso {
                         type = SidebarItemTypes.doc
                         id = "guide/local-search"
-                        label = "Local search"
                     },
                 )
             },
@@ -233,7 +233,6 @@ fun sidebars(): SidebarsConfig = unsafeJso<DemoSidebars> {
             unsafeJso {
                 type = SidebarItemTypes.doc
                 id = "kit/overview"
-                label = "Overview"
             },
             unsafeJso {
                 type = SidebarItemTypes.category
@@ -243,19 +242,16 @@ fun sidebars(): SidebarsConfig = unsafeJso<DemoSidebars> {
                     unsafeJso {
                         type = SidebarItemTypes.doc
                         id = "kit/home-sections"
-                        label = "Home sections"
                     },
                     unsafeJso {
                         type = SidebarItemTypes.doc
                         id = "kit/toc-toggle"
-                        label = "TOC toggle"
                     },
                 )
             },
         unsafeJso {
             type = SidebarItemTypes.doc
             id = "kit/gradle-plugin"
-            label = "Gradle plugin"
         },
     )
 }.unsafeCast<SidebarsConfig>()
