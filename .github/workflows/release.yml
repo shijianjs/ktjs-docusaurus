@@ -133,7 +133,11 @@ jobs:
             echo "no module of the root build is part of this release"
             exit 0
           fi
-          ./gradlew $tasks --stacktrace -Pktjs.release=true
+          # The stored lock describes a working tree, whose module versions carry `-SNAPSHOT`; the
+          # release invocation derives the same modules without the suffix, so the generated npm
+          # packages differ by that string alone and the comparison cannot pass. `npm install` is
+          # still the same graph, and CI verifies the committed lock on every PR.
+          ./gradlew $tasks --stacktrace -Pktjs.release=true -x kotlinStorePackageLock
 
       # The plugin cannot ride along with the invocation above: Gradle does not forward -P across a
       # build boundary, and the plugin lives in its own build. It publishes into its own

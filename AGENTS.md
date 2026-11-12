@@ -680,6 +680,10 @@ interface` 声明私有字段，`unsafeCast` 过去读写，元素被移除时�
   去掉后缀，`release.yml` 的两处 Gradle 调用都带着它；本地要发真版本时自己加。
   Gradle 不把 `-P` 传给 included build，`ktjs-docusaurus-gradle-plugin` 是独立构建，发布它时必须在它自己的
   调用里再传一次。
+- **提交的锁文件描述工作树**：`kotlin-js-store/package-lock.json` 里各个 workspace 包的版本带 `-SNAPSHOT`，
+  而发布时用的是去掉后缀的版本，生成的 `package.json` 只差这一串，`kotlinStorePackageLock` 必然报
+  `Lock file was changed`。所以 `release.yml` 的发布调用带 `-x kotlinStorePackageLock`；依赖图没变，
+  普通 PR 的 CI 仍然照常校验锁文件。
 - 每个模块的修订号独立递增，永不重置为 `kt.1`。它表示该模块的第 N 次 wrapper 发布，与上游 npm 版本
   各自独立演进。
 - wrapper 代码或该模块的已发布元数据变化时，只把 `wrapper-revisions.properties` 中对应模块的修订号加一；
