@@ -30,8 +30,8 @@ class SiteE2eTest {
         assertThat(page.locator("ktjs-features h2")).hasText("Why this project")
         assertThat(page.locator("ktjs-next-steps h2")).hasText("Where to go next")
         assertEquals(2, page.locator("ktjs-action").count())
-        assertEquals(4, page.locator("ktjs-feature").count())
-        assertEquals(3, page.locator("ktjs-step").count())
+        assertEquals(6, page.locator("ktjs-feature").count())
+        assertEquals(4, page.locator("ktjs-step").count())
         assertThat(page.locator("ktjs-feature h3").first()).hasText("Configuration is Kotlin")
     }
 
@@ -157,8 +157,8 @@ class SiteE2eTest {
         page.navigate(DocsServer.zhHomeUrl, Page.NavigateOptions().setWaitUntil(WaitUntilState.LOAD))
 
         assertThat(page.locator("ktjs-hero h1")).hasText("ktjs-docusaurus")
-        assertEquals(4, page.locator("ktjs-feature").count())
-        assertEquals(3, page.locator("ktjs-step").count())
+        assertEquals(6, page.locator("ktjs-feature").count())
+        assertEquals(4, page.locator("ktjs-step").count())
     }
 
     /**

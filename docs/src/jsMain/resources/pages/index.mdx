@@ -20,7 +20,11 @@ hide_table_of_contents: true
 
 <ktjs-feature icon="lucide:file-code-2" title="Configuration is Kotlin">The site config, the theme config and the sidebars are typed Kotlin values; a misspelt field is a compile error, not a validation message at build time.</ktjs-feature>
 
+<ktjs-feature icon="lucide:puzzle" title="Every official plugin, typed">Official plugins and themes have Kotlin option types too, so preset-classic, pwa or sitemap options are checked like the site config.</ktjs-feature>
+
 <ktjs-feature icon="lucide:package" title="No npm project to maintain">Versions live in one package.json for Dependabot, node_modules is installed by the Kotlin/JS workspace, and the Docusaurus CLI is invoked by Gradle.</ktjs-feature>
+
+<ktjs-feature icon="lucide:tags" title="One version to track">Docusaurus ships its packages in lockstep, so the wrapper publishes a single Maven version derived from the package.json it was built against.</ktjs-feature>
 
 <ktjs-feature icon="lucide:folder-tree" title="Markdown stays Markdown">Pages live under src/jsMain/resources and are copied next to the compiled Kotlin. Prose does not need a component tree.</ktjs-feature>
 
@@ -31,6 +35,8 @@ hide_table_of_contents: true
 <ktjs-next-steps section-title="Where to go next">
 
 <ktjs-step href="docs/intro" title="Introduction">What the project is and how a site is laid out.</ktjs-step>
+
+<ktjs-step href="docs/guide/getting-started" title="Getting started">Requirements, the build task, and a dev server that reloads on Markdown edits.</ktjs-step>
 
 <ktjs-step href="docs/kit/overview" title="The kit">Home sections and the TOC toggle, with their API.</ktjs-step>
 

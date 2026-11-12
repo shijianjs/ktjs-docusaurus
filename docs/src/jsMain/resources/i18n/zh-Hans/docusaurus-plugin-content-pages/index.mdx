@@ -19,7 +19,11 @@ hide_table_of_contents: true
 
 <ktjs-feature icon="lucide:file-code-2" title="配置就是 Kotlin">站点配置、主题配置、侧边栏都是带类型的 Kotlin 值；字段拼错是编译错误，不是构建期的校验提示。</ktjs-feature>
 
+<ktjs-feature icon="lucide:puzzle" title="官方插件全带类型">官方插件与主题也有 Kotlin 选项类型，preset-classic、pwa、sitemap 的选项和站点配置一样受检查。</ktjs-feature>
+
 <ktjs-feature icon="lucide:package" title="没有要维护的 npm 工程">版本集中在一个 package.json 里交给 Dependabot，node_modules 由 Kotlin/JS 工作区安装，Docusaurus CLI 由 Gradle 调用。</ktjs-feature>
+
+<ktjs-feature icon="lucide:tags" title="版本只跟一个号">Docusaurus 的包 lockstep 发版，wrapper 也只发布一个 Maven 版本，版本号从它编译用的 package.json 推出来。</ktjs-feature>
 
 <ktjs-feature icon="lucide:folder-tree" title="Markdown 还是 Markdown">页面放在 src/jsMain/resources 下，和编译产物一起拷进站点；正文不需要组件树。</ktjs-feature>
 
@@ -30,6 +34,8 @@ hide_table_of_contents: true
 <ktjs-next-steps section-title="接下来">
 
 <ktjs-step href="docs/intro" title="简介">这个项目是什么，一个站点怎么组织。</ktjs-step>
+
+<ktjs-step href="docs/guide/getting-started" title="快速开始">环境要求、构建命令，以及 Markdown 改动即时刷新的开发服务器。</ktjs-step>
 
 <ktjs-step href="docs/kit/overview" title="工具箱">首页分区与目录折叠，以及它们的 API。</ktjs-step>
 
