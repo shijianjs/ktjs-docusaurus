@@ -75,6 +75,14 @@ The first call inside `connectedCallback` that goes through one of those names â
 overflows. `getAttribute` / `setAttribute` / `hasAttribute` / `textContent` need no fix: they are
 abstract members of the external `Element` class, so no bridge is generated for them at all.
 
+Reported upstream as
+[kotlin-wrappers#2932](https://github.com/JetBrains/kotlin-wrappers/issues/2932), which is where the
+compiler-side explanation lives: the bridge is generated for members declared `= definedExternally`
+on external *interfaces* (a member of an external *class* such as `getAttribute` is abstract and
+stops at the `ABSTRACT` guard), it is named after its own target, and the call inside it therefore
+resolves to itself. The JVM backend has a guard against exactly this pattern (`isErroneousSpecialBridge`,
+KT-82651); JS does not, so the fix has to live here until it does.
+
 `stripBridgesFrom(klass)` deletes those names from every prototype in the class's chain, stopping
 before `HTMLElement.prototype`, where they are the real DOM methods. Deleting a name that was never
 bridged is a no-op, so the list can stay wider than a given class strictly needs. It walks the whole

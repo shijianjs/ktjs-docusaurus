@@ -139,7 +139,10 @@ duckfn 站点一致。
    `querySelectorAll` / `append` / `animate` / `focus`，不需要 `…Super` 转发。生命周期钩子声明成
    `connectedCallback()`——元素类只写 `override fun connectedCallback()`，不要再起 `onConnected`
    之类的别名，也不必每个类带 `@JsName`。**没有任何 JS 类字面量**。细节与实测在
-   `probes/web-components` 的 `CustomElementAdapter.kt` / `MyPanelAdapter.kt`。
+   `probes/web-components` 的 `CustomElementAdapter.kt` / `MyPanelAdapter.kt`。编译器侧的解释在上游
+   <https://github.com/JetBrains/kotlin-wrappers/issues/2932>：桥只为外部**接口**上 `= definedExternally`
+   的成员生成，名字与目标同名，所以调用解析回自己；JVM 后端有 `isErroneousSpecialBridge`（KT-82651）
+   防护，JS 后端还没有。
 
    **分层是硬约定**：kit 按「Node 是否加载」拆成两个都发布的共享包，另有一个通用的 DOM 模块：
 

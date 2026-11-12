@@ -22,6 +22,8 @@ import io.github.shijianjs.ktjs.docusaurus.plugins.themeclassic.ThemeClassicOpti
 import io.github.shijianjs.ktjs.docusaurus.presets.BlogOptionsOrFalse
 import io.github.shijianjs.ktjs.docusaurus.presets.DocsOptionsOrFalse
 import io.github.shijianjs.ktjs.docusaurus.presets.classicPreset
+import io.github.shijianjs.ktjs.docusaurus.sidebars.SidebarCategoryLink
+import io.github.shijianjs.ktjs.docusaurus.sidebars.SidebarCategoryLinkTypes
 import io.github.shijianjs.ktjs.docusaurus.sidebars.SidebarItem
 import io.github.shijianjs.ktjs.docusaurus.sidebars.SidebarItemTypes
 import io.github.shijianjs.ktjs.docusaurus.sidebars.SidebarsConfig
@@ -219,6 +221,10 @@ fun docusaurusConfig(): Config = unsafeJso {
  * and the previous/next buttons from the page's `sidebar_label` or its heading, so a translated page
  * brings its translated label along, and a translated sidebar entry is not enough for the buttons.
  *
+ * Every category links to a `generated-index` page — the label is clickable and the section gets a
+ * landing page without a hand-written index doc. The slug is explicit because the default is derived
+ * from the label, which is translated; the title still comes from the label, so the page is localised.
+ *
  * The Gradle plugin belongs to the user guide, not the kit: the wrapper and the plugin are the two
  * halves of a Docusaurus site, while the kit is this project's own additions on top.
  */
@@ -233,6 +239,14 @@ fun sidebars(): SidebarsConfig = unsafeJso<DocsSidebars> {
                 type = SidebarItemTypes.category
                 label = "Guide"
                 collapsed = false
+                // A category label is only a link when the category says what it links to. Both
+                // categories point at a page Docusaurus generates from the docs below them, so the
+                // label is clickable and the section needs no hand-written index doc. The slug is
+                // spelled out because the default is derived from the label, which is translated.
+                link = unsafeJso<SidebarCategoryLink> {
+                    type = SidebarCategoryLinkTypes.generatedIndex
+                    slug = "category/guide"
+                }
                 items = arrayOf(
                     unsafeJso {
                         type = SidebarItemTypes.doc
@@ -262,6 +276,10 @@ fun sidebars(): SidebarsConfig = unsafeJso<DocsSidebars> {
                 type = SidebarItemTypes.category
                 label = "Building blocks"
                 collapsed = false
+                link = unsafeJso<SidebarCategoryLink> {
+                    type = SidebarCategoryLinkTypes.generatedIndex
+                    slug = "category/building-blocks"
+                }
                 items = arrayOf(
                     unsafeJso {
                         type = SidebarItemTypes.doc
