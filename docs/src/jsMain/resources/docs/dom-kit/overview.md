@@ -10,8 +10,8 @@ native DOM, with no knowledge of Docusaurus and no component runtime behind them
 It is a module of this build rather than a library of its own. The wrapper (`ktjs-docusaurus`) maps
 npm packages to Kotlin declarations, the docs kit is this project's own UI, and this is the plumbing
 both sit on — a base class a custom element can extend, an attribute delegate that makes the DOM the
-single source of truth, a typed view of an element's inline style, and a way to build a
-`CSSStyleSheet` out of Kotlin values instead of CSS text.
+single source of truth, a typed view of an element's inline style, a way to build a `CSSStyleSheet`
+out of Kotlin values instead of CSS text, and a typed face for the `loadjs` loader.
 
 ## Why it lives here
 
@@ -37,6 +37,7 @@ written, and because the alternatives are worse.
 | `ShadowStyles.kt` | `attachShadowRoot` and `attachStyledShadow` |
 | `InlineStyles.kt` | `HTMLElement.inlineStyle`, the element's own style seen as `csstype.Properties` |
 | `DomExtensions.kt` | `TagName<T>.createElement { … }` |
+| `loadjs/` | a wrapper for the [`loadjs`](https://github.com/kubetail-org/loadjs) loader: its four call shapes as overloads, the path prefixes (`css!`, `img!`, `module!`, `nomodule!`), and the bundle registry (`ready` / `done` / `reset` / `isDefined`) |
 | `CssSheet.kt` | `cssSheet { … }` and `cssText { … }` |
 | `css/` | what cssom does not model, filled in with typed values: `Pseudos`, `SupportsQuery`, `radialGradient`, `webkitBackgroundClip`, … |
 

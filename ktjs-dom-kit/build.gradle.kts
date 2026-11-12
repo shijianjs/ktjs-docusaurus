@@ -48,6 +48,9 @@ kotlin {
             // @emotion/cache pins, and `implementation` since neither type is in the public API.
             implementation(npm("@emotion/serialize", "1.3.3"))
             implementation(npm("stylis", "4.2.0"))
+            // The `dom.loadjs` package wraps this loader; it ships UMD only (`dist/loadjs.umd.js`),
+            // which is why the declaration binds to the module's default export.
+            implementation(npm("loadjs", "4.3.0"))
         }
         jsTest.dependencies {
             implementation(kotlin("test"))

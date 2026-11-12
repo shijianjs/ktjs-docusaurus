@@ -20,8 +20,8 @@ sidebar_position: 1
 
 | 状态 | 数量 |
 | --- | ---: |
-| 总计 | 49 |
-| 已完成 | 37 |
+| 总计 | 50 |
+| 已完成 | 38 |
 | 明确不做 | 4 |
 | 保留 | 1 |
 | 待完成 | 7 |
@@ -75,7 +75,7 @@ sidebar_position: 1
 - 3.8 插件本体的 Maven 发布（独立构建，需单独的发布命令与 staging 配置） —— **待完成**
 - 3.9 插件接入 `release.yml`，与 wrapper 同版本发布 —— **待完成**（依赖 3.8）
 
-## 4. kit（7 项：5 完成 / 2 不做）
+## 4. kit（8 项：6 完成 / 2 不做）
 
 - 4.1 `HomeHero` / `FeatureSection` / `NextStepSection`
 - 4.2 `TocToggle`
@@ -83,6 +83,9 @@ sidebar_position: 1
 - 4.4 JVM 版 Playwright e2e（`jvm()` + `src/jvmTest` + `e2eTest`，参考 `ktjs-vaadin`）
 - 4.5 `ktjs-dom-kit` 固定留在本仓库、不迁出：它的文档要用它所帮助构建的那套框架来写，拆出去会让站点依赖
   这个库、库的文档又依赖站点，绕成环。模块名不进发布前缀，文档并入站点的 DOM 工具箱分类
+- 4.6 `ktjs-dom-kit` 的 `dom.loadjs` 包：`loadjs` 4.3.0 的完整封装——四种调用形态按分支写成一个重载
+  （含 promise 分支）、`LoadOptions` / `ReadyOptions`、`before` 返回 `false` 跳过插入、bundle 注册表；
+  浏览器测试 14 例（blob/data URL 与必然失败的 URL 代替上游的静态资源服务器）
 
 明确不做：
 

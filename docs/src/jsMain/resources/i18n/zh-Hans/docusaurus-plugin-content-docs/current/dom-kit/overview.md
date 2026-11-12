@@ -9,8 +9,8 @@ sidebar_position: 1
 
 它是本构建的一个模块，而不是一个独立库。wrapper（`ktjs-docusaurus`）把 npm 包映射成 Kotlin 声明，文档
 工具箱是本项目自家的 UI，而这里是两者共同踩的那层地皮——自定义元素可以继承的基类、把 DOM 当作唯一状态
-来源的属性委托、元素内联样式的类型化视图，以及用 Kotlin 值（而不是 CSS 文本）搭出 `CSSStyleSheet` 的
-方式。
+来源的属性委托、元素内联样式的类型化视图、用 Kotlin 值（而不是 CSS 文本）搭出 `CSSStyleSheet` 的方式，
+以及 `loadjs` 加载器的类型化封装。
 
 ## 为什么留在本仓库
 
@@ -32,6 +32,7 @@ sidebar_position: 1
 | `ShadowStyles.kt` | `attachShadowRoot` 与 `attachStyledShadow` |
 | `InlineStyles.kt` | `HTMLElement.inlineStyle`，把元素自己的样式看成 `csstype.Properties` |
 | `DomExtensions.kt` | `TagName<T>.createElement { … }` |
+| `loadjs/` | [`loadjs`](https://github.com/kubetail-org/loadjs) 加载器的封装：四种调用形态各按分支写成一个重载、路径前缀（`css!`、`img!`、`module!`、`nomodule!`）与 bundle 注册表（`ready` / `done` / `reset` / `isDefined`） |
 | `CssSheet.kt` | `cssSheet { … }` 与 `cssText { … }` |
 | `css/` | cssom 没建模的部分，用类型化的值补齐：`Pseudos`、`SupportsQuery`、`radialGradient`、`webkitBackgroundClip`…… |
 
