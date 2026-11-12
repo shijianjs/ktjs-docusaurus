@@ -22,21 +22,26 @@ fun onRouteDidUpdate() {
 ```
 
 `install()` 是幂等的——它读取已存的选择、接上视口监听，只做一次。`refresh()` 让按钮与当前页面重新对齐：
-目录是 React 渲染的，所以它只出现在有标题的页面上、只出现在宽视口下。按钮本身只在 `<body>` 上创建一次，
-没有目录的页面再把它移除，所以文章区域重渲染不会把它带走。
+目录是 React 渲染的，所以它只出现在有标题的页面上、只出现在宽视口下。按钮只创建一次，没有目录的页面再把它
+移除；React 重建目录列之后会重新插入，所以重渲染不会把它带走。
 
 Gradle 插件把导出的函数变成 `client-module.mjs`，站点在 `clientModules` 里列出它。
 
 ## 布局
 
-按钮固定在视口右下角：滚动时够得着，更关键的是目录收起后也够得着。如果把它插在目录旁边，它就落在 React
-的子树里，而收起目录列会把按钮一起隐藏掉。
+按钮插在目录列里、正好在它控制的目录列表上方，并用与列表相同的方式钉住：`position: sticky`，紧贴导航栏
+下方。放在视口角落更简单，但右下角已经属于主题自带的「回到顶部」按钮，两者会重叠。
 
-收起时目录列隐藏，文章列加宽到整行。后半段需要自己的类（`.ktjs-doc-article`）和
-`max-width: 100% !important`：Docusaurus 在一个带哈希的 CSS module 里用 `max-width: 75% !important`
-钉住了文章列，只隐藏目录列会留下 25% 的空白。
+收起时目录列缩成一条窄栏，而不是整列隐藏——按钮就在这一列里，隐藏整列等于把「把目录叫回来」的控件也藏掉。
+窄栏里只隐藏列表，文章列（打了 `ktjs-doc-article` 标记）用 `max-width: 100% !important` 接管腾出来的宽度：
+Docusaurus 在一个带哈希的 CSS module 里用 `max-width: 75% !important` 钉住文章列，只隐藏列表会留下 25% 的
+空白。
 
-按钮只在 `min-width: 997px` 出现，与 Docusaurus 桌面目录的断点一致。
+按钮自身的高度把目录的 sticky 偏移往下顶（`calc(var(--ifm-navbar-height) + 3rem)`），这就是两者不重叠的
+原因。
+
+折叠控件只在 `min-width: 997px` 出现，与 Docusaurus 桌面目录的断点一致：更窄时根本没有
+`theme-doc-toc-desktop`，`refresh()` 会把按钮移除。
 
 ## 状态类为什么挂在 `<body>`
 

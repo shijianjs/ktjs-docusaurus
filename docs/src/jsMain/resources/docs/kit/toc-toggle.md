@@ -24,23 +24,30 @@ fun onRouteDidUpdate() {
 
 `install()` is idempotent — it reads the stored preference and wires the viewport listener once.
 `refresh()` reconciles the button with the page: the TOC is rendered by React, so it only exists on
-pages with headings, and only on wide viewports. The button itself is created once on `<body>` and
-removed again on pages without a TOC, so a re-render of the article cannot take it with it.
+pages with headings, and only on wide viewports. The button is created once and removed again on pages
+without a TOC; it is re-inserted when React has rebuilt the column underneath it, so a re-render
+cannot take it with it.
 
 The Gradle plugin turns the export into `client-module.mjs`; the site lists it in `clientModules`.
 
 ## Layout
 
-The button is fixed to the bottom-right corner of the viewport: it stays reachable while scrolling,
-and — more importantly — while the TOC is collapsed. Injecting it next to the TOC instead would put
-it inside a React subtree, and hiding the TOC column would hide the button with it.
+The button is inserted into the TOC column, directly above the list it controls, and pinned the same
+way the list is: `position: sticky` just under the navbar. A button in the viewport's corner would be
+simple, but the bottom-right corner already belongs to the theme's own "back to top" button, and the
+two overlapped.
 
-Collapsing hides the TOC column and widens the article column to the full row. The second half needs
-its own class (`.ktjs-doc-article`) and `max-width: 100% !important`: Docusaurus pins the article with
-`max-width: 75% !important` in a hashed CSS module, so hiding the TOC alone would leave a 25% gap.
+Collapsing shrinks the TOC column to a narrow strip instead of hiding it — the button lives in the
+column, so hiding the column would hide the control that brings the TOC back. Only the list is hidden
+inside the strip, and the article column (tagged `.ktjs-doc-article`) takes the freed width with
+`max-width: 100% !important`: Docusaurus pins the article with `max-width: 75% !important` in a hashed
+CSS module, so hiding the list alone would leave a 25% gap.
 
-The button only appears at `min-width: 997px`, the same breakpoint Docusaurus uses for the desktop
-TOC.
+The button's own height is what pushes the TOC's sticky offset down (`calc(var(--ifm-navbar-height) +
+3rem)`), which is what keeps the two from overlapping.
+
+The toggle only appears at `min-width: 997px`, the same breakpoint Docusaurus uses for the desktop
+TOC: below it there is no `theme-doc-toc-desktop`, and `refresh()` removes the button again.
 
 ## Why the class is on `<body>`
 

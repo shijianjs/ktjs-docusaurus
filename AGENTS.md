@@ -808,10 +808,12 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
   内容始终对应触发时 `master` 的提交。仓库 Settings → Pages 的 Source 必须选 **GitHub Actions**。
 - 本地预览：执行 `./gradlew pagesSite` 后给 `build/pages` 起任意静态服务器。直接开 `file://` 会因相对
   路径与 CORS 导致资源加载异常。要看 dev server 用 `./gradlew :docs:docusaurusStart`。
-- 右侧目录的折叠按钮由 kit 的 `TocToggle` 注入：按钮挂在 `<body>` 上（插进 React 子树里会被下次
-  reconciliation 影响，而且收起目录列时会跟着 `display: none`）。收起靠 `body.ktjs-toc-collapsed`，
-  同时给文章列加 `ktjs-doc-article` 加宽到整行——Docusaurus 在哈希 CSS module 里用
-  `max-width: 75% !important` 钉住文章列，只隐藏目录列会留下 25% 空白。
+- 右侧目录的折叠按钮由 kit 的 `TocToggle` 注入：按钮插进目录列、位于目录列表上方（目录列是唯一既挨着目录、
+  又在文章之外的位置），与列表一样用 `position: sticky` 钉在导航栏下方——视口右下角是主题自带「回到顶部」
+  按钮的地盘，放那里会重叠。按钮高度把目录的 sticky 偏移往下顶，两者因此不会叠在一起。收起靠
+  `body.ktjs-toc-collapsed`：目录列缩成 2.5rem 的窄条（不能整列隐藏，按钮就在里面）、只隐藏列表，同时给
+  文章列加 `ktjs-doc-article` 加宽到整行——Docusaurus 在哈希 CSS module 里用 `max-width: 75% !important`
+  钉住文章列，只隐藏列表会留下 25% 空白。
 
 ## 文档约定
 
