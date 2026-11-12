@@ -42,6 +42,12 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+
+    // Central requires both next to every jar-packaged coordinate, and the hub's dry run refuses a
+    // bundle without them. The javadoc jar carries no content: the API reference is Dokka output on
+    // the Pages site, exactly as for the wrapper modules.
+    withSourcesJar()
+    withJavadocJar()
 }
 
 gradlePlugin {
