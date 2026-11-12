@@ -93,27 +93,27 @@ deliberately not implemented: its `val connectedCallback` compiles to a getter t
 
 | Package | Published | Contents |
 | --- | --- | --- |
-| `ktjs-docusaurus-kit` | yes, with the UI bundle | Node-safe helpers (`TocToggle`) + a `browser` artifact |
+| `ktjs-docusaurus-kit` | yes | Node-safe helpers (`TocToggle`) + `ktjs-client/ktjs-docusaurus-kit-browser.js` as a klib resource |
 | `ktjs-docusaurus-kit-browser` | no | every `<ktjs-…>` element (home sections, TOC toggle) and its shadow |
 | `ktjs-dom-kit` | no — it has [its own section](../dom-kit/overview.md) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `cssSheet` / `cssText` |
 
-The home UI travels with the kit: the webpack bundle is attached to the kit's coordinate as a
-`browser` artifact, so another project needs one dependency and one copy:
+The home UI travels with the kit as a **resource**: the webpack output is staged under
+`ktjs-client/` and added to the kit's `jsMain` resources, so it ends up in the published klib next to
+the compiled code. One dependency, one version, and the bundle cannot drift from the Kotlin it was
+built with. A site copies it out of the klib:
 
 ```kotlin
-val browserUi by configurations.creating
-dependencies {
-    browserUi("io.github.shijianjs:ktjs-docusaurus-kit:<version>") {
-        artifact {
-            classifier = "browser"
-            type = "js"
-        }
-    }
-}
+// jsMain.dependencies { implementation("io.github.shijianjs:ktjs-docusaurus-kit:<version>") }
 
-tasks.register<Copy>("stageHomeUi") {
-    from(browserUi)
-    into("static/ktjs-client")
+tasks.register<Sync>("stageHomeUi") {
+    from(provider {
+        val klib = configurations.jsRuntimeClasspath.get().single {
+            it.name.startsWith("ktjs-docusaurus-kit-js-") && it.extension == "klib"
+        }
+        // The zip path is the resource path: `ktjs-client/<bundle>.js`.
+        zipTree(klib).matching { include("ktjs-client/**") }
+    })
+    into("static")
 }
 ```
 

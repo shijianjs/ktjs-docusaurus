@@ -148,14 +148,20 @@ duckfn 站点一致。
    通用的 DOM 模块：
 
    - `ktjs-docusaurus-kit`：Node 安全的辅助（目前是 TOC toggle 的组装），不知道 MDX、标签名或自定义
-     元素；它自己只按字面量拼标签名，从不 import 浏览器模块。
+     元素；它自己只按字面量拼标签名，从不 import 浏览器模块。它也**承载浏览器那一半的产物**：`stageBrowserBundle`
+     把 webpack 输出放到 `build/generated/browser-bundle/ktjs-client/`，该目录作为 `jsMain` 的 resource
+     root，于是 bundle 以 `ktjs-client/ktjs-docusaurus-kit-browser.js` 出现在发布的 klib 里，和编译产物同在
+     一个坐标、同一个版本。`srcDir(task)` 只贡献目录不建立依赖，`jsProcessResources` 必须显式
+     `dependsOn(stageBrowserBundle)`；`check` 里再挂一个解压 klib 校验该条目的任务，因为「拷贝缺失的源」
+     是静默无操作。**Kotlin 块注释可嵌套**：KDoc 里写路径通配（`ktjs-client/**`）会让 `/**` 再开一层注释，
+     该注释之后到文件尾全被吃掉、任务静默不注册——症状是脚本末尾的 `throw` 都不执行，别再往注释里写 `/**`。
    - `ktjs-docusaurus-kit-browser`：浏览器专属——全部自定义元素：`ktjs-hero` / `ktjs-action` /
      `ktjs-badge` / `ktjs-features` / `ktjs-feature` / `ktjs-next-steps` / `ktjs-step`，以及
      `ktjs-toc-toggle`。每个元素都渲染进自己的 shadow root：父级负责框架和 `<slot>` 布局，子级自己
      渲染卡片，子标签是真元素，不再被解析成数据后丢弃。它是 `executable`（不是 library）：没人消费
      它的 Kotlin API，而 executable 的链接才会跑 webpack 把 npm 依赖（`iconify-icon`）内联进一个
      `.js` 文件。顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进 `docs` 站的
-     依赖图。**不发布**：这是本站的 UI，不是通用契约，其他项目通过 kit 分发的 bundle 使用。
+     依赖图。**不发布**：这是本站的 UI，不是通用契约，其他项目从 kit 的 klib 里取那个 `.js` 资源使用。
    - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`）、挂 shadow root 的 `attachShadowRoot` /
      `attachStyledShadow(vararg CSSStyleSheet)`，以及 `HTMLElement.inlineStyle`（`csstype.Properties`
      视图）、`loadjs` 加载器的封装（`dom.loadjs` 包：四种调用形态写成 `invoke` 扩展重载 + bundle
