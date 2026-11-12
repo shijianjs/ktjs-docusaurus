@@ -74,7 +74,8 @@ jobs:
 
       # The module versions are derived from package.json and wrapper-revisions.properties, so the
       # workflow never repeats the "-kt.N" rule. Only modules whose revision was bumped get a new
-      # version; unchanged modules keep a version that already exists on Central.
+      # version; unchanged modules keep a version that already exists on Central. `-Pktjs.release`
+      # is what drops the `-SNAPSHOT` suffix a working tree carries.
       - name: Resolve the modules in this release
         id: plan
         env:
@@ -82,7 +83,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build
-          ./gradlew -q printPublishedVersions | tee build/published-versions.txt
+          ./gradlew -q printPublishedVersions -Pktjs.release=true | tee build/published-versions.txt
           python3 - "$INPUT_MODULES" build/published-versions.txt build/release-modules.txt <<'PY'
           import sys
 
@@ -116,7 +117,7 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
-        run: ./gradlew ${{ steps.plan.outputs.tasks }} --stacktrace
+        run: ./gradlew ${{ steps.plan.outputs.tasks }} --stacktrace -Pktjs.release=true
 
       - name: Package the archives and registrations
         env:

@@ -11,7 +11,10 @@ plugins {
  * POM metadata are configured once for every published module in the root build.
  */
 group = "io.github.shijianjs"
-version = "0.1.0"
+// Empty in a release build, `-SNAPSHOT` in a working tree: see the note in the root build script.
+@Suppress("UNCHECKED_CAST")
+val versionSuffix = rootProject.extra["versionSuffix"] as String
+version = "0.1.0$versionSuffix"
 description = "Reusable Kotlin/JS building blocks for Docusaurus sites: home sections and a TOC toggle."
 
 /**

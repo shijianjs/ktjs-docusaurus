@@ -13,8 +13,11 @@ val docusaurusVersion = npmVersions.getValue("@docusaurus/core")
 // Added by the single first upstream package, so it is looked up through its own key.
 val prismReactRendererVersion = npmVersions.getValue("prism-react-renderer")
 val wrapperRevision = wrapperRevisions.getValue(project.name)
+// Empty in a release build, `-SNAPSHOT` in a working tree: see the note in the root build script.
+@Suppress("UNCHECKED_CAST")
+val versionSuffix = rootProject.extra["versionSuffix"] as String
 
-version = "$docusaurusVersion-kt.$wrapperRevision"
+version = "$docusaurusVersion-kt.$wrapperRevision$versionSuffix"
 description = "Kotlin/JS wrapper for Docusaurus: typed site configuration, presets, plugins and theme options."
 
 kotlin {

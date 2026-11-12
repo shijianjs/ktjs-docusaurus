@@ -49,6 +49,17 @@ abstract class DocusaurusSiteTask @Inject constructor(
     abstract val compiledJs: ConfigurableFileCollection
 
     /**
+     * File name of the module's own linked entry point, for example `my-project-docs.mjs`.
+     *
+     * Kotlin/JS names a module's output after the npm package it generates, `<root project>-<project>`,
+     * and links the `.mjs` of every *dependency* module into the same `kotlin/` directory. Picking the
+     * entry point by name is what keeps a dependency's file from being imported as the site config —
+     * it only works by chance when the module sorts first alphabetically.
+     */
+    @get:Input
+    abstract val ownModuleFile: Property<String>
+
+    /**
      * Where the site is assembled.
      *
      * Deliberately `@Internal` instead of `@OutputDirectory`: the directory lives inside the
@@ -234,14 +245,26 @@ abstract class DocusaurusSiteTask @Inject constructor(
         }
 
         val runtimePrefixes = listOf("kotlin-", "kotlin_", "kotlinx-", "seskar-")
-        return mainOutput
+        val candidates = mainOutput
             .filter { it.endsWith(".mjs") }
             .filterNot { name -> runtimePrefixes.any { name.startsWith(it) } }
-            .minOrNull()
-            ?: error(
-                "No Kotlin/JS module output found for ${site.name}. " +
-                    "The module must declare a `js` target and be compiled before this task runs.",
+        check(candidates.isNotEmpty()) {
+            "No Kotlin/JS module output found for ${site.name}. " +
+                "The module must declare a `js` target and be compiled before this task runs."
+        }
+
+        // The dependency modules' outputs sit in the same directory, so the name decides. A single
+        // candidate needs no name: there is nothing to confuse it with.
+        val own = ownModuleFile.get()
+        return when {
+            own in candidates -> own
+            candidates.size == 1 -> candidates.single()
+            else -> error(
+                "Could not tell which Kotlin/JS output is ${site.name}'s entry point: " +
+                    "expected '$own', found ${candidates.sorted().joinToString()}. " +
+                    "The output is named after the generated npm package, `<root project>-<project>`.",
             )
+        }
     }
 
     private fun writeConfigShim(site: File, bundle: String) {

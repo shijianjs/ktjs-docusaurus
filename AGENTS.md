@@ -674,6 +674,11 @@ interface` 声明私有字段，`unsafeCast` 过去读写，元素被移除时�
 各子模块读取后声明 `npm(...)` 并推导版本。禁止在模块脚本里硬编码 npm 版本或 `kt.N`。
 
 - 只发布带 `-kt.N` 后缀的版本，不存在不带后缀的版本。
+- **工作树里的版本一律再带 `-SNAPSHOT`**：推导出的 `X-kt.N` 是「下一个要发的版本」，Central 上还没有，
+  所以开发构建不冒用这个名字（本地发布也不会遮蔽真实版本，消费方能一眼分辨）。`-Pktjs.release=true`
+  去掉后缀，`release.yml` 的两处 Gradle 调用都带着它；本地要发真版本时自己加。
+  Gradle 不把 `-P` 传给 included build，`ktjs-docusaurus-gradle-plugin` 是独立构建，发布它时必须在它自己的
+  调用里再传一次。
 - 每个模块的修订号独立递增，永不重置为 `kt.1`。它表示该模块的第 N 次 wrapper 发布，与上游 npm 版本
   各自独立演进。
 - wrapper 代码或该模块的已发布元数据变化时，只把 `wrapper-revisions.properties` 中对应模块的修订号加一；

@@ -70,6 +70,9 @@ class DocusaurusPlugin : Plugin<Project> {
                 "Assembles the Docusaurus site from the module's resources and compiled Kotlin/JS."
             it.contentDir.set(contentDir)
             it.compiledJs.from(compiledJs)
+            // Kotlin/JS names the linked output after the npm package it generates, and links the
+            // `.mjs` of every dependency module next to it.
+            it.ownModuleFile.set("${project.rootProject.name}-${project.name}.mjs")
             it.siteDir.set(siteDirectory)
             it.configFunction.set(project.provider { extension.configFunction })
             it.sidebarsFunction.set(project.provider { extension.sidebarsFunction ?: "" })

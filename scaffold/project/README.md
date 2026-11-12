@@ -26,6 +26,9 @@ declared once in the root [`package.json`](package.json); the revision is read p
 the `npm(...)` dependency from these two files:
 
 - Only `-kt.N` versions are published; a version without the suffix never exists.
+- A working tree always adds `-SNAPSHOT`: the derived number is the *next* release, which Central does
+  not have yet, so development builds never impersonate it. Publishing passes `-Pktjs.release=true`,
+  which drops the suffix.
 - Upstream upgrade: change the version in `package.json`; the base version follows automatically
   while the revision stays, even when the wrapper code itself did not change.
 - Wrapper-only fix: the revision increments (`kt.2`, `kt.3`, ...) while the base version stays.
