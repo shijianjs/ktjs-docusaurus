@@ -20,11 +20,11 @@ sidebar_position: 1
 
 | 状态 | 数量 |
 | --- | ---: |
-| 总计 | 50 |
+| 总计 | 51 |
 | 已完成 | 43 |
 | 明确不做 | 4 |
 | 保留 | 1 |
-| 待完成 | 2 |
+| 待完成 | 3 |
 
 ## 1. 项目形态（6 项，全部完成）
 
@@ -128,7 +128,7 @@ sidebar_position: 1
   仍然有用：以后再遇到 `connectedCallback` 不触发、原型链自递归桥、`@JsName` 改名这几类问题时不必重建
   最小工程。不参与发布与 Dokka。
 
-## 7. 发布（3 项，全部完成）
+## 7. 发布（4 项：3 完成 / 1 待完成）
 
 - 7.1 wrapper 首发到 Maven Central：`release-1`（2026-11-12）发布 `3.10.2-kt.2`
 - 7.2 kit 首发：同一个 release 里发布 `0.1.0`
@@ -137,3 +137,7 @@ sidebar_position: 1
 `release.yml` 第一次真正跑的时候暴露出两件事：发布构建的模块版本不带 `-SNAPSHOT`，与提交的锁文件必然不
 一致（`-x kotlinStorePackageLock`）；插件的 jar 坐标必须有 `-sources.jar` / `-javadoc.jar`，否则 hub 的
 dry run 直接拒绝整批。
+
+- 7.4 dom-kit 首发 —— **待完成（只差上传）**：`release-2` 已注册 `ktjs-dom-kit` 0.1.0 与
+  `ktjs-dom-kit-js` 0.1.0，hub 的 dry run 打包通过（2 个坐标、44 个文件）。有意不单独占一次
+  deployment，等下一次 hub 勾 `upload=true` 随批上传；注册留在 hub 的 `registry/` 里直到那次上传成功。
