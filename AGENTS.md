@@ -100,7 +100,8 @@ npm 包拆模块的原因。
   找不到它。注意搜索那个包是**主题**（`@theme/SearchBar` / `@theme/SearchPage`），要放进 `Config.themes`；
   Docusaurus 3.10 在没有 `type: 'search'` 导航条目时会自己渲染 `@theme/SearchBar`。索引是 `postBuild`
   产物，落在 `<site>/build/search-index.json` 与 `<site>/build/<locale>/search-index.json`。
-- Gradle 插件的 Maven 发布尚未接进 `release.yml`（它是独立构建，需要单独一条发布命令）。
+- Gradle 插件与 wrapper 的「同一次发布」只在 `release.yml` 里成立：本地要一次发齐，得分别跑根构建与
+  `-p ktjs-docusaurus-gradle-plugin` 两条命令（见「发布到 Maven Central」）。
 
 ### 页面用 MDX，不用 tsx
 
@@ -747,6 +748,9 @@ interface` 声明私有字段，`unsafeCast` 过去读写，元素被移除时�
 
 发布配置统一在根 `build.gradle.kts` 的 `subprojects {}` 里，使用 `com.vanniktech.maven.publish`，
 group 固定为 `io.github.shijianjs`。`subprojects` 的 group 必须单独设置，根项目的 `group` 不会自动继承。
+Gradle 插件不在这个构建里，所以 `ktjs-docusaurus-gradle-plugin/build.gradle.kts` 自己声明
+`maven-publish` + `signing` + 同名的 `hubStaging` 文件仓库：签名密钥由 `signingInMemoryKey` 属性传入，
+没有密钥的 SNAPSHOT 可以照常本地发布，而版本不带 `SNAPSHOT` 时缺密钥会直接失败，不会产出未签名构件。
 
 发布是两段式，Central 只在第二段被触及：
 
@@ -773,7 +777,12 @@ gh workflow run release.yml -f release=release-1 \
 
 版本仍完全由 `package.json` 与 `wrapper-revisions.properties` 推导，工作流不重复 `-kt.N` 规则：
 `./gradlew -q printPublishedVersions` 输出 `模块=版本`，只把 `modules` 选中的模块传给
-`hub-release.py`。
+`hub-release.py`。插件是独立构建，所以工作流额外用 `-p ktjs-docusaurus-gradle-plugin` 跑一次它自己的
+`printPublishedVersions` 与 `publishAllPublicationsToHubStagingRepository`：`-P` 不过构建边界，
+`ktjs.release` 也要各传一次。两个构建各写自己的 `build/hub-staging`，`hub-release.py` 按
+`<模块>/build/hub-staging` 找坐标；插件的 marker 发布在插件 id 这个**另一个 group** 下
+（`io.github.shijianjs.ktjs.docusaurus:...gradle.plugin`），所以脚本除了 `io.github.shijianjs` 还会收
+`*.gradle.plugin` 目录，否则 `plugins { id(...) }` 在 Central 上解析不到。
 
 ### 一次性准备
 

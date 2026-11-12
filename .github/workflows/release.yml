@@ -76,6 +76,10 @@ jobs:
       # workflow never repeats the "-kt.N" rule. Only modules whose revision was bumped get a new
       # version; unchanged modules keep a version that already exists on Central. `-Pktjs.release`
       # is what drops the `-SNAPSHOT` suffix a working tree carries.
+      #
+      # The Gradle plugin is a build of its own, so it reports its version from its own build. Listing
+      # it here is what makes "empty modules means everything" and
+      # `-f modules=ktjs-docusaurus-gradle-plugin` behave like any other module.
       - name: Resolve the modules in this release
         id: plan
         env:
@@ -83,7 +87,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build
-          ./gradlew -q printPublishedVersions -Pktjs.release=true | tee build/published-versions.txt
+          {
+            ./gradlew -q printPublishedVersions -Pktjs.release=true
+            ./gradlew -q -p ktjs-docusaurus-gradle-plugin printPublishedVersions -Pktjs.release=true
+          } | grep -E '^[a-z][a-z0-9-]*=' | tee build/published-versions.txt
           python3 - "$INPUT_MODULES" build/published-versions.txt build/release-modules.txt <<'PY'
           import sys
 
@@ -108,7 +115,9 @@ jobs:
                   stream.write(f"{name}={versions[name]}\n")
           print("release modules: " + " ".join(selected))
           PY
-          tasks="$(sed -n 's/^\([^=]*\)=.*/:\1:publishAllPublicationsToHubStagingRepository/p' build/release-modules.txt | tr '\n' ' ')"
+          # The plugin is published by its own build (its task path does not exist in this one), so it
+          # is filtered out here and handled in the step below.
+          tasks="$(sed -n 's/^\([^=]*\)=.*/:\1:publishAllPublicationsToHubStagingRepository/p' build/release-modules.txt | grep -v '^:ktjs-docusaurus-gradle-plugin:' | tr '\n' ' ')"
           echo "tasks=$tasks" >> "$GITHUB_OUTPUT"
 
       # A file repository produces the Maven layout with the `.asc` signatures and never contacts
@@ -117,7 +126,30 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
-        run: ./gradlew ${{ steps.plan.outputs.tasks }} --stacktrace -Pktjs.release=true
+        run: |
+          set -euo pipefail
+          tasks="${{ steps.plan.outputs.tasks }}"
+          if [ -z "$tasks" ]; then
+            echo "no module of the root build is part of this release"
+            exit 0
+          fi
+          ./gradlew $tasks --stacktrace -Pktjs.release=true
+
+      # The plugin cannot ride along with the invocation above: Gradle does not forward -P across a
+      # build boundary, and the plugin lives in its own build. It publishes into its own
+      # `build/hub-staging`, which is where scripts/hub-release.py looks for it.
+      - name: Publish the Gradle plugin to the file repository
+        env:
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if ! grep -q '^ktjs-docusaurus-gradle-plugin=' build/release-modules.txt; then
+            echo "the Gradle plugin is not part of this release"
+            exit 0
+          fi
+          ./gradlew -p ktjs-docusaurus-gradle-plugin \
+            publishAllPublicationsToHubStagingRepository --stacktrace -Pktjs.release=true
 
       - name: Package the archives and registrations
         env:

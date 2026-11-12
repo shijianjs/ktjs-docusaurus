@@ -14,6 +14,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import javax.inject.Inject
 
@@ -29,6 +30,9 @@ import javax.inject.Inject
  * paths, and the Docusaurus packages used by the configuration are resolved by Docusaurus from the
  * npm workspace's `node_modules` above the site directory.
  */
+// The site directory is @Internal on purpose (it lives inside the Kotlin/JS npm workspace), so there
+// is no declared output to cache against; the task is a cheap set of file copies and re-runs.
+@DisableCachingByDefault(because = "Writes into the npm workspace and declares no outputs")
 abstract class DocusaurusSiteTask @Inject constructor(
     private val fs: FileSystemOperations,
 ) : DefaultTask() {

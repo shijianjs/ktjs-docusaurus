@@ -8,6 +8,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
+import org.gradle.work.DisableCachingByDefault
 import javax.inject.Inject
 
 /**
@@ -17,6 +18,9 @@ import javax.inject.Inject
  * installed by Gradle, so there is no `package-lock.json` of its own to install from and no shell
  * to go through.
  */
+// The command runs an external tool in place and declares no outputs; caching would only claim a
+// result it cannot reproduce (a dev server never finishes, a build writes outside the build cache).
+@DisableCachingByDefault(because = "Runs the Docusaurus CLI in place and declares no outputs")
 abstract class DocusaurusCommandTask @Inject constructor(
     private val exec: ExecOperations,
 ) : DefaultTask() {
