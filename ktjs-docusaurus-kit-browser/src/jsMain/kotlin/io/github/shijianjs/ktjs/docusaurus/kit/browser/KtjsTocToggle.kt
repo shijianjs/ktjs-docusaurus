@@ -276,7 +276,9 @@ class KtjsTocToggle : CustomElementAdapter() {
                     height = 0.45.rem
                     borderInlineStart = Border(2.px, LineStyle.solid, `var`(textHook, NamedColor.black))
                     borderBlockStart = Border(2.px, LineStyle.solid, `var`(textHook, NamedColor.black))
-                    transform = rotate(45.deg)
+                    // A start/top corner rotated by 45° is the usual upward chevron; 135° turns the
+                    // same corner into `›`, which is the direction the TOC collapses towards.
+                    transform = rotate(135.deg)
                     transition = Transition(
                         PropertyName.transform,
                         0.15.s,
@@ -287,7 +289,9 @@ class KtjsTocToggle : CustomElementAdapter() {
 
             ":host([collapsed]) > button" {
                 Pseudos.before {
-                    transform = rotate(225.deg)
+                    // Expanded is `›`, so the way back has to be `‹`: a reader who collapsed the
+                    // column expects the control to point where the list will reappear.
+                    transform = rotate(315.deg)
                 }
             }
         }

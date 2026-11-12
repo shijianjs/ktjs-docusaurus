@@ -65,7 +65,9 @@ disconnects (a column left collapsed after the control is gone would have no way
 
 The button's styles — sticky under the navbar, the pill, the arrow and its rotation — are the
 element's own `CSSStyleSheet`, adopted by every instance. Nothing is written into `document.head`,
-and nothing outside the component is styled by a page-wide rule.
+and nothing outside the component is styled by a page-wide rule. The chevron points right while the
+list is expanded (the direction the column collapses towards) and left while it is collapsed, which
+is where the list comes back from.
 
 ## Placement
 
