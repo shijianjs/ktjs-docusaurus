@@ -22,9 +22,11 @@ site that consumes them — which is a cycle with no clean direction. Keeping th
 documentation in one build is what makes them consistent, so this repository is its home, not a
 holding area.
 
-The name is deliberately not prefixed with `ktjs-docusaurus`: the module is not part of the published
-API and never reaches Dokka. It is documented here because it is how this project's components are
-written, and because the alternatives are worse.
+The name is deliberately not prefixed with `ktjs-docusaurus`: nothing here wraps an npm package, so the
+module follows its own semantic version instead of `{Docusaurus version}-kt.{revision}`, and the root
+build lists it explicitly next to the prefix. It is a published coordinate
+(`io.github.shijianjs:ktjs-dom-kit`) and it does reach Dokka — a reusable contract, not this site's
+private plumbing.
 
 ## What is in it
 

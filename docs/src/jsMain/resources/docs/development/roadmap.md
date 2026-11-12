@@ -106,8 +106,8 @@ sidebar_position: 1
   `kit/toc-toggle`、`dom-kit/*`；`development/*` 只写中文，不进翻译
 - 5.5 导航栏四个大分类（User guide / Docs kit / DOM kit / Development）：前三个面向站点使用者，
   Development 放本仓库自己的开发文档；Gradle 插件页从 kit 移进用户指南——wrapper 加插件才是完整的
-  Docusaurus，kit 只是本项目按自己的喜好加的增强；DOM kit 是 kit 底下那层通用 DOM 辅助，虽然不发布，
-  但本站每个元素都按它写，所以单独一类而不是塞进 kit 的角落
+  Docusaurus，kit 只是本项目按自己的喜好加的增强；DOM kit 是 kit 底下那层通用 DOM 辅助，本站每个元素
+  都按它写，所以单独一类而不是塞进 kit 的角落
 - 5.6 TOC 在客户端导航后重新挂载（`onRouteDidUpdate` 每次路由变化都 `refresh()`）；按钮改为挂在
   `<body>` 上并固定在视口右下角，因为原来的位置在页面顶部会被固定导航栏盖住、收起后又会随目录列一起
   `display: none`；收起时文章列同时加宽到整行

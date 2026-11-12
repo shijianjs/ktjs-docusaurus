@@ -9,15 +9,24 @@ plugins {
  *
  * `CustomElementAdapter` is the base for custom elements written in Kotlin; `attachShadowRoot` /
  * `attachStyledShadow` attach a shadow root (the latter adopting constructed `CSSStyleSheet`s), and
- * `HTMLElement.inlineStyle` is the typed view used to style a node in place. All of it lives in this
- * repository and has no build of its own: it is deliberately **not** published from here — the root
- * build only releases modules whose name starts with `ktjs-docusaurus` — because its documentation is
- * written with the framework it helps build, so a repository split would put the site and the library
- * in a cycle. The docs site's `dom-kit` section is its manual.
+ * `HTMLElement.inlineStyle` is the typed view used to style a node in place.
+ *
+ * It wraps no npm package, so it keeps its own name and its own semantic version instead of the
+ * `{npm version}-kt.{revision}` scheme; the root build publishes it explicitly, because the prefix
+ * filter only covers `ktjs-docusaurus*`. It still ships from this repository rather than one of its
+ * own: its documentation is written with the framework it helps build, so a split would put the site
+ * and the library in a cycle. The docs site's `dom-kit` section is its manual.
  *
  * The module shares the root build's KMP settings (`-Xir-dce=false`, ES2015 target, detekt) through
  * the `subprojects` blocks, so it needs no local copy of those workarounds.
  */
+// Empty in a release build, `-SNAPSHOT` in a working tree: see the note in the root build script.
+@Suppress("UNCHECKED_CAST")
+val versionSuffix = rootProject.extra["versionSuffix"] as String
+version = "0.1.0$versionSuffix"
+description =
+    "Generic Kotlin/JS DOM helpers: custom-element base class, shadow-root styles, typed inline styles."
+
 kotlin {
     js {
         useEsModules()

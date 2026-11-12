@@ -166,10 +166,13 @@ duckfn 站点一致。
    - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`）、挂 shadow root 的 `attachShadowRoot` /
      `attachStyledShadow(vararg CSSStyleSheet)`，以及 `HTMLElement.inlineStyle`（`csstype.Properties`
      视图）、`loadjs` 加载器的封装（`dom.loadjs` 包：四种调用形态写成 `invoke` 扩展重载 + bundle
-     注册表），与 Docusaurus 无关。模块名不以 `ktjs-docusaurus` 开头，因此不参与发布和 Dokka；元素包用
-     `implementation` 依赖它，产物作为独立 `.mjs` 一起进 `static/ktjs-client/`。**固定留在这个仓库**：
-     它的文档要用它所帮助构建的那套框架来写，拆出去会让站点依赖这个库、库的文档又依赖站点，绕成环。
-     文档在站点的 `dom-kit` 分类下（`docs/src/jsMain/resources/docs/dom-kit/`）。
+     注册表），与 Docusaurus 无关。模块名不以 `ktjs-docusaurus` 开头：它不跟随任何 npm 包，版本是它自己的
+     语义版本 `0.1.0`（与 kit 一样带 `-SNAPSHOT`）。它**照样发布、也进 Dokka**——根构建用
+     `extraPublishedModules` 显式列出它，发布、Dokka 与 `printPublishedVersions` 共用 `isPublished()`
+     这一个判断，加模块时只要名字不带前缀就得在那份名单里补一行。元素包用 `implementation` 依赖它，产物
+     作为独立 `.mjs` 一起进 `static/ktjs-client/`。**固定留在这个仓库**：它的文档要用它所帮助构建的那套框架
+     来写，拆出去会让站点依赖这个库、库的文档又依赖站点，绕成环。文档在站点的 `dom-kit` 分类下
+     （`docs/src/jsMain/resources/docs/dom-kit/`）。
 
     **组件的属性用 `attr` 委托**（`ktjs-dom-kit`）：`var titleText: String by attr("title") { change -> … }`。
     属性是唯一状态——getter 读 attribute、setter 写 attribute，不另存字段；外部 `setAttribute` 由

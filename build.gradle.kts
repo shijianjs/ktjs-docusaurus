@@ -22,7 +22,7 @@ val versionSuffix =
     if (providers.gradleProperty("ktjs.release").map(String::toBoolean).getOrElse(false)) "" else "-SNAPSHOT"
 extra["versionSuffix"] = versionSuffix
 
-// Every publishable module shares the prefix, which is also how publishing, Dokka and the version
+// Every publishable module carries the prefix, which is also how publishing, Dokka and the version
 // report find them. Keep it in sync with the module directories and settings.gradle.kts. The prefix
 // deliberately has no trailing dash: `ktjs-docusaurus-gradle-plugin` is a separate build (see
 // settings.gradle.kts) but still follows the same upstream version.
@@ -34,6 +34,14 @@ val publishedPrefix = "ktjs-docusaurus"
 // `browser` artifact.
 val unpublishedModules = setOf("ktjs-docusaurus-kit-browser")
 
+// Published modules outside the prefix. `ktjs-dom-kit` wraps no npm package and is Docusaurus
+// independent, so it keeps its own name; it is released from here all the same, because its manual is
+// written with the framework it helps build (see the layering note in AGENTS.md).
+val extraPublishedModules = setOf("ktjs-dom-kit")
+
+fun isPublished(module: String): Boolean =
+    module in extraPublishedModules || (module.startsWith(publishedPrefix) && module !in unpublishedModules)
+
 // Only the wrapper follows an upstream npm version. The kit is original code with its own semantic
 // version, so it is not looked up in wrapper-revisions.properties.
 val wrapperModules = setOf("ktjs-docusaurus")
@@ -42,7 +50,7 @@ val wrapperModules = setOf("ktjs-docusaurus")
 // published API surface, so it is excluded by the prefix filter.
 dependencies {
     subprojects
-        .filter { it.name.startsWith(publishedPrefix) && it.name !in unpublishedModules }
+        .filter { isPublished(it.name) }
         .forEach { dokka(project(it.path)) }
 }
 
@@ -129,8 +137,8 @@ subprojects {
         source.setFrom(files("src"))
     }
 
-    // Only wrapper modules are published and documented; `docs` is the GitHub Pages site.
-    if (name.startsWith(publishedPrefix) && name !in unpublishedModules) {
+    // Only published modules are documented; `docs` is the GitHub Pages site.
+    if (isPublished(name)) {
         apply(plugin = "org.jetbrains.dokka")
     }
 }
@@ -142,7 +150,7 @@ subprojects {
 // GitHub repository) and requires the kotlin-tooling-metadata.json produced by the Kotlin
 // Multiplatform plugin. Keep both intact when changing this block.
 subprojects {
-    if (!name.startsWith(publishedPrefix) || name in unpublishedModules) return@subprojects
+    if (!isPublished(name)) return@subprojects
 
     if (name in wrapperModules) {
         check(wrapperRevisions.containsKey(name)) {
@@ -230,8 +238,7 @@ subprojects {
 // would upload before running publishToMavenCentral, so version derivation stays in the module
 // scripts rather than being duplicated in shell.
 tasks.register("printPublishedVersions") {
-    val publishedModules =
-        subprojects.filter { it.name.startsWith(publishedPrefix) && it.name !in unpublishedModules }
+    val publishedModules = subprojects.filter { isPublished(it.name) }
     doLast {
         publishedModules
             .associate { it.name to it.version.toString() }
