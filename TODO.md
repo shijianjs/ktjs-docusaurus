@@ -3,18 +3,23 @@
 把 Docusaurus 站点做成 Kotlin/JS 项目：配置是 Kotlin，页面是 Markdown/MDX，构建由 Gradle 插件驱动。
 
 - 总计：50
-- 已完成：38
+- 已完成：43
 - 明确不做：4
 - 保留：1
-- 待完成：7
+- 待完成：2
 
 详细清单：[docs/src/jsMain/resources/docs/development/roadmap.md](docs/src/jsMain/resources/docs/development/roadmap.md)
 （同时发布在站点的「Development」分类下：<https://shijianjs.github.io/ktjs-docusaurus/docs/development/roadmap>）
 
 ## 当前待办
 
-- [ ] Gradle 插件的 Maven 发布（独立构建，需要单独发布命令 + 接入 `release.yml`）
-- [ ] wrapper / kit / 插件首次发布到 Maven Central
+没有未完成的施工项。剩下的两项都要等 Kotlin 2.5 正式版（见下一节）。
+
+## 已发布
+
+`release-1`（2026-11-12）：`ktjs-docusaurus` 3.10.2-kt.2、`ktjs-docusaurus-kit` 0.1.0、
+`ktjs-docusaurus-gradle-plugin` 3.10.2-kt.1（含它的 marker 坐标），由 `shijianjs/maven-central-publishing`
+合并成一次 Central deployment。
 
 ## 已排期的升级（等 Kotlin 2.5 正式版）
 

@@ -21,10 +21,10 @@ sidebar_position: 1
 | 状态 | 数量 |
 | --- | ---: |
 | 总计 | 50 |
-| 已完成 | 38 |
+| 已完成 | 43 |
 | 明确不做 | 4 |
 | 保留 | 1 |
-| 待完成 | 7 |
+| 待完成 | 2 |
 
 ## 1. 项目形态（6 项，全部完成）
 
@@ -63,7 +63,7 @@ sidebar_position: 1
 | `@docusaurus/core` 运行时导出（`build` / `start` / `serve` / `swizzle`） | Gradle 插件直接调 CLI，Kotlin 侧没有消费者 |
 | 其余第三方主题/插件选项类型 | 按实际需求逐个补，不做枚举式预置 |
 
-## 3. Gradle 插件（9 项：7 完成 / 2 待完成）
+## 3. Gradle 插件（9 项，全部完成）
 
 - 3.1 站点组装（内容、编译产物、config/sidebars shim）
 - 3.2 `docusaurusBuild` / `Start` / `Serve` / `Clear`
@@ -72,8 +72,11 @@ sidebar_position: 1
 - 3.5 `browserBundle` + `browserBundleEntry` → `static/ktjs-client/`（浏览器专属 bundle）
 - 3.6 `pageFunctions` / `pageBundle` 页面 shim
 - 3.7 Node 运行时探测（workspace / Gradle 用户目录 / PATH）
-- 3.8 插件本体的 Maven 发布（独立构建，需单独的发布命令与 staging 配置） —— **待完成**
-- 3.9 插件接入 `release.yml`，与 wrapper 同版本发布 —— **待完成**（依赖 3.8）
+- 3.8 插件本体的 Maven 发布：独立构建里 `maven-publish` + `signing` + 自己的 `hubStaging` 文件仓库，
+  签名密钥从 `signingInMemoryKey` 读，缺密钥的 SNAPSHOT 照常可本地发布
+- 3.9 插件接入 `release.yml`：同一个 release 里跑第二条 Gradle 调用（`-p ktjs-docusaurus-gradle-plugin`），
+  版本仍各自推导。`scripts/hub-release.py` 额外收插件 id 那个 group 下的 marker 发布，否则
+  `plugins { id(...) }` 在 Central 上解析不到
 
 ## 4. kit（8 项：6 完成 / 2 不做）
 
@@ -125,8 +128,12 @@ sidebar_position: 1
   仍然有用：以后再遇到 `connectedCallback` 不触发、原型链自递归桥、`@JsName` 改名这几类问题时不必重建
   最小工程。不参与发布与 Dokka。
 
-## 7. 发布（3 项：全部待完成）
+## 7. 发布（3 项，全部完成）
 
-- 7.1 wrapper 首发到 Maven Central —— **待完成**；`release.yml` 沿用模板但未实际跑通
-- 7.2 kit 首发 —— **待完成**，依附 7.1 的流程
-- 7.3 插件首发 —— **待完成**，与 3.8 / 3.9 是同一件事的两个侧面
+- 7.1 wrapper 首发到 Maven Central：`release-1`（2026-11-12）发布 `3.10.2-kt.2`
+- 7.2 kit 首发：同一个 release 里发布 `0.1.0`
+- 7.3 插件首发：同一个 release 里发布 `3.10.2-kt.1` 与它的 marker 坐标
+
+`release.yml` 第一次真正跑的时候暴露出两件事：发布构建的模块版本不带 `-SNAPSHOT`，与提交的锁文件必然不
+一致（`-x kotlinStorePackageLock`）；插件的 jar 坐标必须有 `-sources.jar` / `-javadoc.jar`，否则 hub 的
+dry run 直接拒绝整批。

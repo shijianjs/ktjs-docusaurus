@@ -68,6 +68,25 @@ docusaurus {
 
 Gradle 插件与配置一起发布，版本跟随上游 Docusaurus（`{上游版本}-kt.{修订号}`）。
 
+## 安装
+
+`release-1` 起都在 Maven Central：
+
+```kotlin
+plugins {
+    kotlin("multiplatform")
+    id("io.github.shijianjs.ktjs.docusaurus") version "3.10.2-kt.1"
+}
+
+kotlin {
+    sourceSets.jsMain.dependencies {
+        implementation("io.github.shijianjs:ktjs-docusaurus:3.10.2-kt.2")
+        // 可选：首页分区与目录折叠
+        implementation("io.github.shijianjs:ktjs-docusaurus-kit:0.1.0")
+    }
+}
+```
+
 ## 开发
 
 ```bash
