@@ -153,6 +153,14 @@ fun docusaurusConfig(): Config = unsafeJso {
                     label = "Docs kit"
                     position = NavbarItemPositions.left
                 },
+                // The layer under the kit. It is not published, but it is how every element in this
+                // site is written, so it has a guide of its own instead of a corner of the kit's.
+                unsafeJso<NavbarItem> {
+                    type = NavbarItemTypes.docSidebar
+                    sidebarId = "domKit"
+                    label = "DOM kit"
+                    position = NavbarItemPositions.left
+                },
                 // How this repository is built, as opposed to how a site is built with it. Kept apart
                 // so the two audiences do not have to read each other's pages.
                 unsafeJso<NavbarItem> {
@@ -204,8 +212,8 @@ fun docusaurusConfig(): Config = unsafeJso {
 /**
  * The sidebars, imported by the generated `sidebars.mjs`.
  *
- * Three id-matched sidebars: the user guide, the kit, and this repository's own development notes.
- * The navbar links to all three.
+ * Four id-matched sidebars: the user guide, the kit, the DOM kit and this repository's own
+ * development notes. The navbar links to all four.
  *
  * Only the categories carry a label here. A doc keeps its own: Docusaurus labels the sidebar entry
  * and the previous/next buttons from the page's `sidebar_label` or its heading, so a translated page
@@ -266,6 +274,28 @@ fun sidebars(): SidebarsConfig = unsafeJso<DocsSidebars> {
                 )
             },
         )
+        domKit = arrayOf<SidebarItem>(
+            unsafeJso {
+                type = SidebarItemTypes.doc
+                id = "dom-kit/overview"
+            },
+            unsafeJso {
+                type = SidebarItemTypes.doc
+                id = "dom-kit/custom-elements"
+            },
+            unsafeJso {
+                type = SidebarItemTypes.doc
+                id = "dom-kit/attributes"
+            },
+            unsafeJso {
+                type = SidebarItemTypes.doc
+                id = "dom-kit/styling"
+            },
+            unsafeJso {
+                type = SidebarItemTypes.doc
+                id = "dom-kit/css-sheet"
+            },
+        )
         development = arrayOf<SidebarItem>(
             unsafeJso {
                 type = SidebarItemTypes.doc
@@ -292,6 +322,8 @@ private external interface DocsSidebars {
     var userGuide: Array<SidebarItem>?
 
     var docsKit: Array<SidebarItem>?
+
+    var domKit: Array<SidebarItem>?
 
     var development: Array<SidebarItem>?
 }

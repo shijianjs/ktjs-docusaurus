@@ -86,7 +86,7 @@ override 它。定义标签之前，`defineIfMissing` 会调用 `stripBridgesFro
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | 是，带 UI bundle | Node 安全的辅助（`TocToggle`）+ 一个 `browser` 构件 |
 | `ktjs-docusaurus-kit-elements` | 否 | 全部首页元素及其 shadow |
-| `ktjs-dom-kit` | 否（以后搬到独立仓库） | `CustomElementAdapter`、`attr` 与 `AttributeCodec`、`defineIfMissing`、`createElement`、`attachShadowRoot`、`attachStyledShadow`、`inlineStyle`、`cssSheet` / `cssText` |
+| `ktjs-dom-kit` | 否——它有[自己的一类](../dom-kit/overview.md) | `CustomElementAdapter`、`attr` 与 `AttributeCodec`、`defineIfMissing`、`createElement`、`attachShadowRoot`、`attachStyledShadow`、`inlineStyle`、`cssSheet` / `cssText` |
 
 首页 UI 跟着 kit 走：webpack bundle 以 `browser` 构件的身份挂在 kit 的坐标上，所以另一个项目只要一个依赖、
 一份拷贝：

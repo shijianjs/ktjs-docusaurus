@@ -22,8 +22,8 @@ import web.html.HTMLElement
  * ```
  *
  * Style belongs here, on the node that owns it. A stylesheet is for what inline styles cannot say
- * (`:hover`, `::before`, media queries) — see [ShadowRoot.appendStyle] — and adoption is for what
- * several components really share — see [attachStyledShadow].
+ * (`:hover`, `::before`, media queries) — see [attachStyledShadow] — and adoption is for what
+ * several components really share — the same call with more sheets.
  */
 val HTMLElement.inlineStyle: Properties
     get() = unsafeCast(style)

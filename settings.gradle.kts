@@ -53,9 +53,12 @@ include(":ktjs-docusaurus-kit")
 // Published as a package too, but its bundle is loaded by the browser alone (never by Node).
 include(":ktjs-docusaurus-kit-elements")
 
-// Generic DOM helpers (the custom-element adapter), independent of Docusaurus. Temporarily hosted in
-// this build so the docs kit can validate it; the `ktjs-dom-kit` name keeps it out of the published
-// prefix, and it is meant to move to its own repository.
+// Generic DOM helpers (the custom-element adapter, the attribute delegate, the typed stylesheet),
+// independent of Docusaurus. It is hosted in this build rather than a repository of its own on
+// purpose: its documentation is written with the very framework it helps build, so splitting the two
+// would make the site depend on the library while the library's docs depend on the site. The
+// `ktjs-dom-kit` name keeps it out of the published prefix; the docs site's `dom-kit` section is its
+// manual.
 include(":ktjs-dom-kit")
 
 // Webpack bundle of the elements library for the browser. Not published: it exists so the site loads

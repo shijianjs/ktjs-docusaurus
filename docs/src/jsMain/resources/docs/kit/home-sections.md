@@ -95,7 +95,7 @@ deliberately not implemented: its `val connectedCallback` compiles to a getter t
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | yes, with the UI bundle | Node-safe helpers (`TocToggle`) + a `browser` artifact |
 | `ktjs-docusaurus-kit-elements` | no | all home elements and their shadows |
-| `ktjs-dom-kit` | no (moves to its own repository) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `cssSheet` / `cssText` |
+| `ktjs-dom-kit` | no — it has [its own section](../dom-kit/overview.md) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `cssSheet` / `cssText` |
 
 The home UI travels with the kit: the webpack bundle is attached to the kit's coordinate as a
 `browser` artifact, so another project needs one dependency and one copy:

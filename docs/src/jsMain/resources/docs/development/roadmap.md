@@ -11,7 +11,7 @@ sidebar_position: 1
 - 来源：本项目的需求清单（2026-11-08 起的需求对话）与 Docusaurus 3.10.2 的公开配置面。
 - 版本：`@docusaurus/*` 3.10.2；`@easyops-cn/docusaurus-search-local` 0.55.3；Kotlin 2.4.21；
   `kotlin-wrappers` 2026.11.0。
-- 核对日期：2026-11-10。
+- 核对日期：2026-11-12。
 - 范围：`ktjs-docusaurus` 仓库（wrapper、Gradle 插件、kit、`docs` 站点），以及 `ktjs-*` 系列的通用构建约定
   （第 6 节）。
 - 不在范围：`duckfn` 站点的内容、`oop-react`（TypeScript 项目，`target: ES2022`）。
@@ -20,8 +20,8 @@ sidebar_position: 1
 
 | 状态 | 数量 |
 | --- | ---: |
-| 总计 | 47 |
-| 已完成 | 35 |
+| 总计 | 49 |
+| 已完成 | 37 |
 | 明确不做 | 4 |
 | 保留 | 1 |
 | 待完成 | 7 |
@@ -75,12 +75,14 @@ sidebar_position: 1
 - 3.8 插件本体的 Maven 发布（独立构建，需单独的发布命令与 staging 配置） —— **待完成**
 - 3.9 插件接入 `release.yml`，与 wrapper 同版本发布 —— **待完成**（依赖 3.8）
 
-## 4. kit（6 项：4 完成 / 2 不做）
+## 4. kit（7 项：5 完成 / 2 不做）
 
 - 4.1 `HomeHero` / `FeatureSection` / `NextStepSection`
 - 4.2 `TocToggle`
 - 4.3 iconify 图标接入
 - 4.4 JVM 版 Playwright e2e（`jvm()` + `src/jvmTest` + `e2eTest`，参考 `ktjs-vaadin`）
+- 4.5 `ktjs-dom-kit` 固定留在本仓库、不迁出：它的文档要用它所帮助构建的那套框架来写，拆出去会让站点依赖
+  这个库、库的文档又依赖站点，绕成环。模块名不进发布前缀，文档并入站点的 DOM 工具箱分类
 
 明确不做：
 
@@ -89,22 +91,26 @@ sidebar_position: 1
 | colormath 颜色计算 | 组件只读 `--ktjs-*` 自定义属性，不参与颜色运算 |
 | Playwright 的 TS wrapper / TS 测试层 | 直接用 Playwright Java API 与 JUnit 5 集成；duckfn kit 那套 TS 封装不搬，简单思路可参考 |
 
-## 5. docs 文档站（7 项：全部完成）
+## 5. docs 文档站（8 项：全部完成）
 
 - 5.1 首页 MDX + 自定义元素（`ktjs-hero` / `ktjs-features` / `ktjs-next-steps`）
 - 5.2 双语 i18n 配置（en / zh-Hans）
-- 5.3 英文文档页（`intro`、`guide/*`、`kit/*`、`development/*`）
+- 5.3 英文文档页（`intro`、`guide/*`、`kit/*`、`dom-kit/*`、`development/*`）
 - 5.4 中文翻译：`guide/content`、`guide/local-search`、`guide/gradle-plugin`、`kit/home-sections`、
-  `kit/toc-toggle`；`development/*` 只写中文，不进翻译
-- 5.5 导航栏三个大分类（User guide / Docs kit / Development）：前两个面向站点使用者，Development 放
-  本仓库自己的开发文档；Gradle 插件页从 kit 移进用户指南——wrapper 加插件才是完整的 Docusaurus，
-  kit 只是本项目按自己的喜好加的增强
+  `kit/toc-toggle`、`dom-kit/*`；`development/*` 只写中文，不进翻译
+- 5.5 导航栏四个大分类（User guide / Docs kit / DOM kit / Development）：前三个面向站点使用者，
+  Development 放本仓库自己的开发文档；Gradle 插件页从 kit 移进用户指南——wrapper 加插件才是完整的
+  Docusaurus，kit 只是本项目按自己的喜好加的增强；DOM kit 是 kit 底下那层通用 DOM 辅助，虽然不发布，
+  但本站每个元素都按它写，所以单独一类而不是塞进 kit 的角落
 - 5.6 TOC 在客户端导航后重新挂载（`onRouteDidUpdate` 每次路由变化都 `refresh()`）；按钮改为挂在
   `<body>` 上并固定在视口右下角，因为原来的位置在页面顶部会被固定导航栏盖住、收起后又会随目录列一起
   `display: none`；收起时文章列同时加宽到整行
 - 5.7 运行时验收（headless Chromium）：首页 hero 1 / 卡片 4 / 步骤 3、shadow root 已挂载；文档页的 TOC
   按钮在「加载 → 客户端导航 → 无目录页 → 回到有目录页」全链路都在，收起/展开与刷新后保持；本地搜索在
   en / zh-Hans 两侧都能返回建议与结果页；console 无错误
+- 5.8 dom-kit 文档并入站点（overview / custom elements / attributes / styling / typed stylesheets），
+  模块内原来的 `ktjs-dom-kit/docs/css-sheet.md` 删除、内容并入 `dom-kit/css-sheet`；顺带补上此前没有的
+  自定义元素基类（`CustomElementAdapter` / `stripBridgesFrom` / `defineIfMissing`）文档
 
 ## 6. 跨仓库构建约定（5 项：2 完成 / 2 待完成 / 1 保留）
 

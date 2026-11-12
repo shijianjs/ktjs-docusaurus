@@ -11,6 +11,10 @@
     "message": "文档工具箱",
     "description": "Navbar item with label Docs kit"
   },
+  "item.label.DOM kit": {
+    "message": "DOM 工具箱",
+    "description": "Navbar item with label DOM kit"
+  },
   "item.label.Development": {
     "message": "开发文档",
     "description": "Navbar item with label Development"

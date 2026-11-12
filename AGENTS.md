@@ -23,7 +23,8 @@ Gradle 插件驱动。Kotlin/JS 模块名、`wrapper-revisions.properties` 的 k
   `settings.gradle.kts` 的 `pluginManagement { includeBuild(...) }` 接入，所以 `docs` 能把它当普通插件用。
   它不在 root 构建的子项目里：`./gradlew build` 不编译它，`includeBuild` 在配置阶段按需编译。
 - `docs`：本项目的文档站（Markdown + Kotlin 配置），不发布、不进 Dokka，是 GitHub Pages 的内容。
-  站点内容在 `src/jsMain/resources/docs`，分三块：用户指南、文档工具箱（kit）、开发文档（本仓库自己的）。
+  站点内容在 `src/jsMain/resources/docs`，分四块：用户指南、文档工具箱（kit）、DOM 工具箱（dom-kit）、
+  开发文档（本仓库自己的）。
 - `scaffold/module`：模板骨架，保留占位符，不参与构建。
 
 Docusaurus 全部包 lockstep 发版（`3.10.2` 一次发齐），所以整个生态只产生一个 Maven 版本；这也是不按
@@ -140,7 +141,7 @@ duckfn 站点一致。
    之类的别名，也不必每个类带 `@JsName`。**没有任何 JS 类字面量**。细节与实测在
    `probes/web-components` 的 `CustomElementAdapter.kt` / `MyPanelAdapter.kt`。
 
-   **分层是硬约定**：kit 按「Node 是否加载」拆成两个都发布的共享包，另有一个暂存于此的通用模块：
+   **分层是硬约定**：kit 按「Node 是否加载」拆成两个都发布的共享包，另有一个通用的 DOM 模块：
 
    - `ktjs-docusaurus-kit`：Node 安全的辅助（目前是 TOC toggle），不知道 MDX、标签名或自定义元素。
    - `ktjs-docusaurus-kit-elements`：浏览器专属——全部 home 元素：`ktjs-hero` / `ktjs-action` /
@@ -151,7 +152,9 @@ duckfn 站点一致。
    - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`）、挂 shadow root 的 `attachShadowRoot` /
      `attachStyledShadow(vararg CSSStyleSheet)`，以及 `HTMLElement.inlineStyle`（`csstype.Properties`
      视图），与 Docusaurus 无关。模块名不以 `ktjs-docusaurus` 开头，因此不参与发布和 Dokka；元素包用
-     `implementation` 依赖它，产物作为独立 `.mjs` 一起进 `static/ktjs-client/`。以后搬到独立仓库。
+     `implementation` 依赖它，产物作为独立 `.mjs` 一起进 `static/ktjs-client/`。**固定留在这个仓库**：
+     它的文档要用它所帮助构建的那套框架来写，拆出去会让站点依赖这个库、库的文档又依赖站点，绕成环。
+     文档在站点的 `dom-kit` 分类下（`docs/src/jsMain/resources/docs/dom-kit/`）。
 
     **组件的属性用 `attr` 委托**（`ktjs-dom-kit`）：`var titleText: String by attr("title") { change -> … }`。
     属性是唯一状态——getter 读 attribute、setter 写 attribute，不另存字段；外部 `setAttribute` 由
@@ -187,8 +190,8 @@ duckfn 站点一致。
     （`HomeSection.kt`）属于「父容器统一控制子组件布局」，是允许提取的那一类。
 
     **组件自己的 CSS 用 `ktjs-dom-kit` 的 `cssSheet { … }` 写**：类型化的规则对象交给 emotion 的文本管线
-    序列化。写法、坑、参考与示例都在 `ktjs-dom-kit/docs/css-sheet.md`（跟着该模块走，将来它独立成库时
-    一起搬）。典型形态：
+    序列化。写法、坑、参考与示例都在站点的 DOM 工具箱分类里
+    （`docs/src/jsMain/resources/docs/dom-kit/css-sheet.md`，中文版在对应的 `i18n/zh-Hans/` 下）。典型形态：
 
     ```kotlin
     private val cardClass = ClassName("ktjs-feature-card")   // 与 shadow 里的 classList 共用
@@ -784,10 +787,12 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
   `src/jsMain/kotlin/io/github/shijianjs/ktjs/docusaurus/docs/Config.kt` 是配置。
   `./gradlew :docs:docusaurusBuild` 把它变成静态站点，产物在 `build/js/docusaurus/docs/build`（站点目录
   在 npm workspace 里的原因见上面的「Gradle 插件与站点组装」）。
-- 导航栏分三块，三块各自一个 `docSidebar` 条目、一个同名 sidebar：User guide（`userGuide`）与 Docs kit
-  （`docsKit`）面向站点使用者，Development（`development`）放本仓库自己的开发文档。Gradle 插件页在用户
-  指南里，不在 kit 里——wrapper 加插件才是完整的 Docusaurus，kit 只是本项目按自己的喜好加的增强。
-  开发文档只写中文，不建 `i18n/` 下的对应文件（`zh-Hans` 会回落到原文）。
+- 导航栏分四块，四块各自一个 `docSidebar` 条目、一个同名 sidebar：User guide（`userGuide`）与 Docs kit
+  （`docsKit`）面向站点使用者，DOM kit（`domKit`）是两者底下那层通用 DOM 辅助的说明，Development
+  （`development`）放本仓库自己的开发文档。Gradle 插件页在用户指南里，不在 kit 里——wrapper 加插件才是
+  完整的 Docusaurus，kit 只是本项目按自己的喜好加的增强。开发文档只写中文，不建 `i18n/` 下的对应文件
+  （`zh-Hans` 会回落到原文）；其余三块英文为源、中文在
+  `i18n/zh-Hans/docusaurus-plugin-content-docs/current/` 下对应路径。
 - 浏览器端 e2e 是 `:docs:e2eTest`（JVM Playwright，见「Kotlin/JS 模块格式与测试运行时」），改完站点
   本地按需核对；它不进 `build` / `check`，也不进 CI。CI 的链路验证仍是「构建成功 + Docusaurus 自己的
   断链检查」：`onBrokenLinks = 'throw'`（`docs` 里显式设置）让断链变成构建失败。

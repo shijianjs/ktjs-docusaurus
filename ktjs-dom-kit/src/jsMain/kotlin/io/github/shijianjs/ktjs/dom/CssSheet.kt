@@ -34,8 +34,8 @@ import web.cssom.CSSStyleSheet
  * Serialization is the two packages emotion's cache uses (`@emotion/serialize` + `stylis`), so the
  * sheet holds what emotion would emit: nested selectors resolved against their parent, values
  * normalized (`0.2s ease` stays, `0` may become `0px`), `fallback(…)` arrays expanded into repeated
- * declarations. The whole pipeline, including what does *not* work and why, is documented in
- * `docs/css-sheet.md` inside this module.
+ * declarations. The whole pipeline, including what does *not* work and why, is the docs site's
+ * "Typed stylesheets" page (`docs/src/jsMain/resources/docs/dom-kit/css-sheet.md`).
  *
  * The top level is a map of **selectors** (`ClassName`, `":host"`); state variants are written with
  * `pseudo` / `pseudos` (see `css/Pseudos.kt`), and at-rules come from

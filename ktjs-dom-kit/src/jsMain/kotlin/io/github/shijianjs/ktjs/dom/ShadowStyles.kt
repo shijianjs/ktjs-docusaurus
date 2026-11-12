@@ -53,8 +53,9 @@ fun HTMLElement.attachShadowRoot(
  * }
  * ```
  *
- * See `docs/css-sheet.md` for the serializer, the typed values and the traps (in particular the
- * `Pseudos` + `pseudo`/`pseudos` variants, and `@media` / `@supports` built from the wrappers' own keywords).
+ * See the docs site's "Typed stylesheets" page (`docs/src/jsMain/resources/docs/dom-kit/css-sheet.md`)
+ * for the serializer, the typed values and the traps (in particular the `Pseudos` + `pseudo`/`pseudos`
+ * variants, and `@media` / `@supports` built from the wrappers' own keywords).
  */
 fun HTMLElement.attachStyledShadow(
     vararg styles: CSSStyleSheet,
