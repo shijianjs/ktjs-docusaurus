@@ -2,15 +2,21 @@ package io.github.shijianjs.ktjs.docusaurus.kit.elements
 
 import io.github.shijianjs.ktjs.dom.createElement
 import io.github.shijianjs.ktjs.dom.defineIfMissing
+import io.github.shijianjs.ktjs.dom.inlineStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import web.cssom.Auto
 import web.cssom.ClassName
+import web.cssom.Margin
+import web.cssom.px
 import web.dom.document
+import web.html.HTMLElement
 import web.html.HtmlTagName
+import web.window.window
 
 class HomeElementsTest {
 
@@ -172,5 +178,40 @@ class HomeElementsTest {
         assertFalse(features.hasAttribute("tinted"))
 
         document.body.removeChild(features)
+    }
+
+    /**
+     * A band is one viewport wide and centred on the viewport, so it reaches both window edges even
+     * though the page keeps its article inside a narrower column (Docusaurus caps `.container` at
+     * `--ifm-container-width-xl` on screens 1440px and wider). `100vw` counts the desktop
+     * scrollbar's gutter, which the site absorbs with `html { overflow-x: clip }`; this test pins
+     * down the bleed itself, the e2e one pins down "no horizontal scrollbar".
+     */
+    @Test
+    fun fullBleedSectionsSpanTheViewportNotTheContentColumn() {
+        defineIfMissing(KtjsHero.NAME, KtjsHero.Companion)
+        defineIfMissing(KtjsFeatures.NAME, KtjsFeatures.Companion)
+
+        // A narrow centred column stands in for the page container the band has to escape.
+        val column = HtmlTagName.div.createElement {
+            inlineStyle.apply {
+                width = 500.px
+                margin = Margin(0.px, Auto.auto)
+            }
+        }
+        val hero = KtjsHero.NAME.createElement()
+        val features = KtjsFeatures.NAME.createElement()
+        column.appendChild(hero)
+        column.appendChild(features)
+        document.body.appendChild(column)
+
+        val viewport = window.innerWidth.toDouble()
+        for (host in listOf<HTMLElement>(hero, features)) {
+            val band = assertNotNull(host.shadowRoot?.querySelector(HtmlTagName.section)).getBoundingClientRect()
+            assertEquals(viewport, band.width, 0.5, "${host.tagName} band width")
+            assertEquals(viewport / 2, band.left + band.width / 2, 0.5, "${host.tagName} band centre")
+        }
+
+        document.body.removeChild(column)
     }
 }

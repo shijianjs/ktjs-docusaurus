@@ -186,6 +186,10 @@ class KtjsHero : CustomElementAdapter() {
             inlineStyle.apply {
                 position = Position.relative
                 isolation = Isolation.isolate
+                // Reach the window edges by measuring against the viewport: the MDX page caps its
+                // container at `--ifm-container-width-xl` on wide screens, so `100%` stops short.
+                // `100vw` includes the desktop scrollbar's gutter, which is why the page clips
+                // horizontal overflow (see the site's `custom.css`) instead of growing a scrollbar.
                 width = 100.vw
                 marginInline = 50.pct - 50.vw
                 overflowX = Overflow.clip

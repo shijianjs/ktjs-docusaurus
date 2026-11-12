@@ -240,6 +240,16 @@ duckfn 站点一致。
       线性/角度渐变）、`webkitBackgroundClip`（`-webkit-` 属性没有）、`pointerEventsNone`（值联合缺
       `none`）。补的时候值仍然类型化，一个缺口一个函数，不要提供通用的 `putRaw(name, value)`。
 
+    **通栏要按页宽算，并在页面根上夹掉横向溢出**：Docusaurus 在 ≥1440px 时把 `.container` 封顶在
+    `--ifm-container-width-xl`（`.container--fluid` 的 `max-width: inherit` 被后面的媒体查询覆盖），
+    所以按内容容器撑开的通栏在宽屏上会停在 1320px、铺不满页面——必须写 `width = 100.vw`、
+    `marginInline = 50.pct - 50.vw`。代价是 `100vw` 含桌面端竖向滚动条的槽，比可见区域宽十几像素，
+    站点 `custom.css` 因此有 `html { overflow-x: clip }`（用 `clip` 不用 `hidden`：`hidden` 会建滚动
+    容器，粘性导航栏与目录就废了）。把 `overflow-x: clip` 写在元素自己身上没用——溢出的是盒子本身。
+    回归用例：`fullBleedSectionsSpanTheViewportNotTheContentColumn`，以及 `SiteE2eTest` 的
+    `the home page fills the window and does not overflow horizontally`（1600px 视口，覆盖容器封顶
+    那种情况）。
+
     同一段卡片规则：手写约 455 个字符的 CSS，这套写法里手写 CSS 文本 0、cast 0，只剩自定义属性名和
     零个伪类键（走 `Pseudos`）。判断值不值得用这套，看的是「还剩多少 CSS 文本要手写」，不是源码行数。
     对照实验（三条写法并排 + 字符数报表）留在 `probes/web-components` 的 `example.CssSheetExperiment`：

@@ -161,6 +161,52 @@ class SiteE2eTest {
         assertEquals(3, page.locator("ktjs-step").count())
     }
 
+    /**
+     * The full-bleed bands are `100vw` wide, pulled out to the window edges. Two things went wrong
+     * here before: `100vw` includes the desktop scrollbar's gutter, which used to add a horizontal
+     * scrollbar under the page; and a container-relative bleed stopped short, because Docusaurus
+     * caps `.container` at `--ifm-container-width-xl` on screens this wide.
+     */
+    @RetryingTest(maxAttempts = 2)
+    fun `the home page fills the window and does not overflow horizontally`(page: Page) {
+        // Wider than the 1440px breakpoint, where the capped container is actually in effect.
+        page.setViewportSize(1600, 900)
+        openHome(page)
+
+        val layout = page.evaluate(
+            """() => {
+                const doc = document.documentElement;
+                const band = document.querySelector('ktjs-features').shadowRoot
+                    .querySelector('section').getBoundingClientRect();
+                return {
+                    client: doc.clientWidth,
+                    scroll: doc.scrollWidth,
+                    left: band.left,
+                    right: band.right,
+                    container: document.querySelector('main.container').getBoundingClientRect().width,
+                };
+            }""",
+        ) as Map<*, *>
+        val visible = (layout["client"] as Number).toDouble()
+        val left = (layout["left"] as Number).toDouble()
+        val right = (layout["right"] as Number).toDouble()
+
+        // The band has to escape the container, not stop at it.
+        assertTrue(
+            (layout["container"] as Number).toDouble() < visible,
+            "the container is not capped at this width, so this would not catch the bug: $layout",
+        )
+        assertTrue(left <= 0.5 && right >= visible - 0.5, "the band does not reach both edges: $layout")
+
+        // The scrollbar gutter `100vw` adds is clipped rather than turned into a second scrollbar.
+        assertTrue(
+            (layout["scroll"] as Number).toDouble() <= visible,
+            "the page is wider than the window: $layout",
+        )
+        page.evaluate("() => window.scrollTo(200, 0)")
+        assertEquals(0.0, (page.evaluate("() => window.scrollX") as Number).toDouble(), "horizontal scroll")
+    }
+
     private fun openHome(page: Page) {
         page.navigate(DocsServer.homeUrl, Page.NavigateOptions().setWaitUntil(WaitUntilState.LOAD))
         // The element bundle is injected by the client module *after* hydration, so a shadow root

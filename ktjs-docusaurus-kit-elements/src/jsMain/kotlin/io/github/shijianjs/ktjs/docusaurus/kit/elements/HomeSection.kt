@@ -56,8 +56,10 @@ internal fun homeSection(): HomeSection {
     }
     val root = HtmlTagName.section.createElement<HTMLElement> {
         inlineStyle.apply {
-            // Span the viewport so a tinted band reaches the window edge; the clip keeps `100vw`
-            // from adding a horizontal scrollbar.
+            // Reach the window edges by measuring against the viewport: the MDX page caps its
+            // container at `--ifm-container-width-xl` on wide screens, so `100%` stops short.
+            // `100vw` includes the desktop scrollbar's gutter, which is why the page clips
+            // horizontal overflow (see the site's `custom.css`) instead of growing a scrollbar.
             width = 100.vw
             marginInline = 50.pct - 50.vw
             padding = Padding(clamp(3.5.rem, 6.vw, 4.5.rem), 0.px)

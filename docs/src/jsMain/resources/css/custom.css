@@ -7,3 +7,16 @@
 [data-theme='dark'] {
     --ifm-color-primary: #6cb6ff;
 }
+
+/*
+ * The kit's full-bleed bands (`<ktjs-hero>`, `<ktjs-features>`, `<ktjs-next-steps>`) are `100vw`
+ * wide after pulling themselves out with `margin-inline: calc(50% - 50vw)`. That is the viewport
+ * width *including* the desktop scrollbar's gutter, so the bands are a few pixels wider than the
+ * visible page — and without this rule the whole page grows a horizontal scrollbar.
+ *
+ * `overflow-x: clip` (not `hidden`) is what keeps that from happening without creating a scroll
+ * container: the sticky navbar and TOC keep working.
+ */
+html {
+    overflow-x: clip;
+}
