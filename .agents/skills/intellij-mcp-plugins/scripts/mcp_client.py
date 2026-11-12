@@ -88,6 +88,10 @@ class Client:
                 "params": {"name": name, "arguments": arguments},
             })
         )
+        if parsed.get("error"):
+            # JSON-RPC level failure (e.g. -32603 from a broken IDE index); keep the message visible
+            # instead of returning an empty dict that looks like "no results".
+            raise RuntimeError(f"{name}: {parsed['error'].get('message')}")
         result = parsed.get("result", {})
         text = "\n".join(item.get("text", "") for item in result.get("content", []))
         if result.get("isError"):
