@@ -72,7 +72,7 @@ class KtjsHero : CustomElementAdapter() {
 也就是说，卡片不是交给某个分区对象的数据：`<ktjs-feature>` 是一个由浏览器自行升级的节点，网格是对 slot
 分配元素生效的普通 CSS。
 
-元素包用的是官方自定义元素 API：`class KtjsFeature : CustomElementAdapter()`（它继承 `HTMLElement`），
+浏览器模块用的是官方自定义元素 API：`class KtjsFeature : CustomElementAdapter()`（它继承 `HTMLElement`），
 外加一个 `CustomElementReference` companion 和 `customElements.define`。`CustomElementAdapter` 在
 `ktjs-dom-kit` 里，它完全不知道 Docusaurus：`connectedCallback()` 只按原生名字声明一次——子类直接
 override 它。定义标签之前，`defineIfMissing` 会调用 `stripBridgesFrom`，把 Kotlin/JS 挂在原型链每层上的
@@ -85,7 +85,7 @@ override 它。定义标签之前，`defineIfMissing` 会调用 `stripBridgesFro
 | 包 | 是否发布 | 内容 |
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | 是，带 UI bundle | Node 安全的辅助（`TocToggle`）+ 一个 `browser` 构件 |
-| `ktjs-docusaurus-kit-elements` | 否 | 全部首页元素及其 shadow |
+| `ktjs-docusaurus-kit-browser` | 否 | 全部 `<ktjs-…>` 元素（首页分区、目录折叠）及其 shadow |
 | `ktjs-dom-kit` | 否——它有[自己的一类](../dom-kit/overview.md) | `CustomElementAdapter`、`attr` 与 `AttributeCodec`、`defineIfMissing`、`createElement`、`attachShadowRoot`、`attachStyledShadow`、`inlineStyle`、`cssSheet` / `cssText` |
 
 首页 UI 跟着 kit 走：webpack bundle 以 `browser` 构件的身份挂在 kit 的坐标上，所以另一个项目只要一个依赖、
@@ -108,20 +108,23 @@ tasks.register<Copy>("stageHomeUi") {
 }
 ```
 
-元素模块本身不发布：它是本站的 UI，不是可复用的契约。
+浏览器模块本身不发布：它是本站的 UI，不是可复用的契约。它是 `executable` 的 Kotlin/JS 模块，链接时会跑
+webpack，把 npm 依赖内联进来——所以 kit 分发的是一个 `.js` 文件。
 
-因为这些类在模块加载时就会求值 `HTMLElement`，元素 bundle 绝不能被 Node 侧 import。Gradle 插件把它发布到
+因为这些类在模块加载时就会求值 `HTMLElement`，这个包绝不能被 Node 侧 import。Gradle 插件把它发布到
 `static/ktjs-client/` 下，client module 在 **hydration 之后**插入它的 `<script type="module">`：
 
 ```kotlin
 // build.gradle.kts
 docusaurus {
     clientModuleFunction = "onRouteDidUpdate"
-    browserBundle = "ktjs-docusaurus-ktjs-docusaurus-kit-elements.mjs"
-    browserBundleEntry = "registerHomeElements"
-    browserBundleFiles.from(/* 元素模块的 productionLibrary/kotlin 产物 */)
+    browserBundle = "ktjs-docusaurus-kit-browser.js"
+    browserBundleFiles.from(/* 浏览器模块的 productionExecutable 产物 */)
 }
 ```
+
+`browserBundleEntry` 不用设：这个包是 executable，插件生成的 `index.mjs` import 它时它的 `main()` 就会执行。
+library 包才需要写入口函数名——只做链接的模块不会自己调用任何东西。
 
 hydration 之后加载意味着 React 已经渲染完这些标签，所以不会出现 hydration 不匹配。
 

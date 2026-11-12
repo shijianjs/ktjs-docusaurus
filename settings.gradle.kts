@@ -49,10 +49,6 @@ project(":probes-web-components").projectDir = file("probes/web-components")
 // from the wrapper: the wrapper only maps npm packages, the kit contains logic of its own.
 include(":ktjs-docusaurus-kit")
 
-// Browser-only half of the docs kit: custom elements built on the official HTMLElement API.
-// Published as a package too, but its bundle is loaded by the browser alone (never by Node).
-include(":ktjs-docusaurus-kit-elements")
-
 // Generic DOM helpers (the custom-element adapter, the attribute delegate, the typed stylesheet),
 // independent of Docusaurus. It is hosted in this build rather than a repository of its own on
 // purpose: its documentation is written with the very framework it helps build, so splitting the two
@@ -61,6 +57,6 @@ include(":ktjs-docusaurus-kit-elements")
 // manual.
 include(":ktjs-dom-kit")
 
-// Webpack bundle of the elements library for the browser. Not published: it exists so the site loads
-// one file with npm dependencies inlined, while `ktjs-docusaurus-kit-elements` stays a library.
-include(":ktjs-docusaurus-kit-bundle")
+// Browser-only half of the docs kit: every custom element the site defines, in one webpack bundle.
+// Executable rather than a library, so the npm imports are inlined for the browser.
+include(":ktjs-docusaurus-kit-browser")

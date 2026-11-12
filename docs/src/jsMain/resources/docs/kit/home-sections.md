@@ -80,7 +80,7 @@ routes its children into named slots by tag name, so MDX does not need a `slot` 
 That means a card is not data handed to a section object: `<ktjs-feature>` is a node the browser
 upgrades on its own, and the grid is ordinary CSS on the slot's assigned elements.
 
-The elements package uses the official custom-element API: `class KtjsFeature : CustomElementAdapter()`
+The browser module uses the official custom-element API: `class KtjsFeature : CustomElementAdapter()`
 (which extends `HTMLElement`) plus a `CustomElementReference` companion and `customElements.define`.
 `CustomElementAdapter` lives in `ktjs-dom-kit`, which knows nothing about Docusaurus: it declares
 `connectedCallback()` once under its native name — subclasses just override it. Before defining a tag,
@@ -94,7 +94,7 @@ deliberately not implemented: its `val connectedCallback` compiles to a getter t
 | Package | Published | Contents |
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | yes, with the UI bundle | Node-safe helpers (`TocToggle`) + a `browser` artifact |
-| `ktjs-docusaurus-kit-elements` | no | all home elements and their shadows |
+| `ktjs-docusaurus-kit-browser` | no | every `<ktjs-…>` element (home sections, TOC toggle) and its shadow |
 | `ktjs-dom-kit` | no — it has [its own section](../dom-kit/overview.md) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `cssSheet` / `cssText` |
 
 The home UI travels with the kit: the webpack bundle is attached to the kit's coordinate as a
@@ -117,9 +117,11 @@ tasks.register<Copy>("stageHomeUi") {
 }
 ```
 
-The elements module itself is not published: it is this site's UI, not a reusable contract.
+The browser module itself is not published: it is this site's UI, not a reusable contract. It is an
+`executable` Kotlin/JS module so that its link runs webpack, which inlines the npm dependencies —
+that is why what the kit carries is a single `.js` file.
 
-Because those classes evaluate `HTMLElement` at module load, the elements bundle must never be imported
+Because those classes evaluate `HTMLElement` at module load, the bundle must never be imported
 by the Node side. The Gradle plugin publishes it under `static/ktjs-client/` and the client module
 inserts its `<script type="module">` **after hydration**:
 
@@ -127,11 +129,14 @@ inserts its `<script type="module">` **after hydration**:
 // build.gradle.kts
 docusaurus {
     clientModuleFunction = "onRouteDidUpdate"
-    browserBundle = "ktjs-docusaurus-ktjs-docusaurus-kit-elements.mjs"
-    browserBundleEntry = "registerHomeElements"
-    browserBundleFiles.from(/* the elements module's productionLibrary/kotlin output */)
+    browserBundle = "ktjs-docusaurus-kit-browser.js"
+    browserBundleFiles.from(/* the browser module's productionExecutable output */)
 }
 ```
+
+`browserBundleEntry` stays unset: the bundle is an executable, so its `main()` runs when the plugin's
+generated `index.mjs` imports it. A library bundle would need the entry name instead, because a module
+that only links never calls anything.
 
 Loading after hydration means React has already rendered the tags, so there is no hydration mismatch.
 

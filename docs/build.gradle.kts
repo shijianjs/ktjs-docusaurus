@@ -9,7 +9,7 @@ plugins {
  * into the static site GitHub Pages serves.
  *
  * This module is loaded by Node (Docusaurus imports `docusaurus.config.mjs` from its bundle), so it
- * must not depend on `ktjs-docusaurus-kit-elements` — those classes evaluate `HTMLElement` at module load.
+ * must not depend on `ktjs-docusaurus-kit-browser` — those classes evaluate `HTMLElement` at module load.
  * That package's linked output is published under `static/ktjs-client/` instead and loaded by the
  * browser after hydration (see `ClientModule.kt`).
  */
@@ -52,12 +52,12 @@ docusaurus {
     // TOC toggle plus the browser bundle loader; runs after hydration on every route change.
     clientModuleFunction = "onRouteDidUpdate"
 
-    // Browser-only bundle: the webpack output of `ktjs-docusaurus-kit-bundle` already contains the
+    // Browser-only bundle: the webpack output of `ktjs-docusaurus-kit-browser` already contains the
     // elements and their npm dependencies, so the plugin just copies it and imports it for its
     // registration side effect.
-    browserBundle = "ktjs-docusaurus-kit-bundle.js"
+    browserBundle = "ktjs-docusaurus-kit-browser.js"
     browserBundleFiles.from(
-        project(":ktjs-docusaurus-kit-bundle")
+        project(":ktjs-docusaurus-kit-browser")
             .layout.buildDirectory.dir("dist/js/productionExecutable"),
     )
     // --locale zh-Hans
@@ -67,7 +67,7 @@ docusaurus {
 // A file collection cannot carry a task dependency across projects, so build the browser bundle
 // before the site is assembled.
 tasks.named("docusaurusSite") {
-    dependsOn(":ktjs-docusaurus-kit-bundle:jsBrowserDistribution")
+    dependsOn(":ktjs-docusaurus-kit-browser:jsBrowserDistribution")
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -9,7 +9,7 @@ import kotlin.js.JsExport
  * Docusaurus evaluates this module in the browser and during the Node prerender pass, so every DOM
  * access is guarded.
  *
- * The custom-element package (`ktjs-docusaurus-kit-elements`) is loaded by inserting a module script
+ * The custom-element bundle (`ktjs-docusaurus-kit-browser`) is loaded by inserting a module script
  * **after hydration**: `onRouteDidUpdate` runs once hydration is done, so React has already rendered
  * the `<ktjs-*>` tags and registering them afterwards produces no hydration mismatch (#418). The
  * script is inserted once; the element registry itself is idempotent as well.

@@ -67,7 +67,10 @@ open class DocusaurusExtension @javax.inject.Inject constructor(
 
     /**
      * Exported function the generated `static/ktjs-client/index.mjs` calls after importing
-     * [browserBundle]. Required when [browserBundle] is set.
+     * [browserBundle], or `null` when the bundle registers itself on load.
+     *
+     * Leave it unset for an `executable` Kotlin/JS bundle: its `main()` runs as soon as the module is
+     * imported. A library bundle does nothing on import, so it has to name the function to call.
      */
     var browserBundleEntry: String? = null
 

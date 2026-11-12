@@ -13,8 +13,10 @@ import org.junitpioneer.jupiter.RetryingTest
  *
  * The table of contents is client-only — Docusaurus mounts `theme-doc-toc-desktop` on a desktop
  * viewport, after hydration — so neither the control nor the layout it switches can be checked
- * against the built HTML. The button used to be fixed to the viewport's bottom-right corner, where
- * it landed on the theme's own "back to top" button; the first test is what pins the placement down.
+ * against the built HTML. The tag is inserted into the TOC column by the Node-safe half; the button
+ * and the inline layout come from the custom element in the browser bundle. The first test is what
+ * pins the placement down: the control used to be fixed to the viewport's bottom-right corner, where
+ * it landed on the theme's own "back to top" button.
  */
 @UsePlaywright(DocsOptions::class)
 class TocToggleE2eTest {
@@ -29,19 +31,17 @@ class TocToggleE2eTest {
             """
             () => {
                 const toc = document.querySelector('.theme-doc-toc-desktop');
-                const button = document.querySelector('.ktjs-toc-toggle');
+                const toggle = document.querySelector('ktjs-toc-toggle');
                 const column = toc.parentElement;
                 return {
-                    inColumn: button.parentElement === column,
-                    beforeToc: (button.compareDocumentPosition(toc) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
-                    columnTagged: column.classList.contains('ktjs-toc-column'),
+                    inColumn: toggle.parentElement === column,
+                    beforeToc: (toggle.compareDocumentPosition(toc) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
                 };
             }
             """.trimIndent(),
         ).asRecord()
         assertEquals(true, placement["inColumn"], "the toggle is not a child of the TOC column")
         assertEquals(true, placement["beforeToc"], "the toggle does not come before the TOC")
-        assertEquals(true, placement["columnTagged"], "the TOC column is not tagged for the collapse rules")
 
         // Scrolled to the bottom, where the theme's own button sits: the two must not overlap. That
         // button is fixed to the bottom-right corner, so its rect is there whether or not the theme
@@ -56,7 +56,7 @@ class TocToggleE2eTest {
             """
             () => {
                 const box = (selector) => document.querySelector(selector).getBoundingClientRect();
-                const toggle = box('.ktjs-toc-toggle');
+                const toggle = box('ktjs-toc-toggle');
                 const toc = box('.theme-doc-toc-desktop');
                 const backToTop = box('.theme-back-to-top-button');
                 return {
@@ -90,35 +90,39 @@ class TocToggleE2eTest {
     fun `collapsing hides the list, keeps the toggle reachable and widens the article`(page: Page) {
         openDocWithToc(page)
 
-        val toggle = page.locator(".ktjs-toc-toggle")
+        // Playwright's CSS engine pierces open shadow roots, so this is the element's own button.
+        val button = page.locator("ktjs-toc-toggle button")
         val toc = page.locator(".theme-doc-toc-desktop")
-        val article = page.locator(".ktjs-doc-article")
-        val expandedWidth = article.boundingBox()!!.width
+        val toggle = page.locator("ktjs-toc-toggle")
+        val expanded = page.layout()
+        val expandedWidth = expanded.articleWidth
 
-        toggle.click()
+        button.click()
 
         // The list is gone; the control that brings it back is not — it lives in the column, which
         // only shrinks. Hiding the column instead would strand a reader who collapsed it.
         assertThat(toc).isHidden()
         assertThat(toggle).isVisible()
-        assertEquals(true, page.isCollapsed(), "the state class is not on <body>")
+        assertTrue(page.isCollapsed(), "the `collapsed` attribute is not on the host")
+        val collapsed = page.layout()
         assertTrue(
-            page.locator(".ktjs-toc-column").boundingBox()!!.width < 60.0,
-            "the collapsed column did not shrink to a strip",
+            collapsed.columnWidth < 60.0,
+            "the collapsed column did not shrink to a strip: $collapsed",
         )
         assertTrue(
-            article.boundingBox()!!.width > expandedWidth,
-            "the article did not take the width the list gave up",
+            collapsed.articleWidth > expandedWidth,
+            "the article did not take the width the list gave up: $collapsed",
         )
 
         // The choice is stored, so a reload comes back collapsed — and still expandable.
         page.reload()
         assertThat(toc).isHidden()
         assertThat(toggle).isVisible()
+        assertTrue(page.isCollapsed(), "the stored preference was not restored")
 
-        toggle.click()
+        button.click()
         assertThat(toc).isVisible()
-        assertEquals(false, page.isCollapsed(), "the state class was not cleared")
+        assertEquals(false, page.isCollapsed(), "the `collapsed` attribute was not cleared")
     }
 
     /** A long page with headings: the TOC exists there, and the back-to-top button can appear. */
@@ -127,12 +131,34 @@ class TocToggleE2eTest {
             DocsServer.homeUrl + "docs/dom-kit/css-sheet/",
             Page.NavigateOptions().setWaitUntil(WaitUntilState.LOAD),
         )
-        // The client module creates the button on its first route update; the assertion retries.
-        assertThat(page.locator(".ktjs-toc-toggle")).isVisible()
+        // The client module inserts the tag on its first route update; the assertion retries.
+        assertThat(page.locator("ktjs-toc-toggle")).isVisible()
     }
 
     private fun Page.isCollapsed(): Boolean =
-        evaluate("() => document.body.classList.contains('ktjs-toc-collapsed')") as Boolean
+        evaluate("() => document.querySelector('ktjs-toc-toggle').hasAttribute('collapsed')") as Boolean
+
+    /**
+     * The two widths the collapse changes: the TOC column and the article beside it.
+     *
+     * Both are found through the list, because that is how the element finds them: the list's parent
+     * is the column, and the column's previous sibling is the article.
+     */
+    private fun Page.layout(): Layout = evaluate(
+        """
+        () => {
+            const toc = document.querySelector('.theme-doc-toc-desktop');
+            const column = toc.parentElement;
+            const article = column.previousElementSibling;
+            return {
+                columnWidth: column.getBoundingClientRect().width,
+                articleWidth: article.getBoundingClientRect().width,
+            };
+        }
+        """.trimIndent(),
+    ).asRecord().let { Layout(it.number("columnWidth"), it.number("articleWidth")) }
+
+    private data class Layout(val columnWidth: Double, val articleWidth: Double)
 
     /** `page.evaluate` hands back a plain JS object as a map; the numbers may be any boxed type. */
     @Suppress("UNCHECKED_CAST")

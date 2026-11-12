@@ -19,13 +19,11 @@ plugins {
 // settings.gradle.kts) but still follows the same upstream version.
 val publishedPrefix = "ktjs-docusaurus"
 
-// Modules that carry the prefix but are not an API surface. The home elements are this site's UI, not
-// a reusable contract, and the bundle only exists to inline them for one site; neither is released or
-// documented. What other projects consume is the bundle, distributed as an artifact of the kit.
-val unpublishedModules = setOf(
-    "ktjs-docusaurus-kit-bundle",
-    "ktjs-docusaurus-kit-elements",
-)
+// Modules that carry the prefix but are not an API surface. The browser half is this site's UI, not
+// a reusable contract, and it only exists as the webpack bundle the site loads; it is neither
+// released nor documented. What other projects consume is that bundle, distributed as the kit's
+// `browser` artifact.
+val unpublishedModules = setOf("ktjs-docusaurus-kit-browser")
 
 // Only the wrapper follows an upstream npm version. The kit is original code with its own semantic
 // version, so it is not looked up in wrapper-revisions.properties.

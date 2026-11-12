@@ -105,7 +105,7 @@ npm 包拆模块的原因。
 ### 页面用 MDX，不用 tsx
 
 首页这类「静态为主 + 少量动态」的页面用 `src/jsMain/resources/pages/index.mdx`，标签是**真正的自定义
-元素**：`<ktjs-hero>` / `<ktjs-features>` / `<ktjs-next-steps>`，类在 `ktjs-docusaurus-kit-elements` 里，
+元素**：`<ktjs-hero>` / `<ktjs-features>` / `<ktjs-next-steps>`，类在 `ktjs-docusaurus-kit-browser` 里，
 `connectedCallback` 读属性与子标签、建一次分区、丢掉声明式子节点（`data-ktjs-read` 防重）。做法与
 duckfn 站点一致。
 
@@ -144,14 +144,18 @@ duckfn 站点一致。
    的成员生成，名字与目标同名，所以调用解析回自己；JVM 后端有 `isErroneousSpecialBridge`（KT-82651）
    防护，JS 后端还没有。
 
-   **分层是硬约定**：kit 按「Node 是否加载」拆成两个都发布的共享包，另有一个通用的 DOM 模块：
+   **分层是硬约定**：kit 按「Node 是否加载」拆成两个模块（kit 发布、浏览器那一半不发布），另有一个
+   通用的 DOM 模块：
 
-   - `ktjs-docusaurus-kit`：Node 安全的辅助（目前是 TOC toggle），不知道 MDX、标签名或自定义元素。
-   - `ktjs-docusaurus-kit-elements`：浏览器专属——全部 home 元素：`ktjs-hero` / `ktjs-action` /
-     `ktjs-badge` / `ktjs-features` / `ktjs-feature` / `ktjs-next-steps` / `ktjs-step`。每个元素
-     都渲染进自己的 shadow root：父级负责框架和 `<slot>` 布局，子级自己渲染卡片，子标签是真元素，
-     不再被解析成数据后丢弃。顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进
-     `docs` 站的依赖图。**不发布**：这是本站的 UI，不是通用契约，其他项目通过 kit 分发的 bundle 使用。
+   - `ktjs-docusaurus-kit`：Node 安全的辅助（目前是 TOC toggle 的组装），不知道 MDX、标签名或自定义
+     元素；它自己只按字面量拼标签名，从不 import 浏览器模块。
+   - `ktjs-docusaurus-kit-browser`：浏览器专属——全部自定义元素：`ktjs-hero` / `ktjs-action` /
+     `ktjs-badge` / `ktjs-features` / `ktjs-feature` / `ktjs-next-steps` / `ktjs-step`，以及
+     `ktjs-toc-toggle`。每个元素都渲染进自己的 shadow root：父级负责框架和 `<slot>` 布局，子级自己
+     渲染卡片，子标签是真元素，不再被解析成数据后丢弃。它是 `executable`（不是 library）：没人消费
+     它的 Kotlin API，而 executable 的链接才会跑 webpack 把 npm 依赖（`iconify-icon`）内联进一个
+     `.js` 文件。顶层 `class X extends HTMLElement` 会被 Node 求值，所以它**不能**进 `docs` 站的
+     依赖图。**不发布**：这是本站的 UI，不是通用契约，其他项目通过 kit 分发的 bundle 使用。
    - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`）、挂 shadow root 的 `attachShadowRoot` /
      `attachStyledShadow(vararg CSSStyleSheet)`，以及 `HTMLElement.inlineStyle`（`csstype.Properties`
      视图）、`loadjs` 加载器的封装（`dom.loadjs` 包：四种调用形态写成 `invoke` 扩展重载 + bundle
@@ -266,7 +270,7 @@ duckfn 站点一致。
 2. **注册放在 hydration 之后**：静态 `<script>` 写在 `<head>` 会早于 hydration，元素先升级就让 React 报
    hydration error #418。现在由 `ClientModule.onRouteDidUpdate` 动态插入一次
    `<script type="module" src="<baseUrl>ktjs-client/index.mjs">`，脚本延迟到 hydration 后才加载并调用
-   `registerHomeElements()`。这里的 `<baseUrl>` 必须是 **Docusaurus 为当前 locale 解析出来的那个**
+   `registerKtjsElements()`。这里的 `<baseUrl>` 必须是 **Docusaurus 为当前 locale 解析出来的那个**
    （默认语言 `/my-site/`、中文 `/my-site/zh-Hans/`）：插件生成的 `client-module.mjs` 从
    `@generated/docusaurus.config` 读它并作为第一个参数传给 `clientModuleFunction`。写成编译期常量时
    `docusaurus start --locale zh-Hans` 会踩坑——dev server 只按该 locale 的前缀伺服，脚本 404，整页
@@ -281,7 +285,8 @@ duckfn 站点一致。
 
 - `browserBundleFiles` 必须与 `additionalJs` 分开：后者也会拷进 `generated/`，若浏览器包里带了共享模块
   的副本，会覆盖 config bundle 的那份，webpack 报 `'X…' is not exported from …`。
-- `docusaurusSite` 必须显式 `dependsOn(":ktjs-docusaurus-kit-elements:jsProductionLibraryCompileSync")`。
+- `docusaurusSite` 必须显式 `dependsOn(":ktjs-docusaurus-kit-browser:jsBrowserDistribution")`：那是
+  executable 的 webpack 产物目录，库的 `jsProductionLibraryCompileSync` 不含内联后的 npm 依赖。
 - 浏览器入口的 `<script src>` 要写**带 baseUrl 的绝对路径**（`/my-site/ktjs-client/index.mjs`），
   相对路径在深页面上会解析到 `.../docs/intro/ktjs-client/...`；这个 baseUrl 取
   `clientModuleFunction` 的第一个参数，不要用编译期常量。
@@ -620,7 +625,7 @@ interface` 声明私有字段，`unsafeCast` 过去读写，元素被移除时�
 
 外部 `MutableMap<HTMLElement, …>` 会把每个宿主都强引用住——文档站每次进首页都新建一批元素，导航几次
 就攒下一堆永不回收的实例。`connectedCallback` 需要「找到自己上次建的那个分区」时，用元素上的字段而不是
-全局索引（见 `ktjs-docusaurus-kit-elements/.../HomeElementRegistry.kt` 的 `HomeHostState`）。
+全局索引（见 `ktjs-docusaurus-kit-browser/.../HomeElementRegistry.kt` 的 `HomeHostState`）。
 
 ### 组件用 class，但不建通用组件基类
 
@@ -831,12 +836,17 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
   内容始终对应触发时 `master` 的提交。仓库 Settings → Pages 的 Source 必须选 **GitHub Actions**。
 - 本地预览：执行 `./gradlew pagesSite` 后给 `build/pages` 起任意静态服务器。直接开 `file://` 会因相对
   路径与 CORS 导致资源加载异常。要看 dev server 用 `./gradlew :docs:docusaurusStart`。
-- 右侧目录的折叠按钮由 kit 的 `TocToggle` 注入：按钮插进目录列、位于目录列表上方（目录列是唯一既挨着目录、
-  又在文章之外的位置），与列表一样用 `position: sticky` 钉在导航栏下方——视口右下角是主题自带「回到顶部」
-  按钮的地盘，放那里会重叠。按钮高度把目录的 sticky 偏移往下顶，两者因此不会叠在一起。收起靠
-  `body.ktjs-toc-collapsed`：目录列缩成 2.5rem 的窄条（不能整列隐藏，按钮就在里面）、只隐藏列表，同时给
-  文章列加 `ktjs-doc-article` 加宽到整行——Docusaurus 在哈希 CSS module 里用 `max-width: 75% !important`
-  钉住文章列，只隐藏列表会留下 25% 空白。
+- 右侧目录的折叠按钮由 kit 的 `TocToggle` 注入：Node 那一半只找到桌面目录、在列表前插一个
+  `<ktjs-toc-toggle>` 标签，按钮、存储的偏好和布局切换全在 `ktjs-docusaurus-kit-browser` 的元素里
+  （kit 不能 import 它，那会在 Node prerender 时求值 `HTMLElement`，所以标签名按字面量跨边界重复一次，
+  由 e2e 兜住）。元素不认 Docusaurus 选择器，只看自己的位置：`parentElement` 是目录列、
+  `nextElementSibling` 是列表、目录列的 `previousElementSibling` 是文章列。收起时这几处改的是**内联样式**
+  （列缩成 2.5rem 的窄条——不能整列隐藏，按钮就在里面；列表 `display: none`；文章列
+  `max-width: 100% !important`，因为 Docusaurus 在哈希 CSS module 里用 `max-width: 75% !important` 钉住
+  它），**没有** `document.head` 里的全局样式表、也没有 `body` 上的状态类；状态就是宿主上的 `collapsed`
+  属性。按钮自身的 sticky、胶囊、箭头旋转在该元素自己的 `cssSheet` 里。目录列是唯一既挨着目录、又在文章
+  之外的位置；视口右下角是主题自带「回到顶部」按钮的地盘，放那里会重叠。按钮高度把目录的 sticky 偏移往下
+  顶，两者因此不会叠在一起。
 
 ## 文档约定
 

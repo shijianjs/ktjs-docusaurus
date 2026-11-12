@@ -46,15 +46,15 @@ kotlin {
  * build's shared publishing block, both of which finish after this script; hence `afterEvaluate`.
  */
 // `builtBy` takes a task, not a task path (`builtBy(":…:jsBrowserDistribution")` fails with "Cannot
-// convert … to a task"), so the bundle project must be evaluated before its task can be looked up.
+// convert … to a task"), so the browser project must be evaluated before its task can be looked up.
 // That is the only reason this script reaches into another project.
-evaluationDependsOn(":ktjs-docusaurus-kit-bundle")
+evaluationDependsOn(":ktjs-docusaurus-kit-browser")
 
 afterEvaluate {
-    val bundleProject = project(":ktjs-docusaurus-kit-bundle")
+    val bundleProject = project(":ktjs-docusaurus-kit-browser")
     val bundleTask = bundleProject.tasks.named("jsBrowserDistribution")
     val bundleFile = bundleProject.layout.buildDirectory
-        .file("dist/js/productionExecutable/ktjs-docusaurus-kit-bundle.js")
+        .file("dist/js/productionExecutable/ktjs-docusaurus-kit-browser.js")
         .get()
         .asFile
     extensions.configure<PublishingExtension> {
