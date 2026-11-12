@@ -215,30 +215,8 @@ subprojects {
         }
     }
 
-    // The kit ships the home UI as data: the webpack bundle is attached to the kit's own coordinate
-    // with a `browser` classifier, so a site depends on the kit and copies the artifact into
-    // `static/` — no second library coordinate, and the version cannot drift.
-    if (name == "ktjs-docusaurus-kit") {
-        // The bundle project has to be evaluated before its task can be wired here.
-        evaluationDependsOn(":ktjs-docusaurus-kit-bundle")
-        afterEvaluate {
-            val bundleProject = project(":ktjs-docusaurus-kit-bundle")
-            val bundleTask = bundleProject.tasks.named("jsBrowserDistribution")
-            val bundleFile = bundleProject.layout.buildDirectory
-                .file("dist/js/productionExecutable/ktjs-docusaurus-kit-bundle.js")
-                .get()
-                .asFile
-            extensions.configure<PublishingExtension> {
-                publications.named<MavenPublication>("kotlinMultiplatform") {
-                    artifact(bundleFile) {
-                        classifier = "browser"
-                        extension = "js"
-                        builtBy(bundleTask)
-                    }
-                }
-            }
-        }
-    }
+    // Everything here applies to every published module. Configuration that only concerns one module
+    // belongs in that module's own build script (the kit's `browser` artifact, for example).
 }
 
 // Prints "<module>=<version>" for every publishable module. Use it to see which versions a release
