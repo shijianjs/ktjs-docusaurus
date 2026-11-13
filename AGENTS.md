@@ -541,6 +541,8 @@ Gradle 9 / JDK 25。升级时注意 2.0 的插件 ID 是 `dev.detekt`，规则�
 ## UI 编程约定
 
 以下为维护者的通用 UI 编码偏好。新增任何 UI 代码（Web Component 包装、演示页）都按此执行。
+规范正文以 [`.agents/skills/ui-code-style/`](.agents/skills/ui-code-style/SKILL.md) 为准（由
+[`shijianjs/dev-agent-skills`](https://github.com/shijianjs/dev-agent-skills) 分发），本节是它的摘要加本类项目的落地方式。
 
 ### 包划分：一个包一个概念
 
