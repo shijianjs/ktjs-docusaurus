@@ -95,7 +95,7 @@ deliberately not implemented: its `val connectedCallback` compiles to a getter t
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | yes | Node-safe helpers (`TocToggle`) + `ktjs-client/ktjs-docusaurus-kit-browser.js` as a klib resource |
 | `ktjs-docusaurus-kit-browser` | no | every `<ktjs-…>` element (home sections, TOC toggle) and its shadow |
-| `ktjs-dom-kit` | no — it has [its own section](../dom-kit/overview.md) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `cssSheet` / `cssText` |
+| `ktjs-dom-kit` | yes, from [its own repository](https://shijianjs.github.io/ktjs-dom-kit/) | `CustomElementAdapter`, `attr` + `AttributeCodec`, `defineIfMissing`, `createElement`, `attachShadowRoot`, `attachStyledShadow`, `inlineStyle`, `cssSheet` / `cssText` |
 
 The home UI travels with the kit as a **resource**: the webpack output is staged under
 `ktjs-client/` and added to the kit's `jsMain` resources, so it ends up in the published klib next to

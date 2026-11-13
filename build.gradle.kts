@@ -34,13 +34,8 @@ val publishedPrefix = "ktjs-docusaurus"
 // `browser` artifact.
 val unpublishedModules = setOf("ktjs-docusaurus-kit-browser")
 
-// Published modules outside the prefix. `ktjs-dom-kit` wraps no npm package and is Docusaurus
-// independent, so it keeps its own name; it is released from here all the same, because its manual is
-// written with the framework it helps build (see the layering note in AGENTS.md).
-val extraPublishedModules = setOf("ktjs-dom-kit")
-
 fun isPublished(module: String): Boolean =
-    module in extraPublishedModules || (module.startsWith(publishedPrefix) && module !in unpublishedModules)
+    module.startsWith(publishedPrefix) && module !in unpublishedModules
 
 // Only the wrapper follows an upstream npm version. The kit is original code with its own semantic
 // version, so it is not looked up in wrapper-revisions.properties.

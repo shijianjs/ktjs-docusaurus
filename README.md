@@ -33,7 +33,7 @@ TypeScript。这个项目把前两层换成 Kotlin/JS：
 | `ktjs-docusaurus` | Kotlin/JS wrapper：站点配置、主题配置、侧边栏、preset 与插件选项的类型声明 |
 | `ktjs-docusaurus-gradle-plugin` | Gradle 插件 `io.github.shijianjs.ktjs.docusaurus`：把 Kotlin/JS 模块组装成 Docusaurus 站点并运行它 |
 | `ktjs-docusaurus-kit` | 可选的构建块：首页分区与目录折叠（连同它用到的浏览器 bundle） |
-| `ktjs-dom-kit` | 与 Docusaurus 无关的通用 DOM 辅助：自定义元素基类、shadow root 样式、类型化内联样式、`loadjs` 封装 |
+| [`ktjs-dom-kit`](https://github.com/shijianjs/ktjs-dom-kit) | 与 Docusaurus 无关的通用 DOM 辅助，2026-11 起独立成仓库并从 Maven Central 依赖：自定义元素基类、属性委托、shadow root 样式、类型化样式表、`loadjs` 封装 |
 | `docs` | 本项目自己的文档站：`src/jsMain/resources` 下的 Markdown + Kotlin 配置，也是 GitHub Pages 的内容 |
 
 ## 用法

@@ -20,9 +20,9 @@ plugins {
  * Not published: this is the site's UI, not a reusable contract. What other projects consume is the
  * bundle, distributed as the kit's `browser` artifact.
  *
- * The `CustomElementAdapter` base class lives in `ktjs-dom-kit`, a Docusaurus-independent module;
- * its linked output is emitted next to this module's into the same `kotlin/` directory, so the
- * browser bundle keeps working without an import map.
+ * The `CustomElementAdapter` base class lives in `ktjs-dom-kit`, a Docusaurus-independent library
+ * published from its own repository; its linked output is emitted next to this module's into the
+ * same `kotlin/` directory, so the browser bundle keeps working without an import map.
  */
 kotlin {
     js {
@@ -46,7 +46,12 @@ kotlin {
 
     sourceSets {
         jsMain.dependencies {
-            implementation(project(":ktjs-dom-kit"))
+            // The custom-element base class, the attribute delegate and the typed stylesheets come from
+            // `ktjs-dom-kit`, which has a repository of its own. The version lives in gradle.properties
+            // like the other cross-project coordinates; a SNAPSHOT there is resolved from `mavenLocal`.
+            implementation(
+                "io.github.shijianjs:ktjs-dom-kit:${providers.gradleProperty("ktjs-dom-kit.version").get()}",
+            )
             // Wrapper for <iconify-icon>; it also registers the element and ships the npm package.
             implementation("io.github.shijianjs:ktjs-iconify-icon:3.0.4-kt.6")
         }

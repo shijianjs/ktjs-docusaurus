@@ -13,6 +13,11 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
+        // `ktjs-dom-kit` is published from its own repository, so a change there can only be tried
+        // here after it is in a repository: a SNAPSHOT comes from `mavenLocal` (that project's
+        // `./gradlew publishToMavenLocal`), a released version from Central. An empty local repository
+        // falls through, so CI resolves exactly the released artifacts.
+        mavenLocal()
         // Maven Central is the source of truth for kotlin-wrappers: the Aliyun mirror lags behind
         // and sometimes serves metadata without the corresponding klibs. Gradle does not fall back
         // to the next repository once metadata is found, so pin these modules to Central even when
@@ -49,13 +54,11 @@ project(":probes-web-components").projectDir = file("probes/web-components")
 // from the wrapper: the wrapper only maps npm packages, the kit contains logic of its own.
 include(":ktjs-docusaurus-kit")
 
-// Generic DOM helpers (the custom-element adapter, the attribute delegate, the typed stylesheet),
-// independent of Docusaurus. It is hosted in this build rather than a repository of its own on
-// purpose: its documentation is written with the very framework it helps build, so splitting the two
-// would make the site depend on the library while the library's docs depend on the site. The
-// `ktjs-dom-kit` name keeps it out of the published prefix; the docs site's `dom-kit` section is its
-// manual.
-include(":ktjs-dom-kit")
+// Generic DOM helpers (the custom-element adapter, the attribute delegate, the typed stylesheet) live
+// in their own repository, `shijianjs/ktjs-dom-kit`, and are consumed here as a Maven artifact: the
+// kit's browser half is built on them, and so is every element on the site. They used to be a module
+// of this build; the split is what lets the library be documented by a site that uses it without
+// either side depending on the other's build.
 
 // Browser-only half of the docs kit: every custom element the site defines, in one webpack bundle.
 // Executable rather than a library, so the npm imports are inlined for the browser.

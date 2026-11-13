@@ -84,8 +84,9 @@ sidebar_position: 1
 - 4.2 `TocToggle`
 - 4.3 iconify 图标接入
 - 4.4 JVM 版 Playwright e2e（`jvm()` + `src/jvmTest` + `e2eTest`，参考 `ktjs-vaadin`）
-- 4.5 `ktjs-dom-kit` 固定留在本仓库、不迁出：它的文档要用它所帮助构建的那套框架来写，拆出去会让站点依赖
-  这个库、库的文档又依赖站点，绕成环。模块名不进发布前缀，文档并入站点的 DOM 工具箱分类
+- 4.5 `ktjs-dom-kit` 独立成仓库（2026-11-13 改判）：原先固定留在本仓库，理由是它的文档要用它所帮助构建的
+  框架来写、拆出去会成环。现在两个仓库各自发布、通过 Maven 坐标单向依赖（本站依赖库，库的站点依赖本站的
+  wrapper），环消失；模块搬到 `shijianjs/ktjs-dom-kit`，本站导航栏的 DOM kit 变成跳去那个站点
 - 4.6 `ktjs-dom-kit` 的 `dom.loadjs` 包：`loadjs` 4.3.0 的完整封装——四种调用形态按分支写成一个重载
   （含 promise 分支）、`LoadOptions` / `ReadyOptions`、`before` 返回 `false` 跳过插入、bundle 注册表；
   浏览器测试 14 例（blob/data URL 与必然失败的 URL 代替上游的静态资源服务器）
@@ -101,22 +102,21 @@ sidebar_position: 1
 
 - 5.1 首页 MDX + 自定义元素（`ktjs-hero` / `ktjs-features` / `ktjs-next-steps`）
 - 5.2 双语 i18n 配置（en / zh-Hans）
-- 5.3 英文文档页（`intro`、`guide/*`、`kit/*`、`dom-kit/*`、`development/*`）
+- 5.3 英文文档页（`intro`、`guide/*`、`kit/*`、`development/*`）
 - 5.4 中文翻译：`guide/content`、`guide/local-search`、`guide/gradle-plugin`、`kit/home-sections`、
-  `kit/toc-toggle`、`dom-kit/*`；`development/*` 只写中文，不进翻译
-- 5.5 导航栏四个大分类（User guide / Docs kit / DOM kit / Development）：前三个面向站点使用者，
+  `kit/toc-toggle`；`development/*` 只写中文，不进翻译
+- 5.5 导航栏分三个分类（User guide / Docs kit / Development）加一个外链（DOM kit）：前两个面向站点使用者，
   Development 放本仓库自己的开发文档；Gradle 插件页从 kit 移进用户指南——wrapper 加插件才是完整的
-  Docusaurus，kit 只是本项目按自己的喜好加的增强；DOM kit 是 kit 底下那层通用 DOM 辅助，本站每个元素
-  都按它写，所以单独一类而不是塞进 kit 的角落
+  Docusaurus，kit 只是本项目按自己的喜好加的增强；DOM kit 是 kit 底下那层通用 DOM 辅助，2026-11-13 起有
+  自己的仓库与站点，导航栏那一项改成跳过去
 - 5.6 TOC 在客户端导航后重新挂载（`onRouteDidUpdate` 每次路由变化都 `refresh()`）；按钮改为挂在
   `<body>` 上并固定在视口右下角，因为原来的位置在页面顶部会被固定导航栏盖住、收起后又会随目录列一起
   `display: none`；收起时文章列同时加宽到整行
 - 5.7 运行时验收（headless Chromium）：首页 hero 1 / 卡片 4 / 步骤 3、shadow root 已挂载；文档页的 TOC
   按钮在「加载 → 客户端导航 → 无目录页 → 回到有目录页」全链路都在，收起/展开与刷新后保持；本地搜索在
   en / zh-Hans 两侧都能返回建议与结果页；console 无错误
-- 5.8 dom-kit 文档并入站点（overview / custom elements / attributes / styling / typed stylesheets），
-  模块内原来的 `ktjs-dom-kit/docs/css-sheet.md` 删除、内容并入 `dom-kit/css-sheet`；顺带补上此前没有的
-  自定义元素基类（`CustomElementAdapter` / `stripBridgesFrom` / `defineIfMissing`）文档
+- 5.8 dom-kit 文档曾并入本站在 `dom-kit/` 分类下（overview / custom elements / attributes / styling /
+  typed stylesheets）；2026-11-13 随模块一起迁到 `ktjs-dom-kit` 仓库的站点，本站只留导航栏那个外链
 
 ## 6. 跨仓库构建约定（5 项：2 完成 / 2 待完成 / 1 保留）
 
@@ -128,7 +128,7 @@ sidebar_position: 1
   仍然有用：以后再遇到 `connectedCallback` 不触发、原型链自递归桥、`@JsName` 改名这几类问题时不必重建
   最小工程。不参与发布与 Dokka。
 
-## 7. 发布（4 项：3 完成 / 1 待完成）
+## 7. 发布（4 项：全部完成）
 
 - 7.1 wrapper 首发到 Maven Central：`release-1`（2026-11-12）发布 `3.10.2-kt.2`
 - 7.2 kit 首发：同一个 release 里发布 `0.1.0`
@@ -138,6 +138,7 @@ sidebar_position: 1
 一致（`-x kotlinStorePackageLock`）；插件的 jar 坐标必须有 `-sources.jar` / `-javadoc.jar`，否则 hub 的
 dry run 直接拒绝整批。
 
-- 7.4 dom-kit 首发 —— **待完成（只差上传）**：`release-2` 已注册 `ktjs-dom-kit` 0.1.0 与
-  `ktjs-dom-kit-js` 0.1.0，hub 的 dry run 打包通过（2 个坐标、44 个文件）。有意不单独占一次
-  deployment，等下一次 hub 勾 `upload=true` 随批上传；注册留在 hub 的 `registry/` 里直到那次上传成功。
+- 7.4 dom-kit 首发 —— **改由它自己的仓库完成**（2026-11-13）：模块搬走后，`release-2` 注册的
+  `ktjs-dom-kit` / `ktjs-dom-kit-js` 0.1.0 从 hub 的 `registry/` 删掉（那份归档来自一个已不再包含该模块
+  的构建），改从 `shijianjs/ktjs-dom-kit` 的 `release-1` 发同一个坐标与版本；本站用
+  `gradle.properties` 的 `ktjs-dom-kit.version` 跟随。

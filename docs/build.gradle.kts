@@ -84,7 +84,7 @@ tasks.register<Test>("e2eTest") {
     group = "verification"
     description = "Runs the Kotlin/JVM Playwright suite against the built Docusaurus site."
     useJUnitPlatform()
-    dependsOn("docusaurusBuild", ":ktjs-dom-kit:kotlinInstallPlaywrightBrowsers")
+    dependsOn("docusaurusBuild", ":ktjs-docusaurus-kit-browser:kotlinInstallPlaywrightBrowsers")
     testClassesDirs = jvmE2eCompilation.output.classesDirs
     classpath = files(jvmE2eCompilation.output.allOutputs, jvmE2eCompilation.runtimeDependencyFiles)
     systemProperty(

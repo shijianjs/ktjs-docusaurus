@@ -59,6 +59,12 @@ internal const val SITE_BASE_URL = "/ktjs-docusaurus/"
 private const val API_URL = "$SITE_URL$SITE_BASE_URL" + "api/"
 
 /**
+ * The DOM helpers this site is built on: a library with its own repository, site and API reference
+ * (`shijianjs/ktjs-dom-kit`). Full URL, because it is not a route of this Docusaurus build.
+ */
+private const val DOM_KIT_URL = "$SITE_URL/ktjs-dom-kit/"
+
+/**
  * The site configuration, imported by the generated `docusaurus.config.mjs`.
  *
  * Everything a `docusaurus.config.ts` can express is a Kotlin value here; the Gradle plugin turns
@@ -165,12 +171,13 @@ fun docusaurusConfig(): Config = unsafeJso {
                     label = "Docs kit"
                     position = NavbarItemPositions.left
                 },
-                // The layer under the kit. It is not published, but it is how every element in this
-                // site is written, so it has a guide of its own instead of a corner of the kit's.
+                // The layer under the kit — the custom-element base class, the attribute delegate and
+                // the typed stylesheets. It has a repository and a site of its own, so this is a jump
+                // out rather than a section here; the URLs are absolute because a relative one would
+                // land under this site's baseUrl.
                 unsafeJso<NavbarItem> {
-                    type = NavbarItemTypes.docSidebar
-                    sidebarId = "domKit"
                     label = "DOM kit"
+                    href = DOM_KIT_URL
                     position = NavbarItemPositions.left
                 },
                 // How this repository is built, as opposed to how a site is built with it. Kept apart
@@ -235,8 +242,8 @@ fun docusaurusConfig(): Config = unsafeJso {
 /**
  * The sidebars, imported by the generated `sidebars.mjs`.
  *
- * Four id-matched sidebars: the user guide, the kit, the DOM kit and this repository's own
- * development notes. The navbar links to all four.
+ * Three id-matched sidebars: the user guide, the kit and this repository's own development notes. The
+ * navbar links to all three; the DOM helpers have a site of their own.
  *
  * Only the categories carry a label here. A doc keeps its own: Docusaurus labels the sidebar entry
  * and the previous/next buttons from the page's `sidebar_label` or its heading, so a translated page
@@ -313,28 +320,6 @@ fun sidebars(): SidebarsConfig = unsafeJso<DocsSidebars> {
                 )
             },
         )
-        domKit = arrayOf<SidebarItem>(
-            unsafeJso {
-                type = SidebarItemTypes.doc
-                id = "dom-kit/overview"
-            },
-            unsafeJso {
-                type = SidebarItemTypes.doc
-                id = "dom-kit/custom-elements"
-            },
-            unsafeJso {
-                type = SidebarItemTypes.doc
-                id = "dom-kit/attributes"
-            },
-            unsafeJso {
-                type = SidebarItemTypes.doc
-                id = "dom-kit/styling"
-            },
-            unsafeJso {
-                type = SidebarItemTypes.doc
-                id = "dom-kit/css-sheet"
-            },
-        )
         development = arrayOf<SidebarItem>(
             unsafeJso {
                 type = SidebarItemTypes.doc
@@ -361,8 +346,6 @@ private external interface DocsSidebars {
     var userGuide: Array<SidebarItem>?
 
     var docsKit: Array<SidebarItem>?
-
-    var domKit: Array<SidebarItem>?
 
     var development: Array<SidebarItem>?
 }

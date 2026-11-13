@@ -86,7 +86,7 @@ override 它。定义标签之前，`defineIfMissing` 会调用 `stripBridgesFro
 | --- | --- | --- |
 | `ktjs-docusaurus-kit` | 是 | Node 安全的辅助（`TocToggle`）+ 作为 klib resource 的 `ktjs-client/ktjs-docusaurus-kit-browser.js` |
 | `ktjs-docusaurus-kit-browser` | 否 | 全部 `<ktjs-…>` 元素（首页分区、目录折叠）及其 shadow |
-| `ktjs-dom-kit` | 否——它有[自己的一类](../dom-kit/overview.md) | `CustomElementAdapter`、`attr` 与 `AttributeCodec`、`defineIfMissing`、`createElement`、`attachShadowRoot`、`attachStyledShadow`、`inlineStyle`、`cssSheet` / `cssText` |
+| `ktjs-dom-kit` | 是，从[它自己的仓库](https://shijianjs.github.io/ktjs-dom-kit/)发布 | `CustomElementAdapter`、`attr` 与 `AttributeCodec`、`defineIfMissing`、`createElement`、`attachShadowRoot`、`attachStyledShadow`、`inlineStyle`、`cssSheet` / `cssText` |
 
 首页 UI 以 **resource** 的形式跟着 kit 走：webpack 产物先落到 `ktjs-client/` 下，再加进 kit 的 `jsMain`
 resources，因此它就在发布出去的 klib 里、和编译产物放在一起。一个依赖、一个版本，bundle 也不会和编译它的

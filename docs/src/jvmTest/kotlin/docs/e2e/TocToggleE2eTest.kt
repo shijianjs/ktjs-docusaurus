@@ -128,7 +128,7 @@ class TocToggleE2eTest {
     /** A long page with headings: the TOC exists there, and the back-to-top button can appear. */
     private fun openDocWithToc(page: Page) {
         page.navigate(
-            DocsServer.homeUrl + "docs/dom-kit/css-sheet/",
+            DocsServer.homeUrl + "docs/kit/home-sections/",
             Page.NavigateOptions().setWaitUntil(WaitUntilState.LOAD),
         )
         // The client module inserts the tag on its first route update; the assertion retries.
