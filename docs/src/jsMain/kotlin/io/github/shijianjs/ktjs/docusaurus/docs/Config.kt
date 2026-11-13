@@ -46,7 +46,17 @@ import kotlin.js.unsafeCast
 
 private const val REPOSITORY = "https://github.com/shijianjs/ktjs-docusaurus"
 
+private const val SITE_URL = "https://shijianjs.github.io"
+
 internal const val SITE_BASE_URL = "/ktjs-docusaurus/"
+
+/**
+ * The API reference: Dokka output that `pagesSite` deploys next to the site, so it is not a route of
+ * this Docusaurus build. The link is a full URL because Docusaurus validates absolute internal paths
+ * against its own routes and would report `/ktjs-docusaurus/api/` as broken; a full URL is treated as
+ * external and left alone.
+ */
+private const val API_URL = "$SITE_URL$SITE_BASE_URL" + "api/"
 
 /**
  * The site configuration, imported by the generated `docusaurus.config.mjs`.
@@ -58,7 +68,7 @@ internal const val SITE_BASE_URL = "/ktjs-docusaurus/"
 fun docusaurusConfig(): Config = unsafeJso {
     title = "ktjs-docusaurus"
     tagline = "Documentation sites as Kotlin/JS projects"
-    url = "https://shijianjs.github.io"
+    url = SITE_URL
     baseUrl = SITE_BASE_URL
     favicon = "img/ktjs-docusaurus-logo.png"
     trailingSlash = true
@@ -175,6 +185,13 @@ fun docusaurusConfig(): Config = unsafeJso {
                     type = NavbarItemTypes.localeDropdown
                     position = NavbarItemPositions.right
                 },
+                // The API reference is the other half of this project's documentation: Dokka output
+                // deployed next to the site by `pagesSite`.
+                unsafeJso<NavbarItem> {
+                    label = "API"
+                    href = API_URL
+                    position = NavbarItemPositions.right
+                },
                 // A plain link has no `type`: Docusaurus validates a missing type as the default
                 // item and rejects an explicit "default" or "link".
                 unsafeJso<NavbarItem> {
@@ -200,6 +217,10 @@ fun docusaurusConfig(): Config = unsafeJso {
             unsafeJso<SimpleFooter> {
                 style = FooterStyles.dark
                 links = arrayOf(
+                    unsafeJso {
+                        label = "API"
+                        href = API_URL
+                    },
                     unsafeJso {
                         label = "GitHub"
                         href = REPOSITORY
