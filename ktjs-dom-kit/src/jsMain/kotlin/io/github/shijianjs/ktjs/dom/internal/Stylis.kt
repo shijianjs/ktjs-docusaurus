@@ -6,7 +6,7 @@ import js.array.ReadonlyArray
 import kotlin.js.JsAny
 
 /**
- * The half of stylis [io.github.shijianjs.ktjs.dom.style.cssSheet] calls, declared as-is.
+ * The half of stylis [io.github.shijianjs.ktjs.dom.css.cssSheet] calls, declared as-is.
  *
  * stylis 4 is a parser plus a middleware chain, not the `compile(selector)` of stylis 3: `compile`
  * turns CSS text into an element tree, `serialize` walks it, and `middleware([stringify])` prints the

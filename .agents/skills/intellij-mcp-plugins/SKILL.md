@@ -87,10 +87,10 @@ python scripts/mcp_client.py --url http://127.0.0.1:64342/stream \
 python scripts/hierarchy.py ktjs-dom-kit/src/jsMain/kotlin/Store.kt 42 7 --project S:/repo
 
 # 全限定名（Kotlin 也走 className，不要加 language）
-python scripts/hierarchy.py --class io.github.shijianjs.ktjs.dom.element.CustomElementAdapter --project S:/repo
+python scripts/hierarchy.py --class io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter --project S:/repo
 
 # 只看一层：直接父类型 + 直接子类型
-python scripts/hierarchy.py --class io.github.shijianjs.ktjs.dom.element.CustomElementAdapter --up 1 --down 1
+python scripts/hierarchy.py --class io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter --up 1 --down 1
 ```
 
 - `--up 0` / `--down 0` 关掉某个方向；`--scope` 默认 `project_and_libraries`，可选
@@ -101,7 +101,7 @@ python scripts/hierarchy.py --class io.github.shijianjs.ktjs.dom.element.CustomE
 输出示例（`--up 3 --down 1`，实测节选）：
 
 ```text
-io.github.shijianjs.ktjs.dom.element.CustomElementAdapter  (ktjs-dom-kit/src/jsMain/kotlin/…/CustomElementAdapter.kt)  [Kotlin CLASS]
+io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter  (ktjs-dom-kit/src/jsMain/kotlin/…/CustomElementAdapter.kt)  [Kotlin CLASS]
 
 UP (supertypes):
   web.html.HTMLElement  @ kotlin-browser-js:2026.11.0/kotlin-browser-js-2026.11.0.klib!/default/linkdata/package_web.html/027_html.knm

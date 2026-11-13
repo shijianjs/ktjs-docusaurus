@@ -70,7 +70,7 @@ cssSheet { cardClass { … } }
 坑：`ClassName("card") { … }` **编译不过**——会被解析成「调用工厂 + 尾随 lambda 当第二个实参」。一次性用
 可以加括号 `(ClassName("card")) { … }`；要复用就存成 `val` 再 `cardClass { … }`。
 
-伪类、伪元素用本模块自建的 `css/Pseudos.kt`：它列全 `csstype.SimplePseudosRuleBuilder` 的 64 个选择器，
+伪类、伪元素用本模块自建的 `css/dsl/Pseudos.kt`：它列全 `csstype.SimplePseudosRuleBuilder` 的 64 个选择器，
 每个都带 `&`：
 
 ```kotlin
@@ -82,7 +82,7 @@ many(Pseudos.hover, Pseudos.focusVisible)             // 也可直接拼成一�
 
 短写法来自 `context(builder: RuleBuilder<T>) operator fun Pseudo.invoke(…)`：context 参数自动取
 `cssSheet { … }` 作用域里的 `PropertiesBuilder`（Kotlin 2.2+ context parameters，本仓库 2.4 无需开关），
-调用点需要 `import io.github.shijianjs.ktjs.dom.css.invoke`。和官方糖的差别是两点：我们带 `&`、能组合。
+调用点需要 `import io.github.shijianjs.ktjs.dom.css.dsl.invoke`。和官方糖的差别是两点：我们带 `&`、能组合。
 `many(…)` 的结果也是 `Pseudo`，可以直接 `(many(Pseudos.hover, Pseudos.focusVisible)) { … }`——括号不能省
 （`many` 是 `vararg`，不加括号尾随 lambda 会被当成 vararg 实参），所以组合态更推荐 `pseudos(…)`。
 显式的 `pseudo(value) { … }` 仍在，适合拿到一个 `Pseudo` 变量时用。
@@ -150,11 +150,11 @@ cssom 没有应用级属性名的常量，字符串在这里出现一次；具�
 | --- | --- | --- |
 | `radial-gradient(…)` | `css/Gradients.kt` | `radialGradient(RadialGradientShape.Circle, colorStop(glow), stop(Color.transparent, 70.pct))` |
 | 无位置的颜色停靠点 | `css/Gradients.kt` | `colorStop(color)`——cssom 的 `stop` 总要带位置 |
-| `-webkit-background-clip`（属性 + 名字） | `css/VendorProperties.kt` | `webkitBackgroundClip(BackgroundClip.text)`、`webkitBackgroundClipName` 给 supports 条件用 |
+| `-webkit-background-clip`（属性 + 名字） | `css/dsl/VendorProperties.kt` | `webkitBackgroundClip(BackgroundClip.text)`、`webkitBackgroundClipName` 给 supports 条件用 |
 | `pointer-events: none` | `css/Values.kt` | `pointerEventsNone`（`PointerEvents` 生成出来只有 SVG 那批值） |
 | `@supports` 条件类型 | `css/Supports.kt` | `SupportsQuery` + `supportsDeclaration(PropertyName<T>, T)` + `and/or/not`，照 `web.cssom.MediaQuery` 的形态 |
-| `@supports` 块（唯一缺的 at-rule helper） | `css/AtRules.kt` | `supports(query) { … }`，关键字取 `AtRules.supports` |
-| 伪类/伪元素常量 + 组合态 | `css/Pseudos.kt` | `Pseudos.hover` / `pseudo(…)` / `pseudos(…)`（64 个常量） |
+| `@supports` 块（唯一缺的 at-rule helper） | `css/dsl/AtRules.kt` | `supports(query) { … }`，关键字取 `AtRules.supports` |
+| 伪类/伪元素常量 + 组合态 | `css/dsl/Pseudos.kt` | `Pseudos.hover` / `pseudo(…)` / `pseudos(…)`（64 个常量） |
 
 补的规矩：**值仍然类型化**（枚举、工具类型、`Length`），只有「属性名」这种没法类型化的东西才写成字符串；
 一个缺口一个函数或常量，不要提供 `putRaw(name, value)` 这类通用逃生口——那等于把字符串又请回来。
@@ -178,7 +178,7 @@ hover {}      -> .probe-sugar :hover{…}     ← 不是 .probe-sugar:hover
 
 **但不必等它修**：这个糖是「一个方法一个伪类」，就算补上 `&` 也写不出
 `"&:hover, &:focus-visible"` 这种「多个状态共用一个块」的形式（本站的 `KtjsStep`、`KtjsAction` 都要）。
-所以 `css/Pseudos.kt` 自建一层，形态照 `web.dom.TagName` + `web.html.HtmlTagName`：
+所以 `css/dsl/Pseudos.kt` 自建一层，形态照 `web.dom.TagName` + `web.html.HtmlTagName`：
 
 - `external interface Pseudo` + `Pseudo(value)` 工厂；
 - `object Pseudos` 列全 `SimplePseudosRuleBuilder` 的 64 个字符串，每个带 `&`（`Pseudos.hover` = `"&:hover"`）；

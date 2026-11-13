@@ -1,4 +1,6 @@
-package io.github.shijianjs.ktjs.dom.attribute
+package io.github.shijianjs.ktjs.dom.attribute.types
+
+import io.github.shijianjs.ktjs.dom.attribute.AttributeCodec
 
 /** Whole number; anything `toIntOrNull` rejects falls back to the delegate's `default` (or `0`). */
 object IntAttributeCodec : AttributeCodec<Int> {

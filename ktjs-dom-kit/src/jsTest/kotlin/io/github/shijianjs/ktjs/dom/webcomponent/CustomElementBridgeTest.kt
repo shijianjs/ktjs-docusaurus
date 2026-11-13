@@ -1,4 +1,4 @@
-package io.github.shijianjs.ktjs.dom.element
+package io.github.shijianjs.ktjs.dom.webcomponent
 
 import io.github.shijianjs.ktjs.dom.attribute.newProbe
 import kotlin.test.Test

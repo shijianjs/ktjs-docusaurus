@@ -1,16 +1,16 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
 import io.github.shijianjs.ktjs.dom.attribute.AttributeCodec
-import io.github.shijianjs.ktjs.dom.element.CustomElementAdapter
-import io.github.shijianjs.ktjs.dom.style.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.attribute.attr
-import io.github.shijianjs.ktjs.dom.createElement
-import io.github.shijianjs.ktjs.dom.css.Pseudos
-import io.github.shijianjs.ktjs.dom.css.pseudo
-import io.github.shijianjs.ktjs.dom.css.pseudos
-import io.github.shijianjs.ktjs.dom.style.cssSheet
-import io.github.shijianjs.ktjs.dom.attribute.enumAttributeCodec
-import io.github.shijianjs.ktjs.dom.style.inlineStyle
+import io.github.shijianjs.ktjs.dom.element.createElement
+import io.github.shijianjs.ktjs.dom.css.dsl.Pseudos
+import io.github.shijianjs.ktjs.dom.css.dsl.pseudo
+import io.github.shijianjs.ktjs.dom.css.dsl.pseudos
+import io.github.shijianjs.ktjs.dom.css.cssSheet
+import io.github.shijianjs.ktjs.dom.attribute.types.enumAttributeCodec
+import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import kotlin.js.JsName

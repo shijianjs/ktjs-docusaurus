@@ -1,4 +1,6 @@
-package io.github.shijianjs.ktjs.dom.attribute
+package io.github.shijianjs.ktjs.dom.attribute.types
+
+import io.github.shijianjs.ktjs.dom.attribute.AttributeCodec
 
 /** Floating point number; anything `toDoubleOrNull` rejects falls back to the default (or `0.0`). */
 object DoubleAttributeCodec : AttributeCodec<Double> {

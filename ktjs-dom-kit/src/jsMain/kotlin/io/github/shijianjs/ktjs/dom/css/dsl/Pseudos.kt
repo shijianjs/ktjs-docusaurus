@@ -1,4 +1,4 @@
-package io.github.shijianjs.ktjs.dom.css
+package io.github.shijianjs.ktjs.dom.css.dsl
 
 import csstype.RuleBuilder
 import js.reflect.unsafeCast

@@ -24,16 +24,15 @@ sidebar_position: 1
 
 ## 里面有什么
 
-模块按关注点分包：一件事一个包，一个声明一个文件（编解码器、委托与它的 provider、桥的删除），所以没有
-哪个文件是杂物间。
+模块按关注点分包：一件事一个包；只要一个包里存在明确的父子级或一对多关系，就再下沉一层子包（一个类型与
+它的各种实现、一张样式表与写它时用的语法糖）；一个声明一个文件，没有哪个文件是杂物间。
 
 | 包 | 提供 |
 | --- | --- |
-| `element/` | `CustomElementAdapter`——按原生名字声明生命周期钩子、承载 `attr` 委托的基类；`defineIfMissing`；以及 [`stripBridgesFrom`](./custom-elements.md)（删掉编译器生成的桥） |
-| `attribute/` | `attr` 属性委托：`AttributeCodec` 与内建实现（`String` / `Boolean` / `Int` / `Double` / `enumAttributeCodec`）、`AttributeChange`、委托与它的 provider，以及属性名规则 |
-| `style/` | `HTMLElement.inlineStyle`（元素自己的样式，`csstype.Properties` 视图）、`cssSheet { … }` / `cssText { … }`、`attachShadowRoot` / `attachStyledShadow` |
-| `DomExtensions.kt` | `TagName<T>.createElement { … }` |
-| `css/` | cssom 没建模的部分，用类型化的值补齐：`Pseudos`、`SupportsQuery`、`radialGradient`、`webkitBackgroundClip`…… |
+| `element/` | 通用元素辅助：`TagName<T>.createElement { … }`，以及 `HTMLElement.inlineStyle`（元素自己的样式，`csstype.Properties` 视图） |
+| `webcomponent/` | 自定义元素的构成：`CustomElementAdapter`（按原生名字声明生命周期钩子、承载 `attr` 委托）、`defineIfMissing`、[`stripBridgesFrom`](./custom-elements.md)，以及 `attachShadowRoot` / `attachStyledShadow` |
+| `attribute/` | `attr` 属性委托：`attr`、`AttributeChange`、它背后的 provider 与 delegate，以及属性名规则；`attribute/types/` 放编解码器——委托认识的每种类型一个，外加 `enumAttributeCodec` |
+| `css/` | `cssSheet { … }` / `cssText { … }`，以及 cssom 没建模的类型化值（`RadialGradientShape`、`radialGradient`、`pointerEventsNone`、`SupportsQuery`……）；`css/dsl/` 放写样式表时用的语法糖：`Pseudos` / `pseudo` / `pseudos`、at-rule `supports { … }` 与 `webkitBackgroundClip` |
 | `loadjs/` | [`loadjs`](https://github.com/kubetail-org/loadjs) 加载器的封装：四种调用形态各按分支写成一个重载、路径前缀（`css!`、`img!`、`module!`、`nomodule!`）与 bundle 注册表（`ready` / `done` / `reset` / `isDefined`） |
 
 ## 它不做什么

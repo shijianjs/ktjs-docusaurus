@@ -1,4 +1,6 @@
-package io.github.shijianjs.ktjs.dom.attribute
+package io.github.shijianjs.ktjs.dom.attribute.types
+
+import io.github.shijianjs.ktjs.dom.attribute.AttributeCodec
 
 /**
  * Plain string value: the attribute is read and written verbatim.

@@ -30,16 +30,16 @@ private plumbing.
 
 ## What is in it
 
-The module is split by concern: one package per job, and a declaration gets a file of its own (the
-codecs, the delegate and its provider, the bridge removal), so no file is a catch-all.
+The module is split by concern: a package per job, a subpackage wherever a package has an obvious
+parent–child or one-to-many relation (a type and the implementations of it, a sheet and the sugar
+written inside it), and a file per declaration — nothing here is a catch-all.
 
 | Package | Provides |
 | --- | --- |
-| `element/` | `CustomElementAdapter` — the base class, with the lifecycle hooks under their native names and the `attr` delegate host; `defineIfMissing`; and [`stripBridgesFrom`](./custom-elements.md), which deletes the compiler-generated bridges |
-| `attribute/` | the `attr` property delegate: `AttributeCodec` and the built-ins (`String` / `Boolean` / `Int` / `Double` / `enumAttributeCodec`), `AttributeChange`, the delegate and its provider, and the property-name rule |
-| `style/` | `HTMLElement.inlineStyle` — the element's own style seen as `csstype.Properties` — plus `cssSheet { … }` / `cssText { … }` and `attachShadowRoot` / `attachStyledShadow` |
-| `DomExtensions.kt` | `TagName<T>.createElement { … }` |
-| `css/` | what cssom does not model, filled in with typed values: `Pseudos`, `SupportsQuery`, `radialGradient`, `webkitBackgroundClip`, … |
+| `element/` | the generic element helpers: `TagName<T>.createElement { … }`, and `HTMLElement.inlineStyle`, the element's own style seen as `csstype.Properties` |
+| `webcomponent/` | what a custom element is built from: `CustomElementAdapter` (the lifecycle hooks under their native names, the `attr` delegate host), `defineIfMissing`, [`stripBridgesFrom`](./custom-elements.md), and `attachShadowRoot` / `attachStyledShadow` |
+| `attribute/` | the `attr` property delegate: `attr`, `AttributeChange`, the provider and the delegate behind it, and the property-name rule; `attribute/types/` holds the codecs — one per type the delegate knows, plus `enumAttributeCodec` |
+| `css/` | `cssSheet { … }` / `cssText { … }`, and the typed values cssom does not model (`RadialGradientShape`, `radialGradient`, `pointerEventsNone`, `SupportsQuery`, …); `css/dsl/` holds the sugar written inside a sheet — `Pseudos` / `pseudo` / `pseudos`, the `supports { … }` at-rule and `webkitBackgroundClip` |
 | `loadjs/` | a wrapper for the [`loadjs`](https://github.com/kubetail-org/loadjs) loader: its four call shapes as overloads, the path prefixes (`css!`, `img!`, `module!`, `nomodule!`), and the bundle registry (`ready` / `done` / `reset` / `isDefined`) |
 
 ## What it does not do

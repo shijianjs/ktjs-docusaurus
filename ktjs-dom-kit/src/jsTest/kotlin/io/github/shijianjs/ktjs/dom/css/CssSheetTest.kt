@@ -1,22 +1,22 @@
-package io.github.shijianjs.ktjs.dom.style
+package io.github.shijianjs.ktjs.dom.css
 
 import csstype.fallback
-import io.github.shijianjs.ktjs.dom.css.Pseudo
-import io.github.shijianjs.ktjs.dom.css.Pseudos
+import io.github.shijianjs.ktjs.dom.css.dsl.Pseudo
+import io.github.shijianjs.ktjs.dom.css.dsl.Pseudos
 import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
-import io.github.shijianjs.ktjs.dom.css.pseudo
-import io.github.shijianjs.ktjs.dom.css.pseudos
+import io.github.shijianjs.ktjs.dom.css.dsl.pseudo
+import io.github.shijianjs.ktjs.dom.css.dsl.pseudos
 import io.github.shijianjs.ktjs.dom.css.colorStop
 import io.github.shijianjs.ktjs.dom.css.pointerEventsNone
 import io.github.shijianjs.ktjs.dom.css.and as supportsAnd
-import io.github.shijianjs.ktjs.dom.css.invoke
+import io.github.shijianjs.ktjs.dom.css.dsl.invoke
 import io.github.shijianjs.ktjs.dom.css.not as supportsNot
 import io.github.shijianjs.ktjs.dom.css.or as supportsOr
 import io.github.shijianjs.ktjs.dom.css.radialGradient
-import io.github.shijianjs.ktjs.dom.css.supports
+import io.github.shijianjs.ktjs.dom.css.dsl.supports
 import io.github.shijianjs.ktjs.dom.css.supportsDeclaration
-import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClip
-import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClipName
+import io.github.shijianjs.ktjs.dom.css.dsl.webkitBackgroundClip
+import io.github.shijianjs.ktjs.dom.css.dsl.webkitBackgroundClipName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

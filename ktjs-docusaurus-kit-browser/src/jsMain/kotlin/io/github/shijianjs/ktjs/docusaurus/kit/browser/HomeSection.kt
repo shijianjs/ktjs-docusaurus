@@ -1,7 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.createElement
-import io.github.shijianjs.ktjs.dom.style.inlineStyle
+import io.github.shijianjs.ktjs.dom.element.createElement
+import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import js.reflect.unsafeCast
 import web.cssom.Auto
 import web.cssom.GridTemplateTracks

@@ -1,5 +1,6 @@
-package io.github.shijianjs.ktjs.dom.style
+package io.github.shijianjs.ktjs.dom.element
 
+import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import csstype.Properties
 import js.reflect.unsafeCast
 import web.html.HTMLElement

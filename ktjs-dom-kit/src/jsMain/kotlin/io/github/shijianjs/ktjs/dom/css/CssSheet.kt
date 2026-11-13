@@ -1,5 +1,6 @@
-package io.github.shijianjs.ktjs.dom.style
+package io.github.shijianjs.ktjs.dom.css
 
+import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import csstype.PropertiesBuilder
 import io.github.shijianjs.ktjs.dom.internal.compile
 import io.github.shijianjs.ktjs.dom.internal.middleware
@@ -38,9 +39,9 @@ import web.cssom.CSSStyleSheet
  * "Typed stylesheets" page (`docs/src/jsMain/resources/docs/dom-kit/css-sheet.md`).
  *
  * The top level is a map of **selectors** (`ClassName`, `":host"`); state variants are written with
- * `pseudo` / `pseudos` (see `css/Pseudos.kt`), and at-rules come from
+ * `pseudo` / `pseudos` (see `css/dsl/Pseudos.kt`), and at-rules come from
  * the wrappers' own helpers — `` `@media`(MediaType.screen and maxWidth(576.px)) `` and
- * [supports][io.github.shijianjs.ktjs.dom.css.supports] — rather than a hand-written `"@media …"` key.
+ * [supports][io.github.shijianjs.ktjs.dom.css.dsl.supports] — rather than a hand-written `"@media …"` key.
  * A rules object that carries only declarations is not a sheet. One sheet per component class,
  * adopted by every instance through [attachStyledShadow] — never one per instance.
  */

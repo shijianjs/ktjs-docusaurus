@@ -3,8 +3,8 @@ package io.github.shijianjs.ktjs.dom.attribute
 /**
  * Converts between a delegated property's Kotlin value and the attribute's string form.
  *
- * The built-ins are [StringAttributeCodec], [BooleanAttributeCodec], [IntAttributeCodec],
- * [DoubleAttributeCodec] and [enumAttributeCodec]; everything else (JSON, a timestamp, a parsed
+ * The built-ins are `StringAttributeCodec`, `BooleanAttributeCodec`, `IntAttributeCodec`,
+ * `DoubleAttributeCodec` and `enumAttributeCodec`; everything else (JSON, a timestamp, a parsed
  * record) is an implementation of this interface. No serialization library is involved.
  */
 interface AttributeCodec<T> {

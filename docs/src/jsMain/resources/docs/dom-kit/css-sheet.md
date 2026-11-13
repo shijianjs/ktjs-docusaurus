@@ -80,7 +80,7 @@ Trap: `ClassName("card") { … }` **does not compile** — Kotlin reads it as "c
 trailing lambda as a second argument". Use parentheses for a one-off (`(ClassName("card")) { … }`),
 or store it in a `val` and call `cardClass { … }`.
 
-Pseudo-classes and pseudo-elements come from the module's own `css/Pseudos.kt`, which lists all 64 of
+Pseudo-classes and pseudo-elements come from the module's own `css/dsl/Pseudos.kt`, which lists all 64 of
 `csstype.SimplePseudosRuleBuilder`'s selectors, each carrying `&`:
 
 ```kotlin
@@ -93,7 +93,7 @@ many(Pseudos.hover, Pseudos.focusVisible)             // a combined Pseudo, too
 The short form comes from `context(builder: RuleBuilder<T>) operator fun Pseudo.invoke(…)`: the
 context parameter picks up the `PropertiesBuilder` of the enclosing `cssSheet { … }` (Kotlin 2.2+
 context parameters; this repository is on 2.4 and needs no flag), and the call site imports
-`io.github.shijianjs.ktjs.dom.css.invoke`. It differs from the official sugar in the two ways that
+`io.github.shijianjs.ktjs.dom.css.dsl.invoke`. It differs from the official sugar in the two ways that
 matter: it carries `&`, and it can combine. `many(…)` also produces a `Pseudo`, so
 `(many(Pseudos.hover, Pseudos.focusVisible)) { … }` works — the parentheses are required (`many` is
 `vararg`, and a trailing lambda would be taken as another argument), which is why `pseudos(…)` is the
@@ -168,11 +168,11 @@ into the call sites. Add the missing piece to this module's `css` package in the
 | --- | --- | --- |
 | `radial-gradient(…)` | `css/Gradients.kt` | `radialGradient(RadialGradientShape.Circle, colorStop(glow), stop(Color.transparent, 70.pct))` |
 | a colour stop with no position | `css/Gradients.kt` | `colorStop(color)` — cssom's `stop` always takes a position |
-| `-webkit-background-clip` (property and name) | `css/VendorProperties.kt` | `webkitBackgroundClip(BackgroundClip.text)`, and `webkitBackgroundClipName` for the `@supports` condition |
+| `-webkit-background-clip` (property and name) | `css/dsl/VendorProperties.kt` | `webkitBackgroundClip(BackgroundClip.text)`, and `webkitBackgroundClipName` for the `@supports` condition |
 | `pointer-events: none` | `css/Values.kt` | `pointerEventsNone` (the generated `PointerEvents` lists only the SVG values) |
 | typed `@supports` conditions | `css/Supports.kt` | `SupportsQuery` + `supportsDeclaration(PropertyName<T>, T)` + `and`/`or`/`not`, modelled after `web.cssom.MediaQuery` |
-| an `@supports` block (the only at-rule helper that was missing) | `css/AtRules.kt` | `supports(query) { … }`, with the keyword from `AtRules.supports` |
-| pseudo-class / pseudo-element constants and combined states | `css/Pseudos.kt` | `Pseudos.hover` / `pseudo(…)` / `pseudos(…)` (64 constants) |
+| an `@supports` block (the only at-rule helper that was missing) | `css/dsl/AtRules.kt` | `supports(query) { … }`, with the keyword from `AtRules.supports` |
+| pseudo-class / pseudo-element constants and combined states | `css/dsl/Pseudos.kt` | `Pseudos.hover` / `pseudo(…)` / `pseudos(…)` (64 constants) |
 
 The rule for the additions: **values stay typed** (enums, utility types, `Length`); only the things
 that cannot be typed — a property name — stay strings. One gap, one function or constant. Do not add
@@ -197,7 +197,7 @@ as [kotlin-wrappers#2933](https://github.com/JetBrains/kotlin-wrappers/issues/29
 
 **There is no reason to wait for it.** That sugar is one method per pseudo-class, so even with `&` it
 could not express `"&:hover, &:focus-visible"` — one block shared by several states, which the
-elements in this repository need. So `css/Pseudos.kt` builds its own layer, shaped after
+elements in this repository need. So `css/dsl/Pseudos.kt` builds its own layer, shaped after
 `web.dom.TagName` + `web.html.HtmlTagName`:
 
 - `external interface Pseudo` + a `Pseudo(value)` factory;

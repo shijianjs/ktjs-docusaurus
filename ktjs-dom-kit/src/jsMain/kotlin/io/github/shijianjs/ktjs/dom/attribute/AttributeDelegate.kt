@@ -1,6 +1,6 @@
 package io.github.shijianjs.ktjs.dom.attribute
 
-import io.github.shijianjs.ktjs.dom.element.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 

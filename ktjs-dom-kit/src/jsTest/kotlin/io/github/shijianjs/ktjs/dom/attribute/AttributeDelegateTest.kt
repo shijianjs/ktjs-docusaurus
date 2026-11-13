@@ -1,6 +1,6 @@
 package io.github.shijianjs.ktjs.dom.attribute
 
-import io.github.shijianjs.ktjs.dom.element.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import js.reflect.unsafeCast
 import kotlin.js.Promise
 import kotlin.test.Test

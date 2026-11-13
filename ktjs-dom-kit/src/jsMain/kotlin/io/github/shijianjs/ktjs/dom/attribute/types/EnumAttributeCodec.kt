@@ -1,4 +1,6 @@
-package io.github.shijianjs.ktjs.dom.attribute
+package io.github.shijianjs.ktjs.dom.attribute.types
+
+import io.github.shijianjs.ktjs.dom.attribute.AttributeCodec
 
 /**
  * Enum attribute, matched against [label] ignoring case.

@@ -1,6 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.element.defineIfMissing
+import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
 import io.github.shijianjs.ktjs.iconify.registerIconifyIcon
 import js.reflect.unsafeCast
 import kotlin.js.JsExport

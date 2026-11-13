@@ -1,6 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.style.cssSheet
+import io.github.shijianjs.ktjs.dom.css.cssSheet
 import web.cssom.BoxSizing
 import web.cssom.CSSStyleSheet
 import web.cssom.Display

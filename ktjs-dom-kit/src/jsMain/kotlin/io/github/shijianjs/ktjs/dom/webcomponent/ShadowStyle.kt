@@ -1,5 +1,6 @@
-package io.github.shijianjs.ktjs.dom.style
+package io.github.shijianjs.ktjs.dom.webcomponent
 
+import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import js.array.jsArrayOf
 import web.components.ShadowRoot
 import web.components.ShadowRootInit

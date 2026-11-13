@@ -1,4 +1,6 @@
-package io.github.shijianjs.ktjs.dom.attribute
+package io.github.shijianjs.ktjs.dom.attribute.types
+
+import io.github.shijianjs.ktjs.dom.attribute.AttributeCodec
 
 /**
  * HTML boolean attribute: presence means `true`, whatever the value says.

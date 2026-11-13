@@ -1,4 +1,4 @@
-package io.github.shijianjs.ktjs.dom.element
+package io.github.shijianjs.ktjs.dom.webcomponent
 
 import kotlin.js.js
 

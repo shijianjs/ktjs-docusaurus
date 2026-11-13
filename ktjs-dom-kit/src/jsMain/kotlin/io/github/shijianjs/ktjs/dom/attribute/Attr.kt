@@ -1,6 +1,10 @@
 package io.github.shijianjs.ktjs.dom.attribute
 
-import io.github.shijianjs.ktjs.dom.element.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.attribute.types.BooleanAttributeCodec
+import io.github.shijianjs.ktjs.dom.attribute.types.DoubleAttributeCodec
+import io.github.shijianjs.ktjs.dom.attribute.types.IntAttributeCodec
+import io.github.shijianjs.ktjs.dom.attribute.types.StringAttributeCodec
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import js.reflect.unsafeCast
 
 /**
@@ -25,8 +29,8 @@ import js.reflect.unsafeCast
  *   `@JsName("titleText")` makes it emit real `get` / `set` accessors, so that
  *   `element.titleText = "x"` works from the page. Kotlin callers do not need it.
  * - **Values are converted by [codec]**, which defaults to the built-in one for [T]
- *   ([StringAttributeCodec], [BooleanAttributeCodec], [IntAttributeCodec], [DoubleAttributeCodec]).
- *   Pass a codec for any other type; see [enumAttributeCodec].
+ *   (`StringAttributeCodec`, `BooleanAttributeCodec`, `IntAttributeCodec`, `DoubleAttributeCodec`).
+ *   Pass a codec for any other type; see `enumAttributeCodec`.
  * - **A string assigned from JavaScript is the attribute's raw value.** The property is also the
  *   element's JS-facing API, and a JS caller only has the value it was given: React 19 assigns every
  *   matching JSX prop to the property, so `<ktjs-action kind="secondary">` becomes

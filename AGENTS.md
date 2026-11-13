@@ -166,7 +166,7 @@ duckfn 站点一致。
    - `ktjs-dom-kit`：通用 DOM 基类（`CustomElementAdapter`）、挂 shadow root 的 `attachShadowRoot` /
      `attachStyledShadow(vararg CSSStyleSheet)`，以及 `HTMLElement.inlineStyle`（`csstype.Properties`
      视图）、`loadjs` 加载器的封装（`dom.loadjs` 包：四种调用形态写成 `invoke` 扩展重载 + bundle
-     注册表），与 Docusaurus 无关。包按关注点分：`dom.element`（`CustomElementAdapter` / `defineIfMissing` / `stripBridgesFrom`）、`dom.attribute`（`attr` 委托、编解码器与命名规则，一个声明一个文件）、`dom.style`（`inlineStyle` / `cssSheet` / `attachStyledShadow`），根包只留 `createElement`，此外还有 `dom.css` 与 `dom.loadjs` 两个子包。模块名不以 `ktjs-docusaurus` 开头：它不跟随任何 npm 包，版本是它自己的
+     注册表），与 Docusaurus 无关。包按关注点分：`dom.element`（通用元素辅助：`createElement`、`inlineStyle`）、`dom.webcomponent`（自定义元素：`CustomElementAdapter` / `defineIfMissing` / `stripBridgesFrom` / `attachShadowRoot` / `attachStyledShadow`）、`dom.attribute`（`attr` 委托与命名规则，编解码器在 `dom.attribute.types`）、`dom.css`（`cssSheet` 与 cssom 缺口的类型化补齐，写样式表的语法糖在 `dom.css.dsl`）、`dom.loadjs`；只要存在父子级/一对多关系就下沉一层子包，且一个声明一个文件。模块名不以 `ktjs-docusaurus` 开头：它不跟随任何 npm 包，版本是它自己的
      语义版本 `0.1.0`（与 kit 一样带 `-SNAPSHOT`）。它**照样发布、也进 Dokka**——根构建用
      `extraPublishedModules` 显式列出它，发布、Dokka 与 `printPublishedVersions` 共用 `isPublished()`
      这一个判断，加模块时只要名字不带前缀就得在那份名单里补一行。元素包用 `implementation` 依赖它，产物
