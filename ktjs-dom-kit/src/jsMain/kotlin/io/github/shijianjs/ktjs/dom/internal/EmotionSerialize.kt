@@ -6,7 +6,7 @@ import js.array.ReadonlyArray
 import kotlin.js.JsAny
 
 /**
- * The corner of `@emotion/serialize` [io.github.shijianjs.ktjs.dom.cssSheet] needs, declared as-is —
+ * The corner of `@emotion/serialize` [io.github.shijianjs.ktjs.dom.style.cssSheet] needs, declared as-is —
  * a rules object in, declaration text out. The package exports more; nothing else is called.
  *
  * `serializeStyles` takes the **argument list as an array**, the way emotion's `css` tagged template

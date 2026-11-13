@@ -1,12 +1,12 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.CustomElementAdapter
-import io.github.shijianjs.ktjs.dom.attachStyledShadow
-import io.github.shijianjs.ktjs.dom.attr
+import io.github.shijianjs.ktjs.dom.element.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.style.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.attribute.attr
 import io.github.shijianjs.ktjs.dom.css.Pseudos
 import io.github.shijianjs.ktjs.dom.css.invoke
 import io.github.shijianjs.ktjs.dom.css.pseudos
-import io.github.shijianjs.ktjs.dom.cssSheet
+import io.github.shijianjs.ktjs.dom.style.cssSheet
 import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
 import io.github.shijianjs.ktjs.dom.css.colorStop
 import io.github.shijianjs.ktjs.dom.css.radialGradient
@@ -17,7 +17,7 @@ import io.github.shijianjs.ktjs.dom.css.supportsDeclaration
 import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClipName
 import io.github.shijianjs.ktjs.dom.css.webkitBackgroundClip
 import io.github.shijianjs.ktjs.dom.createElement
-import io.github.shijianjs.ktjs.dom.inlineStyle
+import io.github.shijianjs.ktjs.dom.style.inlineStyle
 import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.components.HTMLSlotElement

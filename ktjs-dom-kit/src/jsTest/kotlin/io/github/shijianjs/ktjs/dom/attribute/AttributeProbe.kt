@@ -1,5 +1,8 @@
-package io.github.shijianjs.ktjs.dom
+package io.github.shijianjs.ktjs.dom.attribute
 
+import io.github.shijianjs.ktjs.dom.createElement
+import io.github.shijianjs.ktjs.dom.element.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.element.defineIfMissing
 import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.dom.TagName

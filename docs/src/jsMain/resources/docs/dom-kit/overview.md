@@ -30,18 +30,17 @@ private plumbing.
 
 ## What is in it
 
-| File | Provides |
+The module is split by concern: one package per job, and a declaration gets a file of its own (the
+codecs, the delegate and its provider, the bridge removal), so no file is a catch-all.
+
+| Package | Provides |
 | --- | --- |
-| `CustomElementAdapter.kt` | the base class: lifecycle hooks under their native names, the `attr` delegate host, and [`stripBridgesFrom`](./custom-elements.md) |
-| `CustomElementDefinition.kt` | `defineIfMissing` — defining a tag after cleaning the class's prototype chain |
-| `Attributes.kt` | the `attr` property delegate, `AttributeCodec`, `AttributeChange` |
-| `AttributeCodecs.kt` | the `String` / `Boolean` / `Int` / `Double` codecs and `enumAttributeCodec` |
-| `ShadowStyles.kt` | `attachShadowRoot` and `attachStyledShadow` |
-| `InlineStyles.kt` | `HTMLElement.inlineStyle`, the element's own style seen as `csstype.Properties` |
+| `element/` | `CustomElementAdapter` — the base class, with the lifecycle hooks under their native names and the `attr` delegate host; `defineIfMissing`; and [`stripBridgesFrom`](./custom-elements.md), which deletes the compiler-generated bridges |
+| `attribute/` | the `attr` property delegate: `AttributeCodec` and the built-ins (`String` / `Boolean` / `Int` / `Double` / `enumAttributeCodec`), `AttributeChange`, the delegate and its provider, and the property-name rule |
+| `style/` | `HTMLElement.inlineStyle` — the element's own style seen as `csstype.Properties` — plus `cssSheet { … }` / `cssText { … }` and `attachShadowRoot` / `attachStyledShadow` |
 | `DomExtensions.kt` | `TagName<T>.createElement { … }` |
-| `loadjs/` | a wrapper for the [`loadjs`](https://github.com/kubetail-org/loadjs) loader: its four call shapes as overloads, the path prefixes (`css!`, `img!`, `module!`, `nomodule!`), and the bundle registry (`ready` / `done` / `reset` / `isDefined`) |
-| `CssSheet.kt` | `cssSheet { … }` and `cssText { … }` |
 | `css/` | what cssom does not model, filled in with typed values: `Pseudos`, `SupportsQuery`, `radialGradient`, `webkitBackgroundClip`, … |
+| `loadjs/` | a wrapper for the [`loadjs`](https://github.com/kubetail-org/loadjs) loader: its four call shapes as overloads, the path prefixes (`css!`, `img!`, `module!`, `nomodule!`), and the bundle registry (`ready` / `done` / `reset` / `isDefined`) |
 
 ## What it does not do
 

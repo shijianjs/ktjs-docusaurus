@@ -1,4 +1,4 @@
-package io.github.shijianjs.ktjs.dom
+package io.github.shijianjs.ktjs.dom.style
 
 import csstype.PropertiesBuilder
 import io.github.shijianjs.ktjs.dom.internal.compile
@@ -31,7 +31,7 @@ import web.cssom.CSSStyleSheet
  * }
  * ```
  *
- * Serialization is the two packages emotion's cache uses (`@emotion/serialize` + `stylis`), so the
+ * Serialization is the two packages emotion's cache uses (`@emotion/serialize` + stylis), so the
  * sheet holds what emotion would emit: nested selectors resolved against their parent, values
  * normalized (`0.2s ease` stays, `0` may become `0px`), `fallback(…)` arrays expanded into repeated
  * declarations. The whole pipeline, including what does *not* work and why, is the docs site's

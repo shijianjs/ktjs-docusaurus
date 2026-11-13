@@ -1,7 +1,7 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
 import io.github.shijianjs.ktjs.dom.createElement
-import io.github.shijianjs.ktjs.dom.defineIfMissing
+import io.github.shijianjs.ktjs.dom.element.defineIfMissing
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

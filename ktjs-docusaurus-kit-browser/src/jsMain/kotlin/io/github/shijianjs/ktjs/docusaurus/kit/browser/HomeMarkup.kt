@@ -1,6 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.element.CustomElementAdapter
 import web.dom.Element
 
 /**

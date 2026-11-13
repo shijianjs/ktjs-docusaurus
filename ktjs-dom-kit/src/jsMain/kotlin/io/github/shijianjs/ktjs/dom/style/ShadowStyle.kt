@@ -1,4 +1,4 @@
-package io.github.shijianjs.ktjs.dom
+package io.github.shijianjs.ktjs.dom.style
 
 import js.array.jsArrayOf
 import web.components.ShadowRoot

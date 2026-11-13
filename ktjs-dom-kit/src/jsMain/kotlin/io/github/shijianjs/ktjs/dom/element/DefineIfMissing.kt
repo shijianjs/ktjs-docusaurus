@@ -1,4 +1,4 @@
-package io.github.shijianjs.ktjs.dom
+package io.github.shijianjs.ktjs.dom.element
 
 import js.reflect.unsafeCast
 import web.components.CustomElementReference

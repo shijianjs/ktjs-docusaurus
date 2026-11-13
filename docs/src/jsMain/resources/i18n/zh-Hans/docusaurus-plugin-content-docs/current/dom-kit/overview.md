@@ -24,18 +24,17 @@ sidebar_position: 1
 
 ## 里面有什么
 
-| 文件 | 提供 |
+模块按关注点分包：一件事一个包，一个声明一个文件（编解码器、委托与它的 provider、桥的删除），所以没有
+哪个文件是杂物间。
+
+| 包 | 提供 |
 | --- | --- |
-| `CustomElementAdapter.kt` | 基类：按原生名字声明的生命周期钩子、`attr` 委托的宿主，以及 [`stripBridgesFrom`](./custom-elements.md) |
-| `CustomElementDefinition.kt` | `defineIfMissing`——清掉原型链上的桥之后再定义标签 |
-| `Attributes.kt` | `attr` 属性委托、`AttributeCodec`、`AttributeChange` |
-| `AttributeCodecs.kt` | `String` / `Boolean` / `Int` / `Double` 编解码器与 `enumAttributeCodec` |
-| `ShadowStyles.kt` | `attachShadowRoot` 与 `attachStyledShadow` |
-| `InlineStyles.kt` | `HTMLElement.inlineStyle`，把元素自己的样式看成 `csstype.Properties` |
+| `element/` | `CustomElementAdapter`——按原生名字声明生命周期钩子、承载 `attr` 委托的基类；`defineIfMissing`；以及 [`stripBridgesFrom`](./custom-elements.md)（删掉编译器生成的桥） |
+| `attribute/` | `attr` 属性委托：`AttributeCodec` 与内建实现（`String` / `Boolean` / `Int` / `Double` / `enumAttributeCodec`）、`AttributeChange`、委托与它的 provider，以及属性名规则 |
+| `style/` | `HTMLElement.inlineStyle`（元素自己的样式，`csstype.Properties` 视图）、`cssSheet { … }` / `cssText { … }`、`attachShadowRoot` / `attachStyledShadow` |
 | `DomExtensions.kt` | `TagName<T>.createElement { … }` |
-| `loadjs/` | [`loadjs`](https://github.com/kubetail-org/loadjs) 加载器的封装：四种调用形态各按分支写成一个重载、路径前缀（`css!`、`img!`、`module!`、`nomodule!`）与 bundle 注册表（`ready` / `done` / `reset` / `isDefined`） |
-| `CssSheet.kt` | `cssSheet { … }` 与 `cssText { … }` |
 | `css/` | cssom 没建模的部分，用类型化的值补齐：`Pseudos`、`SupportsQuery`、`radialGradient`、`webkitBackgroundClip`…… |
+| `loadjs/` | [`loadjs`](https://github.com/kubetail-org/loadjs) 加载器的封装：四种调用形态各按分支写成一个重载、路径前缀（`css!`、`img!`、`module!`、`nomodule!`）与 bundle 注册表（`ready` / `done` / `reset` / `isDefined`） |
 
 ## 它不做什么
 

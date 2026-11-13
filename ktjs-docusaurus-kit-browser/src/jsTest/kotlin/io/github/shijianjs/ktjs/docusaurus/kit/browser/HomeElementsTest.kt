@@ -1,8 +1,8 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
 import io.github.shijianjs.ktjs.dom.createElement
-import io.github.shijianjs.ktjs.dom.defineIfMissing
-import io.github.shijianjs.ktjs.dom.inlineStyle
+import io.github.shijianjs.ktjs.dom.element.defineIfMissing
+import io.github.shijianjs.ktjs.dom.style.inlineStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

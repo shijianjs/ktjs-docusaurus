@@ -1,10 +1,10 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.CustomElementAdapter
-import io.github.shijianjs.ktjs.dom.attachStyledShadow
-import io.github.shijianjs.ktjs.dom.attr
+import io.github.shijianjs.ktjs.dom.element.CustomElementAdapter
+import io.github.shijianjs.ktjs.dom.style.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.attribute.attr
 import io.github.shijianjs.ktjs.dom.createElement
-import io.github.shijianjs.ktjs.dom.inlineStyle
+import io.github.shijianjs.ktjs.dom.style.inlineStyle
 import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.cssom.Display

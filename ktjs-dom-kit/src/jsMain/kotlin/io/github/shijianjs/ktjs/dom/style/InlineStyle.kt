@@ -1,4 +1,4 @@
-package io.github.shijianjs.ktjs.dom
+package io.github.shijianjs.ktjs.dom.style
 
 import csstype.Properties
 import js.reflect.unsafeCast
