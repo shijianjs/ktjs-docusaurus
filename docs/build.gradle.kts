@@ -49,7 +49,7 @@ kotlin {
             // Playwright's official Java library already includes the JUnit 5 integration; the
             // version has to match the npm Playwright bundled with the Kotlin Gradle Plugin so both
             // reuse the Chromium installed by `kotlinInstallPlaywrightBrowsers`.
-            implementation("com.microsoft.playwright:playwright:1.61.0")
+            implementation("com.microsoft.playwright:playwright:1.64.0")
             implementation("org.junit.jupiter:junit-jupiter:6.1.3")
             implementation("org.junit-pioneer:junit-pioneer:2.3.0")
             implementation(kotlin("test-junit5"))
