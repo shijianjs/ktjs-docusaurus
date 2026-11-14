@@ -879,6 +879,11 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
   `@docusaurus/theme-mermaid` 里 `if (__DOCUSAURUS_MERMAID_LAYOUT_ELK_ENABLED__)` 这个守卫就不再是死代码，
   webpack 会去解析那个**故意没装**的可选 peer `@mermaid-js/layout-elk`，`docusaurusBuild` 停在
   `Can't resolve '@mermaid-js/layout-elk'`（2026-11 加 mermaid 主题时踩过）。顺带产物也不再降级到 ES5。
+- mermaid 的节点 tooltip 还需要 `d3-transition`：`clientModules` 里那条 `../../node_modules/d3-transition`
+  是**副作用导入**，它给 d3 selection 挂上 `transition()`。mermaid 只是通过 `d3` 的 re-export 碰到它，而 `d3`
+  声明了 `sideEffects: false`，webpack 会把该模块摇掉，于是鼠标移到流程图节点上抛
+  `tooltipElem.transition is not a function`（2026-11 在 `docusaurusStart` 里发现）。路径相对**站点目录**
+  （`<root>/build/js/docusaurus/<模块>`），这个布局由 Gradle 插件固定。
 - `docs` 就是文档站本身：`src/jsMain/resources/{docs,pages,css,static}` 是内容，
   `src/jsMain/kotlin/io/github/shijianjs/ktjs/docusaurus/docs/Config.kt` 是配置。
   `./gradlew :docs:docusaurusBuild` 把它变成静态站点，产物在 `build/js/docusaurus/docs/build`（站点目录

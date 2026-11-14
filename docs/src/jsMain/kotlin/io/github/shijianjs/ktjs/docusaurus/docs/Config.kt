@@ -114,7 +114,17 @@ fun docusaurusConfig(): Config = unsafeJso {
     // The landing-page elements and the TOC toggle are registered by `onRouteDidUpdate` in the
     // generated `client-module.mjs`. That runs after hydration, so the custom elements are upgraded
     // once React is done with the page.
-    clientModules = arrayOf("./client-module.mjs")
+    //
+    // `d3-transition` is imported for its side effect, not its exports: it is what puts `transition()`
+    // on d3 selections, and mermaid calls it for the flowchart node tooltips. Mermaid only reaches it
+    // through `d3`'s re-exports, and `d3` declares `sideEffects: false`, so webpack drops the module
+    // and hovering any flowchart node throws "tooltipElem.transition is not a function". Importing the
+    // package itself keeps it (its own package.json says `sideEffects: true`). The path is relative to
+    // the site directory, which the Gradle plugin fixes at `<root>/build/js/docusaurus/<module>`.
+    clientModules = arrayOf(
+        "./client-module.mjs",
+        "../../node_modules/d3-transition",
+    )
 
     // The browser bundle is self-contained (webpack inlines `iconify-icon`), so `<head>` needs no
     // import map to resolve a bare module name.
