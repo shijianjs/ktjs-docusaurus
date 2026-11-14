@@ -30,9 +30,14 @@ external interface PluginOptions {
  */
 external interface PluginConfig
 
-/** A bare package name, with the plugin's default options. */
+/**
+ * A bare package name, with the plugin's default options.
+ *
+ * A plain string, not a one-element array: Docusaurus' schema takes either `string` or a two-element
+ * `[string, object]` tuple, so `[name]` is rejected with "Bad Docusaurus plugin value".
+ */
 inline fun PluginConfig(name: String): PluginConfig =
-    unsafeCast<PluginConfig>(arrayOf<JsAny>(unsafeCast<JsAny>(name)))
+    unsafeCast<PluginConfig>(name)
 
 /** A package name (or a `@site/...` module path) with its options. */
 inline fun PluginConfig(name: String, options: PluginOptions): PluginConfig =
@@ -57,9 +62,14 @@ inline fun PluginConfig(enabled: Boolean): PluginConfig = unsafeCast<PluginConfi
  */
 external interface PresetConfig
 
-/** A bare preset package name, with the preset's default options. */
+/**
+ * A bare preset package name, with the preset's default options.
+ *
+ * Same rule as [PluginConfig]: the bare name stays a string, because the tuple form must have
+ * exactly two elements.
+ */
 inline fun PresetConfig(name: String): PresetConfig =
-    unsafeCast<PresetConfig>(arrayOf<JsAny>(unsafeCast<JsAny>(name)))
+    unsafeCast<PresetConfig>(name)
 
 /** A preset package name with its options. */
 inline fun PresetConfig(name: String, options: JsAny): PresetConfig =

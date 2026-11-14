@@ -8,17 +8,16 @@ import kotlin.test.assertEquals
 
 /**
  * Upstream accepts `string | [string, opts] | [module, opts] | module | false | null` for a plugin
- * and `string | [string, opts] | false | null` for a preset. The factories build real JS arrays, so
- * Docusaurus' own validation sees the shape it expects.
+ * and `string | [string, opts] | false | null` for a preset.
+ *
+ * The bare-name form has to stay a plain string: Docusaurus validates the tuple form as exactly two
+ * elements, so a one-element array is rejected with "Bad Docusaurus plugin/themes value".
  */
 class PluginConfigTest {
 
     @Test
-    fun bareNameIsASingleElementArray() {
-        val value = PluginConfig("my-plugin").unsafeCast<Array<JsAny>>()
-
-        assertEquals(1, value.size)
-        assertEquals("my-plugin", value[0].unsafeCast<String>())
+    fun bareNameStaysAString() {
+        assertEquals("my-plugin", PluginConfig("my-plugin").unsafeCast<String>())
     }
 
     @Test
@@ -46,11 +45,8 @@ class PluginConfigTest {
     }
 
     @Test
-    fun presetNameIsASingleElementArray() {
-        val value = PresetConfig("classic").unsafeCast<Array<JsAny>>()
-
-        assertEquals(1, value.size)
-        assertEquals("classic", value[0].unsafeCast<String>())
+    fun presetBareNameStaysAString() {
+        assertEquals("classic", PresetConfig("classic").unsafeCast<String>())
     }
 
     @Test
