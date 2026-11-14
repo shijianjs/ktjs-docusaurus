@@ -874,6 +874,11 @@ klibs.io 从 Maven Central 与 GitHub 自动抓取，无需提交元数据文件
 
 - `docs` 只消费公共 API，不发布、也不进入 Dokka。根 `build.gradle.kts` 的发布与 Dokka 配置按
   `ktjs-docusaurus` 前缀过滤子模块，新增非发布模块时沿用该约定。
+- 根 `package.json` 的 `browserslist` 是构建必需项，不是装饰：Babel 从生成的站点目录往上找到它才有编译
+  目标。没有它 `@babel/preset-env` 按 ES5 处理，`async/await` 被翻成 regenerator 状态机，
+  `@docusaurus/theme-mermaid` 里 `if (__DOCUSAURUS_MERMAID_LAYOUT_ELK_ENABLED__)` 这个守卫就不再是死代码，
+  webpack 会去解析那个**故意没装**的可选 peer `@mermaid-js/layout-elk`，`docusaurusBuild` 停在
+  `Can't resolve '@mermaid-js/layout-elk'`（2026-11 加 mermaid 主题时踩过）。顺带产物也不再降级到 ES5。
 - `docs` 就是文档站本身：`src/jsMain/resources/{docs,pages,css,static}` 是内容，
   `src/jsMain/kotlin/io/github/shijianjs/ktjs/docusaurus/docs/Config.kt` 是配置。
   `./gradlew :docs:docusaurusBuild` 把它变成静态站点，产物在 `build/js/docusaurus/docs/build`（站点目录
