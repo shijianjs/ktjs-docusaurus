@@ -47,8 +47,8 @@ kotlin {
 
     sourceSets {
         jsMain.dependencies {
-            implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.0")
-            implementation("org.jetbrains.kotlin-wrappers:kotlin-csstype:2026.11.0-3.2.3")
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.1")
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-csstype:2026.11.1-3.2.3")
             // The two halves of emotion's text pipeline: `serializeStyles` writes a rules object out as
             // declaration text, `stylis` resolves the nested selectors into flat rules. The version
             // pinned here is the one @emotion/cache itself pins.
