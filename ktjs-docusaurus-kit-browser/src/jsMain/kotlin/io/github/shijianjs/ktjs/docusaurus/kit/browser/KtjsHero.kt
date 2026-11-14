@@ -22,6 +22,9 @@ import kotlin.js.JsName
 import web.components.CustomElementReference
 import web.components.HTMLSlotElement
 import web.cssom.AlignItems
+import web.cssom.AnimationIterationCount
+import web.cssom.AnimationTimingFunction
+import web.cssom.AtRules
 import web.cssom.BackgroundClip
 import web.cssom.CSSStyleSheet
 import web.cssom.Auto
@@ -40,7 +43,10 @@ import web.cssom.Position
 import web.cssom.PropertyName
 import web.cssom.TextAlign
 import web.cssom.atrule.MediaType
+import web.cssom.atrule.PrefersReducedMotion
 import web.cssom.atrule.maxWidth
+import web.cssom.atrule.prefersReducedMotion
+import web.cssom.ident
 import web.cssom.clamp
 import web.cssom.deg
 import web.cssom.dropShadow
@@ -53,8 +59,10 @@ import web.cssom.pct
 import web.cssom.px
 import web.cssom.rem
 import web.cssom.rgb
+import web.cssom.s
 import web.cssom.stop
 import web.cssom.translatex
+import web.cssom.translatey
 import web.cssom.`var`
 import web.cssom.and
 import web.cssom.vw
@@ -109,6 +117,8 @@ class KtjsHero : CustomElementAdapter() {
         val shadow = attachStyledShadow(HOME_RESET, SHEET)
 
         logoElement = HtmlTagName.img.createElement {
+            // The float animation is a keyframes rule, so it needs this hook (see SHEET).
+            classList.add(LOGO)
             inlineStyle.apply {
                 display = Display.block
                 width = clamp(7.rem, 16.vw, 10.rem)
@@ -220,10 +230,14 @@ class KtjsHero : CustomElementAdapter() {
     companion object : CustomElementReference<KtjsHero>(KtjsHero::class.js) {
         val NAME: TagName<KtjsHero> = TagName(HomeMarkup.HERO)
 
-        /** The host, the gradient headline and the action row, as typed class names. */
+        /** The host, the logo, the gradient headline and the action row, as typed class names. */
         private val HERO: ClassName = ClassName("ktjs-hero")
+        private val LOGO: ClassName = ClassName("ktjs-logo")
         private val TITLE: ClassName = ClassName("ktjs-title")
         private val ACTIONS: ClassName = ClassName("ktjs-actions")
+
+        /** Keyframes name for the logo's float. */
+        private const val FLOAT: String = "ktjs-logo-float"
 
         /**
          * Everything in the hero that inline styles cannot say: two decorative pseudo-elements, the
@@ -289,6 +303,35 @@ class KtjsHero : CustomElementAdapter() {
                     // `background-clip: text` only paints inside the padding box, so the tight line box
                     // would leave the tail of "g" transparent; 0.06em was not enough at the clamped size.
                     paddingBottom = 0.14.em
+                }
+            }
+
+            // The logo floats up and down forever. A keyframes rule has to live in a sheet (there is
+            // no inline form), and it is declared below the animation so the rule reads bottom-up like
+            // the CSS it serializes to.
+            "${AtRules.keyframes} $FLOAT" {
+                "0%" {
+                    transform = translatey((-4).px)
+                }
+
+                "50%" {
+                    transform = translatey(4.px)
+                }
+
+                "100%" {
+                    transform = translatey((-4).px)
+                }
+            }
+
+            // Motion is opt-in: a reader who asked the system for reduced motion gets a still logo
+            // rather than a page that cannot be read (nothing static sets `transform` here).
+            `@media`(prefersReducedMotion(PrefersReducedMotion.noPreference)) {
+                LOGO {
+                    animationName = ident(FLOAT)
+                    animationDuration = 7.s
+                    animationTimingFunction = AnimationTimingFunction.easeInOut
+                    animationIterationCount = AnimationIterationCount.infinite
+                    willChange = ident("transform")
                 }
             }
 
