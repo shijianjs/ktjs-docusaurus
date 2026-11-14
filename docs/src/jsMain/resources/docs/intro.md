@@ -22,3 +22,17 @@ fun docusaurusConfig(): Config = unsafeJso {
 
 The Gradle plugin writes `docusaurus.config.mjs`, imports the exported function from the compiled
 module, and runs the Docusaurus CLI in a directory whose `node_modules` Gradle already installed.
+
+## How the pieces fit together
+
+```mermaid
+flowchart LR
+  K["Config.kt<br/>(Kotlin)"] --> P["Gradle plugin"]
+  M["*.md / *.mdx<br/>(src/jsMain/resources)"] --> P
+  P --> S["docusaurus.config.mjs<br/>+ static site"]
+  S --> B["Docusaurus build"]
+  B --> H["GitHub Pages"]
+```
+
+A fence below is a diagram, not code — mermaid is enabled site-wide (`markdown.mermaid` and the
+`@docusaurus/theme-mermaid` theme), and its palette lives in `themeConfig.mermaid`.

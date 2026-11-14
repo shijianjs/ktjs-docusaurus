@@ -22,3 +22,17 @@ fun docusaurusConfig(): Config = unsafeJso {
 
 Gradle 插件会写出 `docusaurus.config.mjs`，从编译产物里 import 那个导出函数，并在 Gradle 已经装好
 `node_modules` 的目录里调用 Docusaurus CLI。
+
+## 各部分如何协作
+
+```mermaid
+flowchart LR
+  K["Config.kt<br/>（Kotlin）"] --> P["Gradle 插件"]
+  M["*.md / *.mdx<br/>（src/jsMain/resources）"] --> P
+  P --> S["docusaurus.config.mjs<br/>+ 静态站点"]
+  S --> B["Docusaurus 构建"]
+  B --> H["GitHub Pages"]
+```
+
+下面这段围栏就是一张图，不是代码——mermaid 在全站启用（`markdown.mermaid` 和
+`@docusaurus/theme-mermaid` 主题），配色在 `themeConfig.mermaid` 里配置。
