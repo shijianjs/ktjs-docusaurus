@@ -3,6 +3,12 @@ plugins {
     id("io.github.shijianjs.ktjs.docusaurus")
 }
 
+// npm package versions live in the root `package.json`; every Docusaurus package is published in
+// lockstep, so `@docusaurus/core` is the anchor — the same one the wrapper module uses.
+@Suppress("UNCHECKED_CAST")
+val docusaurusVersion =
+    (rootProject.extra["npmVersions"] as Map<String, String>).getValue("@docusaurus/core")
+
 /**
  * `docs` is this project's own documentation site, not a published module: Markdown lives in
  * `src/jsMain/resources`, configuration is Kotlin, and `./gradlew :docs:docusaurusBuild` turns both
@@ -32,6 +38,12 @@ kotlin {
         jsMain.dependencies {
             implementation(project(":ktjs-docusaurus"))
             implementation(project(":ktjs-docusaurus-kit"))
+
+            // The mermaid theme is resolved *by name* from the generated configuration, so npm has
+            // to install it next to the site: no Kotlin code imports it, and the wrapper does not
+            // bring it along with the Docusaurus packages it declares. Version from the same
+            // lockstep anchor the wrapper uses — every `@docusaurus/*` package moves together.
+            implementation(npm("@docusaurus/theme-mermaid", docusaurusVersion))
         }
         jvmTest.dependencies {
             // Playwright's official Java library already includes the JUnit 5 integration; the

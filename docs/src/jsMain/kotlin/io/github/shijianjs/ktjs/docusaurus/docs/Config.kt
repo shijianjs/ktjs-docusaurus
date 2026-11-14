@@ -6,6 +6,7 @@ import io.github.shijianjs.ktjs.docusaurus.config.Directions
 import io.github.shijianjs.ktjs.docusaurus.config.HtmlTagObject
 import io.github.shijianjs.ktjs.docusaurus.config.I18nConfig
 import io.github.shijianjs.ktjs.docusaurus.config.I18nLocaleConfig
+import io.github.shijianjs.ktjs.docusaurus.config.MarkdownConfig
 import io.github.shijianjs.ktjs.docusaurus.config.PluginConfig
 import io.github.shijianjs.ktjs.docusaurus.config.PresetConfig
 import io.github.shijianjs.ktjs.docusaurus.config.ReportingSeverities
@@ -30,6 +31,9 @@ import io.github.shijianjs.ktjs.docusaurus.sidebars.SidebarsConfig
 import io.github.shijianjs.ktjs.docusaurus.theme.ColorModes
 import io.github.shijianjs.ktjs.docusaurus.theme.Footer
 import io.github.shijianjs.ktjs.docusaurus.theme.FooterStyles
+import io.github.shijianjs.ktjs.docusaurus.theme.MermaidTheme
+import io.github.shijianjs.ktjs.docusaurus.theme.MermaidThemeByColorMode
+import io.github.shijianjs.ktjs.docusaurus.theme.MermaidThemeConfig
 import io.github.shijianjs.ktjs.docusaurus.theme.NavbarItem
 import io.github.shijianjs.ktjs.docusaurus.theme.NavbarItemPositions
 import io.github.shijianjs.ktjs.docusaurus.theme.NavbarItemTypes
@@ -80,6 +84,13 @@ fun docusaurusConfig(): Config = unsafeJso {
     trailingSlash = true
     onBrokenLinks = ReportingSeverities.`throw`
 
+    // ```mermaid fences render as diagrams. Two halves, and both are needed: this flag is what
+    // compiles the fence into a `<Mermaid>` element, and the theme registered below is what provides
+    // that element in the browser.
+    markdown = unsafeJso<MarkdownConfig> {
+        mermaid = true
+    }
+
     // English is the source language; every page — `docs/` and `pages/` alike — has a translation
     // under `i18n/zh-Hans/`, in that plugin's own directory (`docusaurus-plugin-content-docs` and
     // `docusaurus-plugin-content-pages`). `code.json` there is only for strings a component owns.
@@ -108,10 +119,16 @@ fun docusaurusConfig(): Config = unsafeJso {
     // The browser bundle is self-contained (webpack inlines `iconify-icon`), so `<head>` needs no
     // import map to resolve a bare module name.
 
-    // Local search: the index is built from the Markdown during `docusaurus build`, so there is no
-    // server and no external crawler. It is a theme — `@theme/SearchBar` replaces the placeholder the
-    // classic theme renders in the navbar, which is why it goes in `themes`, not `plugins`.
+    // Two themes, both resolved by name from the generated configuration:
+    //
+    // - `@docusaurus/theme-mermaid` provides `@theme/Mermaid`, the element a ```mermaid fence
+    //   compiles into. Its palette and look are site configuration (`themeConfig.mermaid` below), so
+    //   it is registered with its own defaults.
+    // - Local search: the index is built from the Markdown during `docusaurus build`, so there is no
+    //   server and no external crawler. It is a theme — `@theme/SearchBar` replaces the placeholder
+    //   the classic theme renders in the navbar, which is why it goes in `themes`, not `plugins`.
     themes = arrayOf<PluginConfig?>(
+        PluginConfig("@docusaurus/theme-mermaid"),
         PluginConfig(
             "@easyops-cn/docusaurus-search-local",
             unsafeJso<SearchLocalOptions> {
@@ -219,6 +236,24 @@ fun docusaurusConfig(): Config = unsafeJso {
             theme = PrismThemes.github
             darkTheme = PrismThemes.dracula
             additionalLanguages = arrayOf("bash", "kotlin", "json")
+        }
+        // Both names are mermaid's own and both come from its `redux` family: a white card with a
+        // dark outline in light mode, its dark counterpart in dark mode. `MermaidThemes` lists the
+        // five older names (default / neutral / dark / forest / base), so these two enter through the
+        // factory that wraps a value mermaid defines.
+        //
+        // `options` is spread into `mermaid.initialize` as `{startOnLoad: false, ...options, theme}`,
+        // the theme above winning over anything set here. Mermaid *ignores* a value it does not
+        // recognise rather than reporting it, so the palette and `look: 'neo'` are verified in a
+        // browser, never by a build.
+        mermaid = unsafeJso<MermaidThemeConfig> {
+            theme = unsafeJso<MermaidThemeByColorMode> {
+                light = MermaidTheme("redux-color")
+                dark = MermaidTheme("redux-dark-color")
+            }
+            options = unsafeJso<MermaidOptions> {
+                look = "neo"
+            }
         }
         footer = Footer(
             unsafeJso<SimpleFooter> {
@@ -331,6 +366,15 @@ fun sidebars(): SidebarsConfig = unsafeJso<DocsSidebars> {
 /** Attributes for the generated `<script type="importmap">`. */
 private external interface ImportMapAttributes {
     var type: String
+}
+
+/**
+ * The one key this site sets in mermaid's `Config`; upstream type is the whole `mermaidAPI.Config`,
+ * which the wrapper leaves opaque. Declared rather than built from a raw object literal so the key
+ * name and the value are checked here — add a property per key this site needs.
+ */
+private external interface MermaidOptions {
+    var look: String
 }
 
 /** The locale record the site declares; keys must match the ids in `Config.i18n.locales`. */
