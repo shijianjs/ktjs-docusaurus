@@ -227,3 +227,18 @@ host.appendChild(hero)
 
 属性写入的就是同名 attribute，所以这样得到的就是 MDX 产出的那个元素。`TagName<T>.createElement { }` 是
 `document.createElement(TagName<T>)` 的类型安全包装；回调拿到的是具体的元素类型。
+
+### 满宽色带需要站点补一条规则
+
+三个色带元素用 `margin-inline: calc(50% - 50vw)` 把自己拉出内容列，而 `100vw` 是含桌面滚动条槽宽的
+视口宽度——于是每个色带都比可视区宽几像素。站点自己不补一条规则，**整个首页底部就会多一条横向滚动条**。
+所以每个站点的 `src/css/custom.css` 都要有：
+
+```css
+html {
+    overflow-x: clip;
+}
+```
+
+是 `clip` 不是 `hidden`：`hidden` 会把 `<html>` 变成滚动容器，sticky 导航与桌面 TOC 一起失效。本站从写下
+这些色带起就带着这条；派生站点漏拷这条，出现滚动条的正是它。

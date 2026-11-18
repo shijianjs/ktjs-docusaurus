@@ -247,3 +247,20 @@ host.appendChild(hero)
 The properties write the attributes, so this is the same element MDX produces. `TagName<T>.createElement { }`
 is the typed wrapper over `document.createElement(TagName<T>)`; the callback receives the concrete
 element type.
+
+### Full-bleed bands need one site rule
+
+The three band elements pull themselves out of the content column with
+`margin-inline: calc(50% - 50vw)`, and `100vw` includes the desktop scrollbar's gutter — so each band
+is a few pixels wider than the visible page. Without a rule of its own, a site grows a **horizontal
+scrollbar across the whole landing page**. Every site's `src/css/custom.css` therefore needs:
+
+```css
+html {
+    overflow-x: clip;
+}
+```
+
+`clip`, not `hidden`: `hidden` turns `<html>` into a scroll container, which kills the sticky navbar
+and the desktop TOC. This site has shipped that rule since the bands were written; a site copied
+without it is the one that shows the bar.
