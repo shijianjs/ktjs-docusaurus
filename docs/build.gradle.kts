@@ -72,7 +72,8 @@ docusaurus {
         project(":ktjs-docusaurus-kit-browser")
             .layout.buildDirectory.dir("dist/js/productionExecutable"),
     )
-    // --locale zh-Hans
+    // Chinese by default for this site's dev server. It is only the default: `--locale en` (or
+    // `-Pdocusaurus.locale=en`) overrides it for one run without touching this file.
     startArguments = listOf("--locale", "zh-Hans")
 }
 

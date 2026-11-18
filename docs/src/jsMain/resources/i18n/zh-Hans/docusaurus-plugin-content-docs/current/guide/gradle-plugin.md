@@ -47,6 +47,28 @@ docusaurus {
 | `docusaurusServe` | 伺服上一次构建的结果 |
 | `docusaurusClear` | 清掉 Docusaurus 的缓存 |
 
+## 单次运行的配置
+
+站点在 `startArguments` 里写的是默认值；某台机器或某一次运行要用别的，不必改构建文件：
+
+```bash
+# 单次：任务自带的类型化选项
+./gradlew :docs:docusaurusStart --locale en --port 3001
+
+# 整个 shell 都生效，或写进 gradle.properties 一行
+./gradlew -Pdocusaurus.locale=en -Pdocusaurus.port=3001 :docs:docusaurusStart
+
+# 插件没有建模的参数
+./gradlew -Pdocusaurus.arguments="--host 0.0.0.0 --poll 1000" :docs:docusaurusStart
+```
+
+- `--locale` / `--port` 会**替换**已有的值：`--locale zh-Hans` 与 `--locale=zh-Hans` 两种写法都会先被
+  摘掉再追加新的，命令行里不会同时出现两个自相矛盾的参数。优先级是：任务选项 > `-P` > `startArguments`。
+- `docusaurus.arguments` 原样追加（`--host`、`--poll` 等任何 Docusaurus 认的参数），排在类型化值之前，
+  所以后者仍能覆盖它。
+- 用 `-P` 而不是 `-D`：项目属性属于 Gradle 的输入模型（参与配置缓存键、能进 build scan），系统属性不属于；
+  而且 `-D` 会和 JVM 自己的选项撞名。
+
 ## 站点目录的位置
 
 `<root>/build/js/docusaurus/<module>`。它必须待在 Kotlin/JS 的 npm workspace 里：Node 解析

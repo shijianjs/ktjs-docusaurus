@@ -132,6 +132,11 @@ open class DocusaurusExtension @javax.inject.Inject constructor(
 
     /**
      * Arguments passed to `docusaurus start`, e.g. `listOf("--port", "3001")`.
+     *
+     * This is the site's **default**: `--locale` / `--port` given on the command line (or
+     * `-Pdocusaurus.locale` / `-Pdocusaurus.port`) replace them for one run, and
+     * `-Pdocusaurus.arguments` appends flags the plugin does not model. A site therefore commits its
+     * usual choice here and still lets a reader start the other locale without editing the build.
      */
     var startArguments: List<String> = emptyList()
 }

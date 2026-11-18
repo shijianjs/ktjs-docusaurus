@@ -49,6 +49,30 @@ under `static/` has to be built from that value: the locale prefix is not knowab
 | `docusaurusServe` | serves the last build |
 | `docusaurusClear` | drops the Docusaurus caches |
 
+## Per-run configuration
+
+A site's committed `startArguments` is its default; a machine or a run that needs something else
+does not edit the build file:
+
+```bash
+# one invocation: typed task options
+./gradlew :docs:docusaurusStart --locale en --port 3001
+
+# the whole shell, or one line in gradle.properties
+./gradlew -Pdocusaurus.locale=en -Pdocusaurus.port=3001 :docs:docusaurusStart
+
+# flags the plugin does not model
+./gradlew -Pdocusaurus.arguments="--host 0.0.0.0 --poll 1000" :docs:docusaurusStart
+```
+
+- `--locale` / `--port` **replace** the committed value: both `--locale zh-Hans` and
+  `--locale=zh-Hans` are dropped before the new pair is appended, so the command line never carries
+  two contradicting flags. A task option wins over `-P`, which wins over `startArguments`.
+- `docusaurus.arguments` is appended as written (`--host`, `--poll`, anything else Docusaurus takes)
+  and comes before the typed values, which can therefore still override it.
+- `-P`, not `-D`: a project property is part of Gradle's input model (configuration cache keys,
+  build scans), while a system property is not — and `-D` competes with the JVM's own options.
+
 ## Where the site lives
 
 `<root>/build/js/docusaurus/<module>`. It has to sit inside the Kotlin/JS npm workspace: that is

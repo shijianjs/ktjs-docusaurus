@@ -30,6 +30,11 @@ import java.io.File
  * - `docusaurusStart` runs the dev server,
  * - `docusaurusServe` serves an existing build,
  * - `docusaurusClear` drops Docusaurus' caches.
+ *
+ * Things that differ per machine or per run are not build-file edits: `docusaurusStart --locale en`
+ * (also `--port`) sets them for one invocation, and `-Pdocusaurus.locale` / `-Pdocusaurus.port` /
+ * `-Pdocusaurus.arguments` (any unmodelled flag, e.g. `--host 0.0.0.0`) apply to every command in
+ * the shell. A site's committed `startArguments` stays the default.
  */
 class DocusaurusPlugin : Plugin<Project> {
 
@@ -143,6 +148,17 @@ class DocusaurusPlugin : Plugin<Project> {
             task.nodeExecutable.set(nodeExecutable)
             task.docusaurusBin.set(docusaurusBin)
             task.arguments.set(project.provider { arguments() })
+            // Gradle properties are the persistent half of the per-run channel: `-P` on the command
+            // line for one shell, or a line in `gradle.properties` for a machine. The `@Option` on
+            // the task (`--locale`, `--port`) overrides them, because a value set on the task itself
+            // replaces the convention.
+            task.locale.convention(project.providers.gradleProperty("docusaurus.locale"))
+            if (name == "docusaurusStart" || name == "docusaurusServe") {
+                task.port.convention(
+                    project.providers.gradleProperty("docusaurus.port").map(String::toInt),
+                )
+            }
+            task.extraArguments.convention(project.providers.gradleProperty("docusaurus.arguments"))
             siteTask?.let { task.dependsOn(it) }
         }
     }

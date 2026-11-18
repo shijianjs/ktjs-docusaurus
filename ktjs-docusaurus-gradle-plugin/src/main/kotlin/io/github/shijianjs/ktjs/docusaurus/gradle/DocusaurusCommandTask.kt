@@ -6,7 +6,9 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.options.Option
 import org.gradle.process.ExecOperations
 import org.gradle.work.DisableCachingByDefault
 import javax.inject.Inject
@@ -17,6 +19,11 @@ import javax.inject.Inject
  * The CLI is invoked through Node directly instead of `npx` / `npm run`: the npm workspace is
  * installed by Gradle, so there is no `package-lock.json` of its own to install from and no shell
  * to go through.
+ *
+ * Which command runs, and its committed flags, come from the plugin; the two things that change
+ * between machines and between runs are options and properties instead of edit-before-run:
+ * `--locale` / `--port` on the command line, or `-Pdocusaurus.locale` / `-Pdocusaurus.port` when the
+ * choice should apply to every invocation from this shell (see [CommandArguments]).
  */
 // The command runs an external tool in place and declares no outputs; caching would only claim a
 // result it cannot reproduce (a dev server never finishes, a build writes outside the build cache).
@@ -37,6 +44,33 @@ abstract class DocusaurusCommandTask @Inject constructor(
     @get:Input
     abstract val arguments: ListProperty<String>
 
+    /**
+     * UI locale for this run, e.g. `zh-Hans`.
+     *
+     * Overrides a `--locale` the site committed in `startArguments`; unset keeps the committed
+     * choice, and a site that commits nothing serves its `defaultLocale`.
+     */
+    @get:Option(option = "locale", description = "UI locale for this run, e.g. zh-Hans.")
+    @get:Optional
+    @get:Input
+    abstract val locale: Property<String>
+
+    /** Port for `start` / `serve`; unset keeps Docusaurus' own default (3000). */
+    @get:Option(option = "port", description = "Port for the dev server or the preview server.")
+    @get:Optional
+    @get:Input
+    abstract val port: Property<Int>
+
+    /**
+     * `-Pdocusaurus.arguments`: flags this plugin does not model, e.g. `--host 0.0.0.0 --poll 1000`.
+     *
+     * Deliberately a property and not an `--option`: it carries a whole flag list, and a task option
+     * that takes "one string of arguments" is what a shell alias is for.
+     */
+    @get:Optional
+    @get:Input
+    abstract val extraArguments: Property<String>
+
     /** Directory the command runs in; the site directory. */
     @get:Internal
     abstract val siteDir: DirectoryProperty
@@ -53,11 +87,19 @@ abstract class DocusaurusCommandTask @Inject constructor(
                 "`./gradlew kotlinNpmInstall`) or set `docusaurus.docusaurusBin`."
         }
 
+        val args = CommandArguments.resolve(
+            base = arguments.get(),
+            extra = extraArguments.orNull,
+            locale = locale.orNull,
+            port = port.orNull,
+        )
+        logger.info("Docusaurus: {} {}", bin, args.joinToString(" "))
+
         exec.exec { spec ->
             spec.workingDir = site
             spec.executable = nodeExecutable.get()
             spec.args(bin)
-            spec.args(arguments.get())
+            spec.args(args)
         }
     }
 }
