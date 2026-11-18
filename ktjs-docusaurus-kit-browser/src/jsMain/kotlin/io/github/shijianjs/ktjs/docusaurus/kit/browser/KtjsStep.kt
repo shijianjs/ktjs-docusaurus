@@ -2,7 +2,7 @@ package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
-import io.github.shijianjs.ktjs.dom.attribute.attr
+import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
 import io.github.shijianjs.ktjs.dom.element.createElement
 import io.github.shijianjs.ktjs.dom.css.dsl.Pseudos
 import io.github.shijianjs.ktjs.dom.css.dsl.pseudo

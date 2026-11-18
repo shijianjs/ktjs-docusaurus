@@ -2,18 +2,17 @@ package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
-import io.github.shijianjs.ktjs.dom.attribute.attr
+import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
 import io.github.shijianjs.ktjs.dom.css.dsl.Pseudos
 import io.github.shijianjs.ktjs.dom.css.dsl.invoke
 import io.github.shijianjs.ktjs.dom.css.dsl.pseudos
 import io.github.shijianjs.ktjs.dom.css.cssSheet
-import io.github.shijianjs.ktjs.dom.css.RadialGradientShape
-import io.github.shijianjs.ktjs.dom.css.colorStop
-import io.github.shijianjs.ktjs.dom.css.radialGradient
-import io.github.shijianjs.ktjs.dom.css.pointerEventsNone
-import io.github.shijianjs.ktjs.dom.css.or
+import io.github.shijianjs.ktjs.dom.css.dsl.RadialGradientShape
+import io.github.shijianjs.ktjs.dom.css.dsl.colorStop
+import io.github.shijianjs.ktjs.dom.css.dsl.radialGradient
+import io.github.shijianjs.ktjs.dom.css.dsl.or
 import io.github.shijianjs.ktjs.dom.css.dsl.supports
-import io.github.shijianjs.ktjs.dom.css.supportsDeclaration
+import io.github.shijianjs.ktjs.dom.css.dsl.supportsDeclaration
 import io.github.shijianjs.ktjs.dom.css.dsl.webkitBackgroundClipName
 import io.github.shijianjs.ktjs.dom.css.dsl.webkitBackgroundClip
 import io.github.shijianjs.ktjs.dom.element.createElement
@@ -37,6 +36,7 @@ import web.cssom.FlexWrap
 import web.cssom.Isolation
 import web.cssom.JustifyContent
 import web.cssom.Margin
+import web.cssom.None
 import web.cssom.Overflow
 import web.cssom.Padding
 import web.cssom.Position
@@ -254,7 +254,7 @@ class KtjsHero : CustomElementAdapter() {
                     position = Position.absolute
                     zIndex = integer(-1)
                     borderRadius = 50.pct
-                    pointerEvents = pointerEventsNone
+                    pointerEvents = None.none
                 }
 
                 Pseudos.before {

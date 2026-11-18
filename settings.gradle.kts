@@ -17,6 +17,11 @@ dependencyResolutionManagement {
         // here after it is in a repository: a SNAPSHOT comes from `mavenLocal` (that project's
         // `./gradlew publishToMavenLocal`), a released version from Central. An empty local repository
         // falls through, so CI resolves exactly the released artifacts.
+        //
+        // The trap: a POM-only `kotlin-stdlib` in the local repository has no JS variant, and Gradle
+        // does not fall back once it has found metadata — the compiler then fails on
+        // `Unresolved reference 'js'` in a file that never mentions it. Keep the Kotlin coordinates
+        // pinned to Central (the `exclusiveContent` block below) so a stray local POM cannot shadow them.
         mavenLocal()
         // Maven Central is the source of truth for kotlin-wrappers: the Aliyun mirror lags behind
         // and sometimes serves metadata without the corresponding klibs. Gradle does not fall back
@@ -27,6 +32,8 @@ dependencyResolutionManagement {
             filter {
                 includeGroup("org.jetbrains.kotlin-wrappers")
                 includeModule("org.jetbrains.kotlin", "kotlin-js-plain-objects")
+                // the stdlib half of the same trap: its JS klib only exists on Central
+                includeGroup("org.jetbrains.kotlin")
             }
         }
         mavenCentral()

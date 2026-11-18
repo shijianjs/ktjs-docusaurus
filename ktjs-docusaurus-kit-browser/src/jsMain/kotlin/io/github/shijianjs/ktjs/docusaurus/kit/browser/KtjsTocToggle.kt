@@ -2,7 +2,7 @@ package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
-import io.github.shijianjs.ktjs.dom.attribute.attr
+import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
 import io.github.shijianjs.ktjs.dom.element.createElement
 import io.github.shijianjs.ktjs.dom.css.dsl.Pseudos
 import io.github.shijianjs.ktjs.dom.css.dsl.invoke
@@ -10,6 +10,9 @@ import io.github.shijianjs.ktjs.dom.css.dsl.pseudos
 import io.github.shijianjs.ktjs.dom.css.cssSheet
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import kotlin.js.JsName
+import web.aria.AriaExpanded
+import web.aria.`false` as ariaCollapsed
+import web.aria.`true` as ariaExpanded
 import web.components.CustomElementReference
 import web.cssom.AlignItems
 import web.cssom.Border
@@ -187,9 +190,9 @@ class KtjsTocToggle : CustomElementAdapter() {
         val label = if (collapsed) showLabel else hideLabel
         button.ariaLabel = label
         button.title = label
-        // `ariaExpanded` is a plain string in the published kotlin-browser (2026.11.0); the union
-        // type in the sources tree is newer than the release we compile against.
-        button.ariaExpanded = if (collapsed) "false" else "true"
+        // `aria-expanded` is a union of "true" / "false": the typed attribute takes the kotlin-browser
+        // constant, not a hand-written string.
+        button.ariaExpanded = if (collapsed) AriaExpanded.ariaCollapsed else AriaExpanded.ariaExpanded
 
         val toc = list ?: return
         val id = toc.getAttribute("id").takeUnless { it.isNullOrEmpty() } ?: TOC_ID.also {
