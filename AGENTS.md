@@ -231,11 +231,14 @@ duckfn 站点一致。
     ① 选择器用 `ClassName` + `invoke`（点号由它补）。Kotlin 的解析规则要注意：`ClassName("x") { … }`
       会被读成「调用工厂 + 尾随 lambda 当第二个实参」，一次性用加括号 `(ClassName("x")) { … }`，
       要复用就存 `val` 再 `cardClass { … }`。
-    ② 伪类 / 伪元素用 `ktjs-dom-kit` 的 `css/Pseudos.kt`：`Pseudos` 列全 64 个选择器（每个带 `&`），
+    ② 伪类 / 伪元素用 `ktjs-dom-kit` 的 `css/dsl/Pseudos.kt`：`Pseudos` 列全 64 个常量（外加 `:host`），
+      每个常量就是伪类文本本身（`Pseudos.hover` = `:hover`，不带 `&`）；
       `Pseudos.hover { … }` 或 `pseudos(Pseudos.hover, Pseudos.focusVisible) { … }`（后者用
       `many` 拼成一个块）。前者靠 `context(RuleBuilder<T>)` + `operator Pseudo.invoke`（Kotlin 2.2+
-      context parameters，本仓库 2.4 无需开关；调用点要 `import …dom.css.invoke`），效果与官方
-      `hover {}` 相同但带 `&`。不要用 `hover {}` 糖：它缺 `&` 会被 stylis 当成后代选择器，而且就算上游
+      context parameters，本仓库 2.4 无需开关；调用点要 `import …dom.css.dsl.invoke`），由作用域补上 `&`
+      （逗号分开的每一支各补一个），效果与官方 `hover {}` 相同。`&` 不在值里，因为它说的是「挂到哪儿」；
+      所以同一个 `Pseudos.hover` 也能当选择器零件：`pseudo(Pseudos.not, className(HIDDEN))`。不要用
+      `hover {}` 糖：它缺 `&` 会被 stylis 当成后代选择器，而且就算上游
       <https://github.com/JetBrains/kotlin-wrappers/issues/2933> 修好，也表达不了「多个状态共用一个块」；
       所以不等它，自建一层（`TagName` + `HtmlTagName` 的形态）。at-rule 别写字符串：
       `` `@media`(MediaType.screen and maxWidth(576.px)) `` 是 csstype `RuleBuilder` 自带的 helper，
