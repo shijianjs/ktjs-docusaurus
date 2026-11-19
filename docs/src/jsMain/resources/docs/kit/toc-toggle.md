@@ -15,6 +15,16 @@ Two pieces, and no stylesheet of its own:
    desktop TOC and inserts a `<ktjs-toc-toggle>` tag in front of the list.
 2. `<ktjs-toc-toggle>`, the browser half. It lives in the kit's browser bundle, owns the button, and
    changes the layout of the nodes it was inserted between.
+```mermaid
+flowchart LR
+  ROUTE["client module<br/>onRouteDidUpdate"] -->|"browser guard, then install()"| TOC["TocToggle<br/>Node-safe half"]
+  TOC -->|"finds the desktop TOC, inserts"| TAG["&lt;ktjs-toc-toggle&gt;"]
+  BUNDLE["kit browser bundle"] -->|"upgrades the tag"| TAG
+  TAG -->|"collapse / expand"| LAYOUT["the nodes it sits between"]
+```
+
+Two halves, two wirings: the module is listed in `clientModules` and calls `install()` plus
+`refresh()` after every route change; the element itself arrives with the kit's browser bundle.
 
 ```kotlin
 private val toggle = TocToggle()

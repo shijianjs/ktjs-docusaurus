@@ -22,6 +22,15 @@ docusaurus {
 }
 ```
 
+## What it generates```mermaid
+flowchart LR
+  KJS["Kotlin/JS docs module"] -->|"@JsExport: config, sidebars, client module, pages"| PLUGIN["ktjs-docusaurus Gradle plugin"]
+  RES["docs/ blog/ src/ static/ i18n/ resources"] --> PLUGIN
+  PLUGIN --> GEN["build/docusaurus<br/>config · sidebars · client-module · pages · compiled JS"]
+  GEN --> CLI["docusaurus CLI"]
+  CLI --> SITE["static site"]
+```
+
 ## What it generates
 
 | Output | From |

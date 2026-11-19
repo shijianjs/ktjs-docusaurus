@@ -13,6 +13,18 @@ Docusaurus. The kit is this project's own taste applied to its site — the piec
 provides — so depend on it only if you want the same look and the same TOC behaviour.
 
 It exists because a documentation site needs three things that no npm package provides:
+```mermaid
+flowchart TB
+  KIT["ktjs-docusaurus-kit<br/>own logic, own semantic version"] --> HOME["home sections<br/>hero · action · badge · features · next steps"]
+  KIT --> TOC["TOC toggle<br/>the right-hand TOC's missing control"]
+  KIT --> W["small widgets<br/>no React, no runtime"]
+  HOME --> PAGE["a page is markup:<br/>the tags upgrade themselves"]
+  TOC --> PAGE
+  W --> PAGE
+```
+
+Everything in the kit is a custom element or a plain DOM widget, so a page uses the tags and never
+imports a component tree.
 
 - **Home sections** — the hero, the feature grid and the "where to go next" cards. Plain DOM, built
   once, updated through setters.

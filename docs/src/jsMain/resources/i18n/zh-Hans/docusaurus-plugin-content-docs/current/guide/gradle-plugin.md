@@ -21,6 +21,15 @@ docusaurus {
 }
 ```
 
+## 它生成什么```mermaid
+flowchart LR
+  KJS["Kotlin/JS 文档模块"] -->|"@JsExport：config、sidebars、client module、页面"| PLUGIN["ktjs-docusaurus Gradle 插件"]
+  RES["docs/ blog/ src/ static/ i18n/ 资源"] --> PLUGIN
+  PLUGIN --> GEN["build/docusaurus<br/>config · sidebars · client-module · 页面 · 编译产物"]
+  GEN --> CLI["docusaurus CLI"]
+  CLI --> SITE["静态站点"]
+```
+
 ## 它生成什么
 
 | 产物 | 来自 |

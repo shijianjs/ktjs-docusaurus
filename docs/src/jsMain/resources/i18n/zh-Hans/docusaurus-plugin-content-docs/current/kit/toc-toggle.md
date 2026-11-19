@@ -15,6 +15,16 @@ Docusaurus 允许读者隐藏左侧栏（`themeConfig.docs.sidebar.hideable`）�
    前面插入一个 `<ktjs-toc-toggle>` 标签。
 2. `<ktjs-toc-toggle>`，浏览器的那一半。它在 kit 的浏览器包里，持有按钮，并改变它被插入的那几个
    节点的布局。
+```mermaid
+flowchart LR
+  ROUTE["client module<br/>onRouteDidUpdate"] -->|"浏览器守卫之后 install()"| TOC["TocToggle<br/>Node 安全的那一半"]
+  TOC -->|"找到桌面目录、插入标签"| TAG["&lt;ktjs-toc-toggle&gt;"]
+  BUNDLE["kit 浏览器包"] -->|"升级这个标签"| TAG
+  TAG -->|"折叠 / 展开"| LAYOUT["它夹在中间的那几个节点"]
+```
+
+两半、两处接线：模块要写进 `clientModules`，并在每次路由变化后调 `install()` 与 `refresh()`；
+元素本身随 kit 的浏览器包到达。
 
 ```kotlin
 private val toggle = TocToggle()
