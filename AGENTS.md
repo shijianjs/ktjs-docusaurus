@@ -133,13 +133,16 @@ duckfn 站点一致。
      `@JsName("connectedCallback") fun` 后才会触发上面那条栈溢出。两种失败都在
      `probes/web-components` 里可复现（`<my-panel>` 与 `<my-panel-fn>`）。
 
-   **本仓库的解法**：`ktjs-dom-kit` 里 `CustomElementAdapter : HTMLElement()` 用官方写法，注册用
-   `defineIfMissing(name, reference)`——它在 `customElements.define` 之前调用 `stripBridgesFrom`，沿
+   **本仓库的解法**：`ktjs-dom-kit` 里 `CustomElementAdapter : HTMLElement(), CustomElement.WithCallbacks`
+   用官方写法（`WithCallbacks` 才是把钩子声明成函数的那个变体），元素类的 `companion object` 直接继承
+   `CustomElementReferenceAdapter<T>(T::class.js, "tag")`——它的 `init` 里调
+   `defineIfMissing(NAME, this)`，后者在 `customElements.define` 之前调用 `stripBridgesFrom`，沿
    原型链删掉编译器生成的自递归桥（`Reflect.deleteProperty`，删到 `HTMLElement.prototype` 之前为止；
    注意 Kotlin 给链上每个类都生成一层桥，只删父类不够），之后元素里直接用原生拼写
    `querySelectorAll` / `append` / `animate` / `focus`，不需要 `…Super` 转发。生命周期钩子声明成
    `connectedCallback()`——元素类只写 `override fun connectedCallback()`，不要再起 `onConnected`
-   之类的别名，也不必每个类带 `@JsName`。**没有任何 JS 类字面量**。细节与实测在
+   之类的别名，也不必每个类带 `@JsName`。**没有任何 JS 类字面量**，也没有 `newXxx()` 工厂：
+   读一次 `X.NAME { … }` 就是注册 + 创建（需要自己控制注册时机时传 `register = false`）。细节与实测在
    `probes/web-components` 的 `CustomElementAdapter.kt` / `MyPanelAdapter.kt`。编译器侧的解释在上游
    <https://github.com/JetBrains/kotlin-wrappers/issues/2932>：桥只为外部**接口**上 `= definedExternally`
    的成员生成，名字与目标同名，所以调用解析回自己；JVM 后端有 `isErroneousSpecialBridge`（KT-82651）
