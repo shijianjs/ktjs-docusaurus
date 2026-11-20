@@ -73,7 +73,7 @@ kotlin {
             resources.srcDir(stageBrowserBundle)
         }
         jsMain.dependencies {
-            api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.1")
+            api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.2")
         }
         jsTest.dependencies {
             implementation(kotlin("test"))
