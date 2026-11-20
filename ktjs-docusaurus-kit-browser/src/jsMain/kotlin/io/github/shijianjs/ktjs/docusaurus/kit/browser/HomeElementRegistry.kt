@@ -1,6 +1,5 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
 import io.github.shijianjs.ktjs.iconify.registerIconifyIcon
 import js.reflect.unsafeCast
 import kotlin.js.JsExport
@@ -10,26 +9,30 @@ import web.html.HTMLElement
  * Registers every `<ktjs-…>` tag with the browser's custom-element registry.
  *
  * Each element renders into its own shadow root and reads its content from attributes, child tags or
- * its own position in the page. `defineIfMissing` strips the compiler-generated bridges before
- * defining, so the elements can use the native DOM spelling.
+ * its own position in the page. The tag itself belongs to the element's companion: an
+ * `CustomElementReferenceAdapter` defines it in `init`, so reading `NAME` on each companion here is
+ * what registers it — and the browser upgrades any markup the page already spells.
  */
+@Suppress("UNUSED_EXPRESSION")
 @JsExport
 fun registerKtjsElements() {
     // Importing the npm module is what registers <iconify-icon>; the wrapper exposes that side
     // effect as this call, so the bundler keeps the module.
     registerIconifyIcon()
 
-    defineIfMissing(KtjsHero.NAME, KtjsHero.Companion)
-    defineIfMissing(KtjsAction.NAME, KtjsAction.Companion)
-    defineIfMissing(KtjsBadge.NAME, KtjsBadge.Companion)
+    // Reading `NAME` on each companion is what registers its tag, and any markup the page already
+    // spells is upgraded right there.
+    KtjsHero.NAME
+    KtjsAction.NAME
+    KtjsBadge.NAME
 
-    defineIfMissing(KtjsFeatures.NAME, KtjsFeatures.Companion)
-    defineIfMissing(KtjsFeature.NAME, KtjsFeature.Companion)
+    KtjsFeatures.NAME
+    KtjsFeature.NAME
 
-    defineIfMissing(KtjsNextSteps.NAME, KtjsNextSteps.Companion)
-    defineIfMissing(KtjsStep.NAME, KtjsStep.Companion)
+    KtjsNextSteps.NAME
+    KtjsStep.NAME
 
-    defineIfMissing(KtjsTocToggle.NAME, KtjsTocToggle.Companion)
+    KtjsTocToggle.NAME
 }
 
 /**

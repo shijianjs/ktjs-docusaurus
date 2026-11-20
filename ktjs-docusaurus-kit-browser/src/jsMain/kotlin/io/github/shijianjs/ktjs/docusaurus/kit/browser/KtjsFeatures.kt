@@ -1,12 +1,12 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
 import io.github.shijianjs.ktjs.dom.element.createElement
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import kotlin.js.JsName
-import web.components.CustomElementReference
 import web.cssom.Display
 import web.cssom.rem
 import web.dom.TagName
@@ -55,7 +55,5 @@ class KtjsFeatures : CustomElementAdapter() {
         applyInitialAttributes()
     }
 
-    companion object : CustomElementReference<KtjsFeatures>(KtjsFeatures::class.js) {
-        val NAME: TagName<KtjsFeatures> = TagName(HomeMarkup.FEATURES)
-    }
+    companion object : CustomElementReferenceAdapter<KtjsFeatures>(KtjsFeatures::class.js, HomeMarkup.FEATURES)
 }

@@ -1,7 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
 import io.github.shijianjs.ktjs.dom.element.createElement
-import io.github.shijianjs.ktjs.dom.webcomponent.defineIfMissing
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,7 +21,6 @@ class HomeElementsTest {
 
     @Test
     fun heroFollowsItsAttributes() {
-        defineIfMissing(KtjsHero.NAME, KtjsHero.Companion)
         val hero = KtjsHero.NAME.createElement()
         hero.setAttribute("title", "First")
         hero.setAttribute("tagline", "The tagline")
@@ -52,7 +50,6 @@ class HomeElementsTest {
 
     @Test
     fun actionFollowsKindHrefAndIcon() {
-        defineIfMissing(KtjsAction.NAME, KtjsAction.Companion)
         val action = KtjsAction.NAME.createElement()
         action.setAttribute("kind", "primary")
         action.setAttribute("href", "docs/intro")
@@ -88,7 +85,6 @@ class HomeElementsTest {
 
     @Test
     fun badgeFollowsItsAttributes() {
-        defineIfMissing(KtjsBadge.NAME, KtjsBadge.Companion)
         val badge = KtjsBadge.NAME.createElement()
         badge.setAttribute("href", "https://example.com")
         badge.setAttribute("src", "badge.svg")
@@ -115,8 +111,6 @@ class HomeElementsTest {
 
     @Test
     fun featureAndStepFollowTheirAttributes() {
-        defineIfMissing(KtjsFeature.NAME, KtjsFeature.Companion)
-        defineIfMissing(KtjsStep.NAME, KtjsStep.Companion)
 
         val feature = KtjsFeature.NAME.createElement()
         feature.setAttribute("title", "Card")
@@ -156,7 +150,6 @@ class HomeElementsTest {
 
     @Test
     fun sectionsFollowTheirAttributes() {
-        defineIfMissing(KtjsFeatures.NAME, KtjsFeatures.Companion)
         val features = KtjsFeatures.NAME.createElement()
         features.setAttribute("section-title", "Why")
         document.body.appendChild(features)
@@ -189,8 +182,6 @@ class HomeElementsTest {
      */
     @Test
     fun fullBleedSectionsSpanTheViewportNotTheContentColumn() {
-        defineIfMissing(KtjsHero.NAME, KtjsHero.Companion)
-        defineIfMissing(KtjsFeatures.NAME, KtjsFeatures.Companion)
 
         // A narrow centred column stands in for the page container the band has to escape.
         val column = HtmlTagName.div.createElement {

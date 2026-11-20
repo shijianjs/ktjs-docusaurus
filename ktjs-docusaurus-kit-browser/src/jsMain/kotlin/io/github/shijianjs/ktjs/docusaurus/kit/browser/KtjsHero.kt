@@ -1,5 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
@@ -18,7 +19,6 @@ import io.github.shijianjs.ktjs.dom.css.dsl.webkitBackgroundClip
 import io.github.shijianjs.ktjs.dom.element.createElement
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import kotlin.js.JsName
-import web.components.CustomElementReference
 import web.components.HTMLSlotElement
 import web.cssom.AlignItems
 import web.cssom.AnimationIterationCount
@@ -227,8 +227,7 @@ class KtjsHero : CustomElementAdapter() {
         }
     }
 
-    companion object : CustomElementReference<KtjsHero>(KtjsHero::class.js) {
-        val NAME: TagName<KtjsHero> = TagName(HomeMarkup.HERO)
+    companion object : CustomElementReferenceAdapter<KtjsHero>(KtjsHero::class.js, HomeMarkup.HERO) {
 
         /** The host, the logo, the gradient headline and the action row, as typed class names. */
         private val HERO: ClassName = ClassName("ktjs-hero")

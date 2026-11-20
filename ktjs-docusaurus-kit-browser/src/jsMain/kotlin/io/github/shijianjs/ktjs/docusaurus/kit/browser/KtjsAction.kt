@@ -1,5 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.attribute.AttributeCodec
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
@@ -14,7 +15,6 @@ import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import kotlin.js.JsName
-import web.components.CustomElementReference
 import web.cssom.AlignItems
 import web.cssom.Border
 import web.cssom.BoxShadow
@@ -149,8 +149,7 @@ class KtjsAction : CustomElementAdapter() {
         if (iconElement.parentNode == null) anchor.insertBefore(iconElement, labelElement)
     }
 
-    companion object : CustomElementReference<KtjsAction>(KtjsAction::class.js) {
-        val NAME: TagName<KtjsAction> = TagName(HomeMarkup.ACTION)
+    companion object : CustomElementReferenceAdapter<KtjsAction>(KtjsAction::class.js, HomeMarkup.ACTION) {
 
         /** `ActionKind` cannot be enumerated through reflection in Kotlin/JS, hence the explicit list. */
         private val kindCodec: AttributeCodec<ActionKind> = enumAttributeCodec(ActionKind.entries)

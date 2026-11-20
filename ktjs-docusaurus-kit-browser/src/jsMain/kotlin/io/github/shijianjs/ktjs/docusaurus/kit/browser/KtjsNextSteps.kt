@@ -1,12 +1,12 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
 import io.github.shijianjs.ktjs.dom.element.createElement
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import kotlin.js.JsName
-import web.components.CustomElementReference
 import web.cssom.Auto
 import web.cssom.Display
 import web.cssom.Margin
@@ -52,7 +52,5 @@ class KtjsNextSteps : CustomElementAdapter() {
         applyInitialAttributes()
     }
 
-    companion object : CustomElementReference<KtjsNextSteps>(KtjsNextSteps::class.js) {
-        val NAME: TagName<KtjsNextSteps> = TagName(HomeMarkup.NEXT_STEPS)
-    }
+    companion object : CustomElementReferenceAdapter<KtjsNextSteps>(KtjsNextSteps::class.js, HomeMarkup.NEXT_STEPS)
 }

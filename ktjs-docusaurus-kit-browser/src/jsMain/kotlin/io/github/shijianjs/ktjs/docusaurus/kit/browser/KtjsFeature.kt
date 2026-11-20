@@ -1,5 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
@@ -12,7 +13,6 @@ import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import kotlin.js.JsName
-import web.components.CustomElementReference
 import web.cssom.AlignItems
 import web.cssom.Border
 import web.cssom.BoxShadow
@@ -124,8 +124,7 @@ class KtjsFeature : CustomElementAdapter() {
         applyInitialAttributes()
     }
 
-    companion object : CustomElementReference<KtjsFeature>(KtjsFeature::class.js) {
-        val NAME: TagName<KtjsFeature> = TagName(HomeMarkup.FEATURE)
+    companion object : CustomElementReferenceAdapter<KtjsFeature>(KtjsFeature::class.js, HomeMarkup.FEATURE) {
 
         /** The card, as a typed class name: the shadow markup and [SHEET] share it. */
         private val CARD: ClassName = ClassName("ktjs-feature-card")

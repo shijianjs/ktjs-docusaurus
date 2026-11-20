@@ -1,5 +1,6 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
+import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
@@ -13,7 +14,6 @@ import kotlin.js.JsName
 import web.aria.AriaExpanded
 import web.aria.`false` as ariaCollapsed
 import web.aria.`true` as ariaExpanded
-import web.components.CustomElementReference
 import web.cssom.AlignItems
 import web.cssom.Border
 import web.cssom.BoxShadow
@@ -217,8 +217,7 @@ class KtjsTocToggle : CustomElementAdapter() {
         }
     }
 
-    companion object : CustomElementReference<KtjsTocToggle>(KtjsTocToggle::class.js) {
-        val NAME: TagName<KtjsTocToggle> = TagName(HomeMarkup.TOC_TOGGLE)
+    companion object : CustomElementReferenceAdapter<KtjsTocToggle>(KtjsTocToggle::class.js, HomeMarkup.TOC_TOGGLE) {
 
         /** Fallbacks used when the kit does not pass `hide-label` / `show-label`. */
         const val DEFAULT_HIDE_LABEL: String = "Collapse table of contents"
