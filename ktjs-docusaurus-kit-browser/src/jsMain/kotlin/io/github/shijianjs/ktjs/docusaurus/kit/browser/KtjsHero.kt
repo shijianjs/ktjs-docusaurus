@@ -1,8 +1,8 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.webcomponent.attr.AttributeName
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
 import io.github.shijianjs.ktjs.dom.css.dsl.Pseudos
 import io.github.shijianjs.ktjs.dom.css.dsl.invoke
@@ -92,7 +92,7 @@ class KtjsHero : CustomElementAdapter() {
 
     /** `logo-src`: the logo image; blank drops the `src` instead of pointing the image at the page. */
     @JsName("logoSrc")
-    var logoSrc: String by attr("logo-src") { change ->
+    var logoSrc: String by attr { change ->
         if (change.newValue.isBlank()) {
             logoElement.removeAttribute("src")
         } else {
@@ -106,8 +106,9 @@ class KtjsHero : CustomElementAdapter() {
      * Named `titleText` because `HTMLElement` already has a `title` (the tooltip attribute), and the
      * spec spelling of the attribute is the only thing the markup cares about.
      */
+    @AttributeName("title")
     @JsName("titleText")
-    var titleText: String by attr("title") { change -> headingElement.textContent = change.newValue }
+    var titleText: String by attr { change -> headingElement.textContent = change.newValue }
 
     /** `tagline`: the sentence under the heading. */
     @JsName("tagline")
@@ -227,7 +228,7 @@ class KtjsHero : CustomElementAdapter() {
         }
     }
 
-    companion object : CustomElementReferenceAdapter<KtjsHero>(KtjsHero::class.js, HomeMarkup.HERO) {
+    companion object : KtjsHeroDefaultReference() {
 
         /** The host, the logo, the gradient headline and the action row, as typed class names. */
         private val HERO: ClassName = ClassName("ktjs-hero")

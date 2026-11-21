@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalJsTestDsl
 
 plugins {
     kotlin("multiplatform")
+    id("com.google.devtools.ksp")
 }
 
 /**
@@ -59,4 +60,17 @@ kotlin {
             implementation(kotlin("test"))
         }
     }
+}
+
+/**
+ * `ktjs-dom-kit-ksp` writes the `…DefaultReference` each element's companion extends — the tag, the
+ * `observedAttributes` array and the property-to-attribute table — from the class's `by attr`
+ * declarations, plus one `<Prefix>CustomElements` object listing all of them. The elements below are
+ * all `Ktjs…`, so the default `ktjs-` prefix spells their tags exactly as `HomeMarkup` does.
+ *
+ * The processor is a JVM artifact of its own, consumed from the same coordinates as the kit: a SNAPSHOT
+ * arrives through `mavenLocal` when working across the two repositories.
+ */
+dependencies {
+    add("kspJs", "io.github.shijianjs:ktjs-dom-kit-ksp:${providers.gradleProperty("ktjs-dom-kit.version").get()}")
 }

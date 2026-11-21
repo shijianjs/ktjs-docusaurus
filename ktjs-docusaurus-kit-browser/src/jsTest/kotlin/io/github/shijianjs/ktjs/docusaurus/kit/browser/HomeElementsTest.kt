@@ -205,4 +205,46 @@ class HomeElementsTest {
 
         document.body.removeChild(column)
     }
+
+    /**
+     * The generated `observedAttributes` is what makes an attribute written *after* the element is
+     * connected reach its shadow tree. Without it the browser never calls `attributeChangedCallback`,
+     * the write is silently dropped, and only `applyInitialAttributes()` — called by hand — would
+     * report it; the catch-up in `connectedCallback` covers markup, not later writes.
+     */
+    @Test
+    fun anAttributeWrittenAfterConnectReachesTheShadowWithoutACatchUp() {
+        val hero = KtjsHero.NAME.createElement()
+        document.body.appendChild(hero)
+        val heading = assertNotNull(assertNotNull(hero.shadowRoot).querySelector(HtmlTagName.h1))
+
+        hero.setAttribute("title", "Live")
+        hero.setAttribute("tagline", "Also live")
+
+        assertEquals("Live", heading.textContent)
+        assertEquals("Also live", assertNotNull(hero.shadowRoot).querySelector(HtmlTagName.p)!!.textContent)
+
+        document.body.removeChild(hero)
+    }
+
+    /**
+     * `HomeMarkup` spells the tags the site's MDX writes, and the registry lists what the processor
+     * generated — two sources that must not drift. The list is what `registerKtjsElements()` defines.
+     */
+    @Test
+    fun theRegistryListsExactlyTheTagsTheMarkupSpells() {
+        assertEquals(
+            listOf(
+                HomeMarkup.ACTION,
+                HomeMarkup.BADGE,
+                HomeMarkup.FEATURE,
+                HomeMarkup.FEATURES,
+                HomeMarkup.HERO,
+                HomeMarkup.NEXT_STEPS,
+                HomeMarkup.STEP,
+                HomeMarkup.TOC_TOGGLE,
+            ).sorted(),
+            KtjsCustomElements.TAGS.sorted(),
+        )
+    }
 }

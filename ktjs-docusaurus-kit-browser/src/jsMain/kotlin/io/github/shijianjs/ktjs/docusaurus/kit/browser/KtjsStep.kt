@@ -1,8 +1,8 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.webcomponent.attr.AttributeName
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
 import io.github.shijianjs.ktjs.dom.element.createElement
 import io.github.shijianjs.ktjs.dom.css.dsl.Pseudos
@@ -69,7 +69,8 @@ class KtjsStep : CustomElementAdapter() {
 
     /** `title`: the card's heading; named `titleText` because `HTMLElement.title` is the tooltip. */
     @JsName("titleText")
-    var titleText: String by attr("title") { change -> headingElement.textContent = change.newValue }
+    @AttributeName("title")
+    var titleText: String by attr { change -> headingElement.textContent = change.newValue }
 
     init {
         val shadow = attachStyledShadow(HOME_RESET, SHEET)
@@ -132,7 +133,7 @@ class KtjsStep : CustomElementAdapter() {
         applyInitialAttributes()
     }
 
-    companion object : CustomElementReferenceAdapter<KtjsStep>(KtjsStep::class.js, HomeMarkup.STEP) {
+    companion object : KtjsStepDefaultReference() {
 
         /** The card, as a typed class name: the shadow markup and [SHEET] share it. */
         private val CARD: ClassName = ClassName("ktjs-next-card")

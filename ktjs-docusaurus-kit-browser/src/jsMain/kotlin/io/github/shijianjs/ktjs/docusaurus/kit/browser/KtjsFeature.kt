@@ -1,8 +1,8 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.webcomponent.attr.AttributeName
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
 import io.github.shijianjs.ktjs.dom.css.dsl.Pseudos
 import io.github.shijianjs.ktjs.dom.css.dsl.pseudos
@@ -60,11 +60,13 @@ class KtjsFeature : CustomElementAdapter() {
 
     /** `icon`: an Iconify name for the chip above the title. */
     @JsName("iconName")
-    var iconName: String by attr("icon") { change -> iconElement.setAttribute("icon", change.newValue) }
+    @AttributeName("icon")
+    var iconName: String by attr { change -> iconElement.setAttribute("icon", change.newValue) }
 
     /** `title`: the card's heading; named `titleText` because `HTMLElement.title` is the tooltip. */
     @JsName("titleText")
-    var titleText: String by attr("title") { change -> headingElement.textContent = change.newValue }
+    @AttributeName("title")
+    var titleText: String by attr { change -> headingElement.textContent = change.newValue }
 
     init {
         val shadow = attachStyledShadow(HOME_RESET, SHEET)
@@ -124,7 +126,7 @@ class KtjsFeature : CustomElementAdapter() {
         applyInitialAttributes()
     }
 
-    companion object : CustomElementReferenceAdapter<KtjsFeature>(KtjsFeature::class.js, HomeMarkup.FEATURE) {
+    companion object : KtjsFeatureDefaultReference() {
 
         /** The card, as a typed class name: the shadow markup and [SHEET] share it. */
         private val CARD: ClassName = ClassName("ktjs-feature-card")

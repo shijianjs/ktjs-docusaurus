@@ -1,6 +1,5 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
@@ -83,15 +82,15 @@ class KtjsTocToggle : CustomElementAdapter() {
 
     /** `hide-label`: the button's label while the list is expanded. */
     @JsName("hideLabel")
-    var hideLabel: String by attr("hide-label", default = DEFAULT_HIDE_LABEL) { updateLabel() }
+    var hideLabel: String by attr(default = DEFAULT_HIDE_LABEL) { updateLabel() }
 
     /** `show-label`: the button's label while the list is collapsed. */
     @JsName("showLabel")
-    var showLabel: String by attr("show-label", default = DEFAULT_SHOW_LABEL) { updateLabel() }
+    var showLabel: String by attr(default = DEFAULT_SHOW_LABEL) { updateLabel() }
 
     /** `storage-key`: the `localStorage` key the choice is remembered under. */
     @JsName("storageKey")
-    var storageKey: String by attr("storage-key", default = DEFAULT_STORAGE_KEY)
+    var storageKey: String by attr(default = DEFAULT_STORAGE_KEY)
 
     /** `collapsed`: whether the list is hidden; also the state the layout is derived from. */
     @JsName("collapsed")
@@ -217,7 +216,7 @@ class KtjsTocToggle : CustomElementAdapter() {
         }
     }
 
-    companion object : CustomElementReferenceAdapter<KtjsTocToggle>(KtjsTocToggle::class.js, HomeMarkup.TOC_TOGGLE) {
+    companion object : KtjsTocToggleDefaultReference() {
 
         /** Fallbacks used when the kit does not pass `hide-label` / `show-label`. */
         const val DEFAULT_HIDE_LABEL: String = "Collapse table of contents"

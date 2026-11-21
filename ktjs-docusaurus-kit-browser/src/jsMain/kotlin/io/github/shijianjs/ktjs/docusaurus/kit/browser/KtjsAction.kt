@@ -1,16 +1,14 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
-import io.github.shijianjs.ktjs.dom.attribute.AttributeCodec
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
+import io.github.shijianjs.ktjs.dom.webcomponent.attr.AttributeName
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
 import io.github.shijianjs.ktjs.dom.element.createElement
 import io.github.shijianjs.ktjs.dom.css.dsl.Pseudos
 import io.github.shijianjs.ktjs.dom.css.dsl.pseudo
 import io.github.shijianjs.ktjs.dom.css.dsl.pseudos
 import io.github.shijianjs.ktjs.dom.css.cssSheet
-import io.github.shijianjs.ktjs.dom.attribute.types.enumAttributeCodec
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
@@ -74,7 +72,7 @@ class KtjsAction : CustomElementAdapter() {
 
     /** `kind`: which pill to paint; `secondary` also opens in a new tab. */
     @JsName("kind")
-    var kind: ActionKind by attr(codec = kindCodec, default = ActionKind.Primary) { change ->
+    var kind: ActionKind by attr(default = ActionKind.Primary) { change ->
         applyKind(change.newValue)
     }
 
@@ -89,8 +87,9 @@ class KtjsAction : CustomElementAdapter() {
     }
 
     /** `icon`: an Iconify name; blank removes the glyph from the pill. */
+    @AttributeName("icon")
     @JsName("iconName")
-    var iconName: String by attr("icon") { change ->
+    var iconName: String by attr { change ->
         applyIcon(change.newValue)
     }
 
@@ -149,10 +148,7 @@ class KtjsAction : CustomElementAdapter() {
         if (iconElement.parentNode == null) anchor.insertBefore(iconElement, labelElement)
     }
 
-    companion object : CustomElementReferenceAdapter<KtjsAction>(KtjsAction::class.js, HomeMarkup.ACTION) {
-
-        /** `ActionKind` cannot be enumerated through reflection in Kotlin/JS, hence the explicit list. */
-        private val kindCodec: AttributeCodec<ActionKind> = enumAttributeCodec(ActionKind.entries)
+    companion object : KtjsActionDefaultReference() {
 
         /**
          * What the pill cannot express inline: the border (hovered through `border-color`), the

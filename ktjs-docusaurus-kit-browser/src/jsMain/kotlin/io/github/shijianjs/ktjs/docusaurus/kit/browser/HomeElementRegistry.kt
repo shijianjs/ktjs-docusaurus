@@ -20,19 +20,11 @@ fun registerKtjsElements() {
     // effect as this call, so the bundler keeps the module.
     registerIconifyIcon()
 
-    // Reading `NAME` on each companion is what registers its tag, and any markup the page already
-    // spells is upgraded right there.
-    KtjsHero.NAME
-    KtjsAction.NAME
-    KtjsBadge.NAME
-
-    KtjsFeatures.NAME
-    KtjsFeature.NAME
-
-    KtjsNextSteps.NAME
-    KtjsStep.NAME
-
-    KtjsTocToggle.NAME
+    // Reading `ALL` initialises every element's companion, and a companion defines its tag in `init` —
+    // so this one reference defines all eight tags, and any markup the page already spells is upgraded
+    // right there. The list is generated (`ktjs-dom-kit-ksp`): the `NAME` reads this function used to
+    // spell out are the same act, already merged, and a ninth element needs no line here.
+    KtjsCustomElements.ALL
 }
 
 /**

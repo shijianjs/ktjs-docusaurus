@@ -1,6 +1,5 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
@@ -26,7 +25,7 @@ class KtjsFeatures : CustomElementAdapter() {
 
     /** `section-title`: the heading above the grid. */
     @JsName("sectionTitle")
-    var sectionTitle: String by attr("section-title") { change -> section.heading.textContent = change.newValue }
+    var sectionTitle: String by attr { change -> section.heading.textContent = change.newValue }
 
     /** `tinted`: paints the band with the section tint; a boolean attribute, so presence means `true`. */
     @JsName("tinted")
@@ -55,5 +54,5 @@ class KtjsFeatures : CustomElementAdapter() {
         applyInitialAttributes()
     }
 
-    companion object : CustomElementReferenceAdapter<KtjsFeatures>(KtjsFeatures::class.js, HomeMarkup.FEATURES)
+    companion object : KtjsFeaturesDefaultReference()
 }

@@ -1,6 +1,5 @@
 package io.github.shijianjs.ktjs.docusaurus.kit.browser
 
-import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementReferenceAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.CustomElementAdapter
 import io.github.shijianjs.ktjs.dom.webcomponent.attachStyledShadow
 import io.github.shijianjs.ktjs.dom.webcomponent.attr.attr
@@ -28,7 +27,7 @@ class KtjsNextSteps : CustomElementAdapter() {
 
     /** `section-title`: the heading above the grid. */
     @JsName("sectionTitle")
-    var sectionTitle: String by attr("section-title") { change -> section.heading.textContent = change.newValue }
+    var sectionTitle: String by attr { change -> section.heading.textContent = change.newValue }
 
     init {
         val shadow = attachStyledShadow(HOME_RESET)
@@ -52,5 +51,5 @@ class KtjsNextSteps : CustomElementAdapter() {
         applyInitialAttributes()
     }
 
-    companion object : CustomElementReferenceAdapter<KtjsNextSteps>(KtjsNextSteps::class.js, HomeMarkup.NEXT_STEPS)
+    companion object : KtjsNextStepsDefaultReference()
 }
