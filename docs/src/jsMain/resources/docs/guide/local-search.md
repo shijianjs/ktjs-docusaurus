@@ -8,6 +8,15 @@ The search box in the navbar is `@easyops-cn/docusaurus-search-local`: the index
 Markdown during `docusaurus build`, so there is no search server and no third-party crawler. The
 `ktjs-docusaurus` wrapper maps its options, and this page uses them.
 
+```mermaid
+flowchart LR
+    THEME["themes: @easyops-cn/docusaurus-search-local<br/>language = [en, zh] / indexBlog = false / hashed = query"] --> BUILD
+    MD["Markdown pages"] --> BUILD["docusaurus build"]
+    BUILD --> IDX["search-index.json<br/>zh-Hans/search-index.json"]
+    IDX --> BAR["@theme/SearchBar in the navbar: suggestions"]
+    IDX --> PAGE["/search: the full result list"]
+```
+
 ## Registering it
 
 The package is a **theme**, not a plugin — it supplies `@theme/SearchBar` and `@theme/SearchPage` —

@@ -16,6 +16,17 @@ sidebar_position: 2
 | `resources/static` | `static/` | 原样拷贝的文件 |
 | `resources/i18n` | `i18n/` | 翻译 |
 
+```mermaid
+flowchart TB
+    SRC["resources/docs/intro.md<br/>英文是源语言"] --> COPY["Gradle 插件把资源树拷成站点目录"]
+    SRC2["resources/i18n/zh-Hans/.../current/intro.md<br/>同路径，深一层 locale"] --> COPY
+    COPY --> EN["docs/"]
+    COPY --> ZH["i18n/ → /zh-Hans/"]
+    CODE["resources/i18n/.../code.json<br/>组件自有的文案"] --> ZH
+    EN --> BUILD["docusaurus build"]
+    ZH --> BUILD
+```
+
 ## 翻译
 
 `docusaurus.config.mjs` 声明了 `en` 和 `zh-Hans` 两种语言，源语言是英文。每个译文页都在自己语言、自己

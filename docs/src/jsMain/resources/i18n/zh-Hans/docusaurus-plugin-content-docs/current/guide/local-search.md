@@ -8,6 +8,15 @@ sidebar_position: 3
 里建出来，所以既没有搜索服务，也没有第三方爬虫。`ktjs-docusaurus` 的 wrapper 映射了它的选项，本站用的就是
 这套类型。
 
+```mermaid
+flowchart LR
+    THEME["themes: @easyops-cn/docusaurus-search-local<br/>language = [en, zh] / indexBlog = false / hashed = query"] --> BUILD
+    MD["Markdown 页"] --> BUILD["docusaurus build"]
+    BUILD --> IDX["search-index.json<br/>zh-Hans/search-index.json"]
+    IDX --> BAR["导航栏 @theme/SearchBar：建议列表"]
+    IDX --> PAGE["/search：完整结果"]
+```
+
 ## 注册
 
 这个包是**主题**，不是插件——它提供 `@theme/SearchBar` 与 `@theme/SearchPage`——所以放在 `themes` 里。

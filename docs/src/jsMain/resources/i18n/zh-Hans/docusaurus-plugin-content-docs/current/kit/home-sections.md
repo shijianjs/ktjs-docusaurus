@@ -30,6 +30,18 @@ sidebar_position: 1
 | `ktjs-features` | `section-title`、`tinted` | `ktjs-feature`（`icon`、`title`），正文即详情 |
 | `ktjs-next-steps` | `section-title` | `ktjs-step`（`href`、`title`），正文即详情 |
 
+```mermaid
+flowchart TB
+    MDX["MDX 里的 ktjs-hero / ktjs-features / ktjs-next-steps"] --> DEF["customElements.define<br/>ktjs-docusaurus-kit-browser"]
+    DEF --> HERO["ktjs-hero：按标签名把子节点路由进具名 slot"]
+    DEF --> FEAT["ktjs-features：网格，卡片是 ktjs-feature"]
+    DEF --> NEXT["ktjs-next-steps：ktjs-step"]
+    HERO --> DOM["ktjs-dom-kit：CustomElementAdapter / attr / cssSheet"]
+    FEAT --> DOM
+    NEXT --> DOM
+    DOM --> SHADOW["每个元素一个 shadow root + 一份类级 CSSStyleSheet"]
+```
+
 ## 属性是响应式的
 
 表里每个属性都是一个 Kotlin 委托（`ktjs-dom-kit` 的 `attr`），不是只在连接时读一次的字段：

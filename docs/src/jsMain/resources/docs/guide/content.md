@@ -16,6 +16,17 @@ directory; nothing is generated from Kotlin for prose.
 | `resources/static` | `static/` | Files copied as-is |
 | `resources/i18n` | `i18n/` | Translations |
 
+```mermaid
+flowchart TB
+    SRC["resources/docs/intro.md<br/>English is the source language"] --> COPY["Gradle plugin copies the resource tree into the site directory"]
+    SRC2["resources/i18n/zh-Hans/.../current/intro.md<br/>same path, one locale deeper"] --> COPY
+    COPY --> EN["docs/"]
+    COPY --> ZH["i18n/ → /zh-Hans/"]
+    CODE["resources/i18n/.../code.json<br/>strings a component owns"] --> ZH
+    EN --> BUILD["docusaurus build"]
+    ZH --> BUILD
+```
+
 ## Translations
 
 `docusaurus.config.mjs` declares two locales, `en` and `zh-Hans`, and English is the source

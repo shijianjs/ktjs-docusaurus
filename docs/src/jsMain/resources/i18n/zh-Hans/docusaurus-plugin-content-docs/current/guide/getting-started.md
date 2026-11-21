@@ -11,6 +11,15 @@ sidebar_position: 1
 
 Node 由 Kotlin/JS 插件提供；Docusaurus 各包来自同一个插件安装的 npm workspace。
 
+```mermaid
+flowchart LR
+    KT["src/jsMain/kotlin/.../Config.kt<br/>站点配置与侧边栏"] --> SITE[":docs:docusaurusSite<br/>生成站点目录"]
+    RES["src/jsMain/resources/{docs,css,static}"] --> SITE
+    SITE --> BUILD[":docs:docusaurusBuild<br/>→ build/js/docusaurus/docs/build"]
+    SITE --> START[":docs:docusaurusStart<br/>Markdown 改动热更新"]
+    SITE --> KOTLIN["改 Kotlin 要先跑一次 docusaurusSite"]
+```
+
 ## 构建站点
 
 ```bash

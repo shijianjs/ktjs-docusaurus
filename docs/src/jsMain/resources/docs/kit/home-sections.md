@@ -30,6 +30,18 @@ one is a real custom element. No React page and no `.tsx` file.
 | `ktjs-features` | `section-title`, `tinted` | `ktjs-feature` (`icon`, `title`), body text is the details |
 | `ktjs-next-steps` | `section-title` | `ktjs-step` (`href`, `title`), body text is the details |
 
+```mermaid
+flowchart TB
+    MDX["ktjs-hero / ktjs-features / ktjs-next-steps in MDX"] --> DEF["customElements.define<br/>ktjs-docusaurus-kit-browser"]
+    DEF --> HERO["ktjs-hero: routes children into named slots by tag name"]
+    DEF --> FEAT["ktjs-features: the grid, cards are ktjs-feature"]
+    DEF --> NEXT["ktjs-next-steps: ktjs-step"]
+    HERO --> DOM["ktjs-dom-kit: CustomElementAdapter / attr / cssSheet"]
+    FEAT --> DOM
+    NEXT --> DOM
+    DOM --> SHADOW["one shadow root and one class-level CSSStyleSheet per element"]
+```
+
 ## Attributes are reactive
 
 Each attribute in that table is a Kotlin delegate (`ktjs-dom-kit`'s `attr`), not a field read once on

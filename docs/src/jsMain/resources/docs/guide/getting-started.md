@@ -12,6 +12,15 @@ sidebar_position: 1
 Node is provided by the Kotlin/JS plugin; the Docusaurus packages come from the npm workspace the
 same plugin installs.
 
+```mermaid
+flowchart LR
+    KT["src/jsMain/kotlin/.../Config.kt<br/>site configuration and sidebar"] --> SITE[":docs:docusaurusSite<br/>writes the site directory"]
+    RES["src/jsMain/resources/{docs,css,static}"] --> SITE
+    SITE --> BUILD[":docs:docusaurusBuild<br/>→ build/js/docusaurus/docs/build"]
+    SITE --> START[":docs:docusaurusStart<br/>Markdown edits hot-reload"]
+    SITE --> KOTLIN["Kotlin changes need docusaurusSite first"]
+```
+
 ## Build the site
 
 ```bash
