@@ -133,32 +133,35 @@ class KtjsStep : CustomElementAdapter() {
         super.connectedCallback()
     }
 
-    companion object : KtjsStepDefaultReference() {
+    companion object : KtjsStepDefaultReference()
+}
 
-        /** The card, as a typed class name: the shadow markup and [SHEET] share it. */
-        private val CARD: ClassName = ClassName("ktjs-next-card")
+// Read from the element's constructor. They stay off the companion on purpose: its `init` defines
+// the tag, `define` upgrades the markup the page already spells, and the constructor therefore runs
+// while the companion is still initialising — a member read off it there would be null.
 
-        /** The card's surface and its `:hover` / `:focus-visible` lift. */
-        private val SHEET: CSSStyleSheet = cssSheet {
-            CARD {
-                border = Border(
-                    1.px,
-                    LineStyle.solid,
-                    `var`(cardBorderHook, rgb(127, 127, 127, 0.24)),
-                )
-                backgroundColor = `var`(cardBackgroundHook, `var`(surfaceColorHook, NamedColor.white))
-                transition = many(
-                    Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
-                    Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
-                )
-                pseudos(Pseudos.hover, Pseudos.focusVisible) {
-                    borderColor = `var`(accentHook, `var`(primaryColorHook))
-                    boxShadow = `var`(
-                        shadowHook,
-                        BoxShadow(0.px, 10.px, 24.px, rgb(31, 111, 235, 0.18)),
-                    )
-                }
-            }
+/** The card, as a typed class name: the shadow markup and [SHEET] share it. */
+private val CARD: ClassName = ClassName("ktjs-next-card")
+
+/** The card's surface and its `:hover` / `:focus-visible` lift. */
+private val SHEET: CSSStyleSheet = cssSheet {
+    CARD {
+        border = Border(
+            1.px,
+            LineStyle.solid,
+            `var`(cardBorderHook, rgb(127, 127, 127, 0.24)),
+        )
+        backgroundColor = `var`(cardBackgroundHook, `var`(surfaceColorHook, NamedColor.white))
+        transition = many(
+            Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
+            Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
+        )
+        pseudos(Pseudos.hover, Pseudos.focusVisible) {
+            borderColor = `var`(accentHook, `var`(primaryColorHook))
+            boxShadow = `var`(
+                shadowHook,
+                BoxShadow(0.px, 10.px, 24.px, rgb(31, 111, 235, 0.18)),
+            )
         }
     }
 }

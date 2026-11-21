@@ -126,32 +126,35 @@ class KtjsFeature : CustomElementAdapter() {
         super.connectedCallback()
     }
 
-    companion object : KtjsFeatureDefaultReference() {
+    companion object : KtjsFeatureDefaultReference()
+}
 
-        /** The card, as a typed class name: the shadow markup and [SHEET] share it. */
-        private val CARD: ClassName = ClassName("ktjs-feature-card")
+// Read from the element's constructor. They stay off the companion on purpose: its `init` defines
+// the tag, `define` upgrades the markup the page already spells, and the constructor therefore runs
+// while the companion is still initialising — a member read off it there would be null.
 
-        /** The card's surface and its `:hover` lift — what inline styles cannot say. */
-        private val SHEET: CSSStyleSheet = cssSheet {
-            CARD {
-                border = Border(
-                    1.px,
-                    LineStyle.solid,
-                    `var`(cardBorderHook, rgb(127, 127, 127, 0.24)),
-                )
-                backgroundColor = `var`(cardBackgroundHook, `var`(surfaceColorHook, NamedColor.white))
-                transition = many(
-                    Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
-                    Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
-                )
-                Pseudos.hover {
-                    borderColor = `var`(accentHook, `var`(primaryColorHook))
-                    boxShadow = `var`(
-                        shadowHook,
-                        BoxShadow(0.px, 10.px, 24.px, rgb(31, 111, 235, 0.18)),
-                    )
-                }
-            }
+/** The card, as a typed class name: the shadow markup and [SHEET] share it. */
+private val CARD: ClassName = ClassName("ktjs-feature-card")
+
+/** The card's surface and its `:hover` lift — what inline styles cannot say. */
+private val SHEET: CSSStyleSheet = cssSheet {
+    CARD {
+        border = Border(
+            1.px,
+            LineStyle.solid,
+            `var`(cardBorderHook, rgb(127, 127, 127, 0.24)),
+        )
+        backgroundColor = `var`(cardBackgroundHook, `var`(surfaceColorHook, NamedColor.white))
+        transition = many(
+            Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
+            Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
+        )
+        Pseudos.hover {
+            borderColor = `var`(accentHook, `var`(primaryColorHook))
+            boxShadow = `var`(
+                shadowHook,
+                BoxShadow(0.px, 10.px, 24.px, rgb(31, 111, 235, 0.18)),
+            )
         }
     }
 }

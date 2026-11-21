@@ -221,125 +221,128 @@ class KtjsHero : CustomElementAdapter() {
         for (index in 0 until children.length) {
             val child = children.item(index) ?: continue
             when (child.tagName.lowercase()) {
-                KtjsAction.tag -> child.setAttribute("slot", "action")
-                KtjsBadge.tag -> child.setAttribute("slot", "badge")
+                KTJS_ACTION_TAG -> child.setAttribute("slot", "action")
+                KTJS_BADGE_TAG -> child.setAttribute("slot", "badge")
             }
         }
     }
 
-    companion object : KtjsHeroDefaultReference() {
+    companion object : KtjsHeroDefaultReference()
+}
 
-        /** The host, the logo, the gradient headline and the action row, as typed class names. */
-        private val HERO: ClassName = ClassName("ktjs-hero")
-        private val LOGO: ClassName = ClassName("ktjs-logo")
-        private val TITLE: ClassName = ClassName("ktjs-title")
-        private val ACTIONS: ClassName = ClassName("ktjs-actions")
+// Read from the element's constructor. They stay off the companion on purpose: its `init` defines
+// the tag, `define` upgrades the markup the page already spells, and the constructor therefore runs
+// while the companion is still initialising — a member read off it there would be null.
 
-        /** Keyframes name for the logo's float. */
-        private const val FLOAT: String = "ktjs-logo-float"
+/** The host, the logo, the gradient headline and the action row, as typed class names. */
+private val HERO: ClassName = ClassName("ktjs-hero")
+private val LOGO: ClassName = ClassName("ktjs-logo")
+private val TITLE: ClassName = ClassName("ktjs-title")
+private val ACTIONS: ClassName = ClassName("ktjs-actions")
 
-        /**
-         * Everything in the hero that inline styles cannot say: two decorative pseudo-elements, the
-         * `@supports`-guarded gradient text (inline colour would beat a descendant rule), and the
-         * small-screen stacking of the action row. The host's own `display` lives in `HOME_RESET`.
-         *
-         * The two `-webkit-` needs of this sheet come from `ktjs-dom-kit`'s `css` package:
-         * `radialGradient` and `webkitBackgroundClip`, since cssom models neither.
-         */
-        private val SHEET: CSSStyleSheet = cssSheet {
-            HERO {
-                pseudos(Pseudos.before, Pseudos.after) {
-                    content = Content()
-                    position = Position.absolute
-                    zIndex = integer(-1)
-                    borderRadius = 50.pct
-                    pointerEvents = None.none
-                }
+/** Keyframes name for the logo's float. */
+private const val FLOAT: String = "ktjs-logo-float"
 
-                Pseudos.before {
-                    top = (-18).rem
-                    left = 50.pct
-                    width = 52.rem
-                    height = 52.rem
-                    transform = translatex((-50).pct)
-                    background = radialGradient(
-                        RadialGradientShape.Circle,
-                        colorStop(glow),
-                        stop(Color.transparent, 70.pct),
-                    )
-                }
+/**
+ * Everything in the hero that inline styles cannot say: two decorative pseudo-elements, the
+ * `@supports`-guarded gradient text (inline colour would beat a descendant rule), and the
+ * small-screen stacking of the action row. The host's own `display` lives in `HOME_RESET`.
+ *
+ * The two `-webkit-` needs of this sheet come from `ktjs-dom-kit`'s `css` package:
+ * `radialGradient` and `webkitBackgroundClip`, since cssom models neither.
+ */
+private val SHEET: CSSStyleSheet = cssSheet {
+    HERO {
+        pseudos(Pseudos.before, Pseudos.after) {
+            content = Content()
+            position = Position.absolute
+            zIndex = integer(-1)
+            borderRadius = 50.pct
+            pointerEvents = None.none
+        }
 
-                Pseudos.after {
-                    right = (-10).rem
-                    bottom = (-14).rem
-                    width = 34.rem
-                    height = 34.rem
-                    background = radialGradient(
-                        RadialGradientShape.Circle,
-                        colorStop(glowWarm),
-                        stop(Color.transparent, 70.pct),
-                    )
-                }
-            }
+        Pseudos.before {
+            top = (-18).rem
+            left = 50.pct
+            width = 52.rem
+            height = 52.rem
+            transform = translatex((-50).pct)
+            background = radialGradient(
+                RadialGradientShape.Circle,
+                colorStop(glow),
+                stop(Color.transparent, 70.pct),
+            )
+        }
 
-            TITLE {
-                color = `var`(accentHook, `var`(primaryColorHook))
-            }
+        Pseudos.after {
+            right = (-10).rem
+            bottom = (-14).rem
+            width = 34.rem
+            height = 34.rem
+            background = radialGradient(
+                RadialGradientShape.Circle,
+                colorStop(glowWarm),
+                stop(Color.transparent, 70.pct),
+            )
+        }
+    }
 
-            supports(
-                supportsDeclaration(webkitBackgroundClipName, BackgroundClip.text) or
-                    supportsDeclaration(PropertyName.backgroundClip, BackgroundClip.text),
-            ) {
-                TITLE {
-                    backgroundImage = linearGradient(
-                        120.deg,
-                        colorStop(accentDeep),
-                        colorStop(accentBright),
-                    )
-                    webkitBackgroundClip(BackgroundClip.text)
-                    backgroundClip = BackgroundClip.text
-                    color = Color.transparent
-                    // `background-clip: text` only paints inside the padding box, so the tight line box
-                    // would leave the tail of "g" transparent; 0.06em was not enough at the clamped size.
-                    paddingBottom = 0.14.em
-                }
-            }
+    TITLE {
+        color = `var`(accentHook, `var`(primaryColorHook))
+    }
 
-            // The logo floats up and down forever. A keyframes rule has to live in a sheet (there is
-            // no inline form), and it is declared below the animation so the rule reads bottom-up like
-            // the CSS it serializes to.
-            "${AtRules.keyframes} $FLOAT" {
-                "0%" {
-                    transform = translatey((-4).px)
-                }
+    supports(
+        supportsDeclaration(webkitBackgroundClipName, BackgroundClip.text) or
+            supportsDeclaration(PropertyName.backgroundClip, BackgroundClip.text),
+    ) {
+        TITLE {
+            backgroundImage = linearGradient(
+                120.deg,
+                colorStop(accentDeep),
+                colorStop(accentBright),
+            )
+            webkitBackgroundClip(BackgroundClip.text)
+            backgroundClip = BackgroundClip.text
+            color = Color.transparent
+            // `background-clip: text` only paints inside the padding box, so the tight line box
+            // would leave the tail of "g" transparent; 0.06em was not enough at the clamped size.
+            paddingBottom = 0.14.em
+        }
+    }
 
-                "50%" {
-                    transform = translatey(4.px)
-                }
+    // The logo floats up and down forever. A keyframes rule has to live in a sheet (there is
+    // no inline form), and it is declared below the animation so the rule reads bottom-up like
+    // the CSS it serializes to.
+    "${AtRules.keyframes} $FLOAT" {
+        "0%" {
+            transform = translatey((-4).px)
+        }
 
-                "100%" {
-                    transform = translatey((-4).px)
-                }
-            }
+        "50%" {
+            transform = translatey(4.px)
+        }
 
-            // Motion is opt-in: a reader who asked the system for reduced motion gets a still logo
-            // rather than a page that cannot be read (nothing static sets `transform` here).
-            `@media`(prefersReducedMotion(PrefersReducedMotion.noPreference)) {
-                LOGO {
-                    animationName = ident(FLOAT)
-                    animationDuration = 7.s
-                    animationTimingFunction = AnimationTimingFunction.easeInOut
-                    animationIterationCount = AnimationIterationCount.infinite
-                    willChange = ident("transform")
-                }
-            }
+        "100%" {
+            transform = translatey((-4).px)
+        }
+    }
 
-            `@media`(MediaType.screen and maxWidth(576.px)) {
-                ACTIONS {
-                    flexDirection = FlexDirection.column
-                    alignItems = AlignItems.stretch
-                }
-            }
+    // Motion is opt-in: a reader who asked the system for reduced motion gets a still logo
+    // rather than a page that cannot be read (nothing static sets `transform` here).
+    `@media`(prefersReducedMotion(PrefersReducedMotion.noPreference)) {
+        LOGO {
+            animationName = ident(FLOAT)
+            animationDuration = 7.s
+            animationTimingFunction = AnimationTimingFunction.easeInOut
+            animationIterationCount = AnimationIterationCount.infinite
+            willChange = ident("transform")
+        }
+    }
+
+    `@media`(MediaType.screen and maxWidth(576.px)) {
+        ACTIONS {
+            flexDirection = FlexDirection.column
+            alignItems = AlignItems.stretch
         }
     }
 }

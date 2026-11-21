@@ -17,6 +17,15 @@ import web.window.WindowTarget
 import web.window._blank
 
 /**
+ * The tag this element registers under, spelled at compile time.
+ *
+ * [KtjsHero] routes its children by tag name while the tags are still being defined, so it cannot read
+ * `KtjsBadge.tag` — that companion may not exist yet. Keep this in step with the generated
+ * `KtjsBadgeDefaultReference()`.
+ */
+internal const val KTJS_BADGE_TAG: String = "ktjs-badge"
+
+/**
  * `<ktjs-badge href="…" src="…" alt="…">` — a shields.io-style image inside an external link.
  *
  * One delegate per attribute: the wrapper link and the image are updated from the callbacks, so the

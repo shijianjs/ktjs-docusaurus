@@ -227,78 +227,81 @@ class KtjsTocToggle : CustomElementAdapter() {
         private const val TOC_ID = "ktjs-doc-toc"
         private const val COLUMN_WIDTH_NAME = "--ifm-col-width"
         private const val COLLAPSED_WIDTH = "2.5rem"
+    }
+}
 
-        private val navbarHeight: Length =
-            `var`(CustomPropertyName<Length>("--ifm-navbar-height"), 0.px)
+// Read from the element's constructor. They stay off the companion on purpose: its `init` defines
+// the tag, `define` upgrades the markup the page already spells, and the constructor therefore runs
+// while the companion is still initialising — a member read off it there would be null.
+    private val navbarHeight: Length =
+        `var`(CustomPropertyName<Length>("--ifm-navbar-height"), 0.px)
 
-        private val surfaceHook = CustomPropertyName<Color>("--ifm-background-surface-color")
-        private val textHook = CustomPropertyName<Color>("--ifm-font-color-base")
+    private val surfaceHook = CustomPropertyName<Color>("--ifm-background-surface-color")
+    private val textHook = CustomPropertyName<Color>("--ifm-font-color-base")
 
-        /**
-         * What the button cannot express inline, and what the state has to say about it: the pin
-         * (sticky, under the navbar), the pill with its hover, the arrow, and the arrow's rotation
-         * when collapsed.
-         */
-        private val SHEET: CSSStyleSheet = cssSheet {
-            ":host" {
-                position = Position.sticky
-                top = navbarHeight + 0.5.rem
-                zIndex = integer(1)
-                display = Display.flex
-                justifyContent = JustifyContent.end
-                marginBlockEnd = 0.5.rem
+    /**
+     * What the button cannot express inline, and what the state has to say about it: the pin
+     * (sticky, under the navbar), the pill with its hover, the arrow, and the arrow's rotation
+     * when collapsed.
+     */
+    private val SHEET: CSSStyleSheet = cssSheet {
+        ":host" {
+            position = Position.sticky
+            top = navbarHeight + 0.5.rem
+            zIndex = integer(1)
+            display = Display.flex
+            justifyContent = JustifyContent.end
+            marginBlockEnd = 0.5.rem
+        }
+
+        ":host([collapsed])" {
+            justifyContent = JustifyContent.center
+        }
+
+        ":host > button" {
+            display = Display.flex
+            alignItems = AlignItems.center
+            justifyContent = JustifyContent.center
+            width = 2.rem
+            height = 2.rem
+            padding = Padding(0.px, 0.px)
+            border = Border(0.px, None.none, Color.transparent)
+            borderRadius = 999.px
+            background = `var`(surfaceHook, NamedColor.white)
+            boxShadow = BoxShadow(0.px, 2.px, 8.px, rgb(0, 0, 0, 0.18))
+            opacity = number(0.85)
+            cursor = Cursor.pointer
+            color = `var`(textHook, NamedColor.black)
+
+            Pseudos.hover {
+                opacity = number(1.0)
             }
 
-            ":host([collapsed])" {
-                justifyContent = JustifyContent.center
+            Pseudos.before {
+                content = Content()
+                width = 0.45.rem
+                height = 0.45.rem
+                borderInlineStart = Border(2.px, LineStyle.solid, `var`(textHook, NamedColor.black))
+                borderBlockStart = Border(2.px, LineStyle.solid, `var`(textHook, NamedColor.black))
+                // A start/top corner rotated by 45° is the usual upward chevron; 135° turns the
+                // same corner into `›`, which is the direction the TOC collapses towards.
+                transform = rotate(135.deg)
+                transition = Transition(
+                    PropertyName.transform,
+                    0.15.s,
+                    TransitionTimingFunction.ease,
+                )
             }
+        }
 
-            ":host > button" {
-                display = Display.flex
-                alignItems = AlignItems.center
-                justifyContent = JustifyContent.center
-                width = 2.rem
-                height = 2.rem
-                padding = Padding(0.px, 0.px)
-                border = Border(0.px, None.none, Color.transparent)
-                borderRadius = 999.px
-                background = `var`(surfaceHook, NamedColor.white)
-                boxShadow = BoxShadow(0.px, 2.px, 8.px, rgb(0, 0, 0, 0.18))
-                opacity = number(0.85)
-                cursor = Cursor.pointer
-                color = `var`(textHook, NamedColor.black)
-
-                Pseudos.hover {
-                    opacity = number(1.0)
-                }
-
-                Pseudos.before {
-                    content = Content()
-                    width = 0.45.rem
-                    height = 0.45.rem
-                    borderInlineStart = Border(2.px, LineStyle.solid, `var`(textHook, NamedColor.black))
-                    borderBlockStart = Border(2.px, LineStyle.solid, `var`(textHook, NamedColor.black))
-                    // A start/top corner rotated by 45° is the usual upward chevron; 135° turns the
-                    // same corner into `›`, which is the direction the TOC collapses towards.
-                    transform = rotate(135.deg)
-                    transition = Transition(
-                        PropertyName.transform,
-                        0.15.s,
-                        TransitionTimingFunction.ease,
-                    )
-                }
-            }
-
-            ":host([collapsed]) > button" {
-                Pseudos.before {
-                    // Expanded is `›`, so the way back has to be `‹`: a reader who collapsed the
-                    // column expects the control to point where the list will reappear.
-                    transform = rotate(315.deg)
-                }
+        ":host([collapsed]) > button" {
+            Pseudos.before {
+                // Expanded is `›`, so the way back has to be `‹`: a reader who collapsed the
+                // column expects the control to point where the list will reappear.
+                transform = rotate(315.deg)
             }
         }
     }
-}
 
 /** The Web Storage surface the toggle uses. */
 private external interface WebStorage {

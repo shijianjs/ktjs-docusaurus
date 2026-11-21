@@ -45,6 +45,15 @@ import web.window.WindowTarget
 import web.window._blank
 
 /**
+ * The tag this element registers under, spelled at compile time.
+ *
+ * [KtjsHero] routes its children by tag name while the tags are still being defined, so it cannot read
+ * `KtjsAction.tag` — that companion may not exist yet. Keep this in step with the generated
+ * `KtjsActionDefaultReference()`.
+ */
+internal const val KTJS_ACTION_TAG: String = "ktjs-action"
+
+/**
  * `kind` of a [`KtjsAction`]: `primary` is the filled pill, `secondary` the outlined one.
  *
  * The lower-cased constant name is what `kind="…"` matches; an unknown value reads as [Primary], the
@@ -148,51 +157,54 @@ class KtjsAction : CustomElementAdapter() {
         if (iconElement.parentNode == null) anchor.insertBefore(iconElement, labelElement)
     }
 
-    companion object : KtjsActionDefaultReference() {
+    companion object : KtjsActionDefaultReference()
+}
 
-        /**
-         * What the pill cannot express inline: the border (hovered through `border-color`), the
-         * transition that animates it, and the two colour schemes with their `:hover` /
-         * `:focus-visible` states.
-         */
-        private val SHEET: CSSStyleSheet = cssSheet {
-            ":host > a" {
-                border = Border(1.px, LineStyle.solid, Color.transparent)
-                transition = many(
-                    Transition(PropertyName.backgroundColor, 0.2.s, TransitionTimingFunction.ease),
-                    Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
-                    Transition(PropertyName.color, 0.2.s, TransitionTimingFunction.ease),
-                    Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
-                )
-            }
+// Read from the element's constructor. They stay off the companion on purpose: its `init` defines
+// the tag, `define` upgrades the markup the page already spells, and the constructor therefore runs
+// while the companion is still initialising — a member read off it there would be null.
 
-            ActionKind.Primary.className {
-                backgroundColor = `var`(accentHook, `var`(primaryColorHook))
-                borderColor = `var`(accentHook, `var`(primaryColorHook))
-                color = NamedColor.white
+/**
+ * What the pill cannot express inline: the border (hovered through `border-color`), the
+ * transition that animates it, and the two colour schemes with their `:hover` /
+ * `:focus-visible` states.
+ */
+private val SHEET: CSSStyleSheet = cssSheet {
+    ":host > a" {
+        border = Border(1.px, LineStyle.solid, Color.transparent)
+        transition = many(
+            Transition(PropertyName.backgroundColor, 0.2.s, TransitionTimingFunction.ease),
+            Transition(PropertyName.borderColor, 0.2.s, TransitionTimingFunction.ease),
+            Transition(PropertyName.color, 0.2.s, TransitionTimingFunction.ease),
+            Transition(PropertyName.boxShadow, 0.2.s, TransitionTimingFunction.ease),
+        )
+    }
 
-                pseudos(Pseudos.hover, Pseudos.focusVisible) {
-                    backgroundColor = `var`(accentStrongHook, rgb(26, 95, 208))
-                    borderColor = `var`(accentStrongHook, rgb(26, 95, 208))
-                    color = NamedColor.white
-                    boxShadow = `var`(
-                        shadowHook,
-                        BoxShadow(0.px, 10.px, 24.px, rgb(31, 111, 235, 0.24)),
-                    )
-                }
-            }
+    ActionKind.Primary.className {
+        backgroundColor = `var`(accentHook, `var`(primaryColorHook))
+        borderColor = `var`(accentHook, `var`(primaryColorHook))
+        color = NamedColor.white
 
-            ActionKind.Secondary.className {
-                backgroundColor = Color.transparent
-                borderColor = `var`(outlineBorderHook, rgb(127, 127, 127, 0.35))
-                color = `var`(accentHook, `var`(primaryColorHook))
+        pseudos(Pseudos.hover, Pseudos.focusVisible) {
+            backgroundColor = `var`(accentStrongHook, rgb(26, 95, 208))
+            borderColor = `var`(accentStrongHook, rgb(26, 95, 208))
+            color = NamedColor.white
+            boxShadow = `var`(
+                shadowHook,
+                BoxShadow(0.px, 10.px, 24.px, rgb(31, 111, 235, 0.24)),
+            )
+        }
+    }
 
-                pseudos(Pseudos.hover, Pseudos.focusVisible) {
-                    backgroundColor = `var`(accentSoftHook, rgb(31, 111, 235, 0.1))
-                    borderColor = `var`(accentHook, `var`(primaryColorHook))
-                    color = `var`(accentHook, `var`(primaryColorHook))
-                }
-            }
+    ActionKind.Secondary.className {
+        backgroundColor = Color.transparent
+        borderColor = `var`(outlineBorderHook, rgb(127, 127, 127, 0.35))
+        color = `var`(accentHook, `var`(primaryColorHook))
+
+        pseudos(Pseudos.hover, Pseudos.focusVisible) {
+            backgroundColor = `var`(accentSoftHook, rgb(31, 111, 235, 0.1))
+            borderColor = `var`(accentHook, `var`(primaryColorHook))
+            color = `var`(accentHook, `var`(primaryColorHook))
         }
     }
 }
