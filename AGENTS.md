@@ -135,12 +135,14 @@ duckfn 站点一致。
 
    **本仓库的解法**：`ktjs-dom-kit` 里 `CustomElementAdapter : HTMLElement(), CustomElement.WithCallbacks`
    用官方写法（`WithCallbacks` 才是把钩子声明成函数的那个变体），元素类的 `companion object` 直接继承
-   `CustomElementReferenceAdapter<T>(T::class.js, "tag")`——它的 `init` 里调
+   `Ktjs…DefaultReference`——`ktjs-dom-kit-ksp` 生成的那个类，底下就是
+   `CustomElementReferenceAdapter<T>(T::class.js, "tag")`。它的 `init` 里调
    `defineIfMissing(NAME, this)`，后者在 `customElements.define` 之前调用 `stripBridgesFrom`，沿
    原型链删掉编译器生成的自递归桥（`Reflect.deleteProperty`，删到 `HTMLElement.prototype` 之前为止；
    注意 Kotlin 给链上每个类都生成一层桥，只删父类不够），之后元素里直接用原生拼写
    `querySelectorAll` / `append` / `animate` / `focus`，不需要 `…Super` 转发。生命周期钩子声明成
-   `connectedCallback()`——元素类只写 `override fun connectedCallback()`，不要再起 `onConnected`
+   `connectedCallback()`，基类已经在里面做了属性兜底：元素类只在自己真有活儿时才 override，并调
+   `super.connectedCallback()`，不要再起 `onConnected`
    之类的别名，也不必每个类带 `@JsName`。**没有任何 JS 类字面量**，也没有 `newXxx()` 工厂：
    读一次 `X.NAME { … }` 就是注册 + 创建（需要自己控制注册时机时传 `register = false`）。细节与实测在
    `probes/web-components` 的 `CustomElementAdapter.kt` / `MyPanelAdapter.kt`。编译器侧的解释在上游
