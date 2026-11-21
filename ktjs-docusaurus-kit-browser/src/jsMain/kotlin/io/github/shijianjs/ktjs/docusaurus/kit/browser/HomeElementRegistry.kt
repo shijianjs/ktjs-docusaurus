@@ -12,6 +12,12 @@ import web.html.HTMLElement
  * its own position in the page. The tag itself belongs to the element's companion: an
  * `CustomElementReferenceAdapter` defines it in `init`, so reading `NAME` on each companion here is
  * what registers it — and the browser upgrades any markup the page already spells.
+ *
+ * That upgrade runs the element's **constructor** while its companion is still initialising, so a
+ * constructor must be self-sufficient: anything it reads has to be a file-level value, a compile-time
+ * constant or an argument — never a member of the companion that is defining it. The stylesheets,
+ * class names and tag strings of these elements live at file level for exactly this reason; see the
+ * note under each element's `companion object`.
  */
 @Suppress("UNUSED_EXPRESSION")
 @JsExport
