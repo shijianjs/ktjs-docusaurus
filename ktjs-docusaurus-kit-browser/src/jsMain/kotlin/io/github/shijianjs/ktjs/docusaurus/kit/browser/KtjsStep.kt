@@ -130,7 +130,7 @@ class KtjsStep : CustomElementAdapter() {
 
     override fun connectedCallback() {
         detailsElement.textContent = textContent?.trim().orEmpty()
-        applyInitialAttributes()
+        super.connectedCallback()
     }
 
     companion object : KtjsStepDefaultReference() {

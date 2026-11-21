@@ -119,7 +119,8 @@ class KtjsTocToggle : CustomElementAdapter() {
         list = nextElementSibling as? HTMLElement
         article = column?.previousElementSibling as? HTMLElement
 
-        applyInitialAttributes()
+        // The attributes, then the preference: where the two disagree, the stored choice wins.
+        super.connectedCallback()
         pinList()
         collapsed = readPreference()
         applyLayout(collapsed)

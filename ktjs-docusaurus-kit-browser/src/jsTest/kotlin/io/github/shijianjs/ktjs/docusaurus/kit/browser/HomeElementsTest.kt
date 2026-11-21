@@ -39,7 +39,6 @@ class HomeElementsTest {
         hero.setAttribute("title", "Second")
         hero.setAttribute("tagline", "Changed")
         hero.setAttribute("logo-src", "")
-        hero.applyInitialAttributes()
 
         assertEquals("Second", heading.textContent)
         assertEquals("Changed", tagline.textContent)
@@ -65,19 +64,16 @@ class HomeElementsTest {
 
         action.setAttribute("kind", "secondary")
         action.setAttribute("href", "")
-        action.applyInitialAttributes()
 
         assertTrue(anchor.classList.contains(ClassName("ktjs-button-secondary")))
         assertNull(anchor.getAttribute("href"))
         assertEquals("_blank", anchor.getAttribute("target"))
 
         action.setAttribute("icon", "lucide:github")
-        action.applyInitialAttributes()
         val icon = assertNotNull(shadow.querySelector("iconify-icon"))
         assertEquals("lucide:github", icon.getAttribute("icon"))
 
         action.setAttribute("icon", "")
-        action.applyInitialAttributes()
         assertNull(shadow.querySelector("iconify-icon"))
 
         document.body.removeChild(action)
@@ -101,7 +97,6 @@ class HomeElementsTest {
 
         badge.setAttribute("alt", "other")
         badge.setAttribute("src", "")
-        badge.applyInitialAttributes()
 
         assertEquals("other", image.alt)
         assertNull(image.getAttribute("src"))
@@ -127,7 +122,6 @@ class HomeElementsTest {
         )
 
         feature.setAttribute("title", "Renamed")
-        feature.applyInitialAttributes()
         assertEquals("Renamed", featureShadow.querySelector(HtmlTagName.h3)!!.textContent)
 
         val step = KtjsStep.NAME.createElement()
@@ -141,7 +135,6 @@ class HomeElementsTest {
         assertEquals("Intro", anchor.textContent!!.substringBefore("Read this"))
 
         step.setAttribute("title", "Start")
-        step.applyInitialAttributes()
         assertTrue(anchor.textContent!!.startsWith("Start"))
 
         document.body.removeChild(feature)
@@ -160,12 +153,10 @@ class HomeElementsTest {
         assertEquals("", band.style.backgroundColor)
 
         features.setAttribute("tinted", "")
-        features.applyInitialAttributes()
         assertTrue(band.style.backgroundColor.isNotEmpty())
 
         features.setAttribute("section-title", "Why this")
         features.removeAttribute("tinted")
-        features.applyInitialAttributes()
         assertEquals("Why this", shadow.querySelector(HtmlTagName.h2)!!.textContent)
         assertEquals("", band.style.backgroundColor)
         assertFalse(features.hasAttribute("tinted"))
@@ -209,8 +200,8 @@ class HomeElementsTest {
     /**
      * The generated `observedAttributes` is what makes an attribute written *after* the element is
      * connected reach its shadow tree. Without it the browser never calls `attributeChangedCallback`,
-     * the write is silently dropped, and only `applyInitialAttributes()` — called by hand — would
-     * report it; the catch-up in `connectedCallback` covers markup, not later writes.
+     * the write is silently dropped, and only the connect-time catch-up would report it — and that
+     * runs once, on markup, not on later writes.
      */
     @Test
     fun anAttributeWrittenAfterConnectReachesTheShadowWithoutACatchUp() {
@@ -228,21 +219,44 @@ class HomeElementsTest {
     }
 
     /**
-     * `HomeMarkup` spells the tags the site's MDX writes, and the registry lists what the processor
-     * generated — two sources that must not drift. The list is what `registerKtjsElements()` defines.
+     * The hero reads its children by tag name and hands them a `slot`, so an MDX author writes
+     * `<ktjs-hero><ktjs-action>…</ktjs-action></ktjs-hero>` and nothing else. The names come from the
+     * elements' own generated tags — there is no second list to keep in step.
+     */
+    @Test
+    fun heroRoutesItsKnownChildrenIntoNamedSlots() {
+        val hero = KtjsHero.NAME.createElement()
+        val action = KtjsAction.NAME.createElement()
+        val badge = KtjsBadge.NAME.createElement()
+        val other = HtmlTagName.div.createElement()
+        hero.appendChild(action)
+        hero.appendChild(badge)
+        hero.appendChild(other)
+        document.body.appendChild(hero)
+
+        assertEquals("action", action.getAttribute("slot"))
+        assertEquals("badge", badge.getAttribute("slot"))
+        assertNull(other.getAttribute("slot"))
+
+        document.body.removeChild(hero)
+    }
+
+    /**
+     * The tags the site's MDX writes, spelled out here, and the registry the processor generated — two
+     * sources that must not drift. The list is what `registerKtjsElements()` defines.
      */
     @Test
     fun theRegistryListsExactlyTheTagsTheMarkupSpells() {
         assertEquals(
             listOf(
-                HomeMarkup.ACTION,
-                HomeMarkup.BADGE,
-                HomeMarkup.FEATURE,
-                HomeMarkup.FEATURES,
-                HomeMarkup.HERO,
-                HomeMarkup.NEXT_STEPS,
-                HomeMarkup.STEP,
-                HomeMarkup.TOC_TOGGLE,
+                "ktjs-action",
+                "ktjs-badge",
+                "ktjs-feature",
+                "ktjs-features",
+                "ktjs-hero",
+                "ktjs-next-steps",
+                "ktjs-step",
+                "ktjs-toc-toggle",
             ).sorted(),
             KtjsCustomElements.TAGS.sorted(),
         )

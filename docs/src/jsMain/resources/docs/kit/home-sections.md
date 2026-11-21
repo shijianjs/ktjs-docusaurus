@@ -50,9 +50,9 @@ class KtjsHero : CustomElementAdapter() {
   sees an outside write immediately.
 - The callback runs when the value actually changes — from the property, from `setAttribute`, from
   devtools. Writing the same value again is not a change; removing the attribute is.
-- Call it from `connectedCallback()` with `applyInitialAttributes()`: markup that was already parsed
-  never passes through a setter, so that is how the callbacks first hear about it. It is idempotent,
-  so reconnecting an element does not repaint it twice.
+- Nothing to write for connect: the base `connectedCallback` calls `applyInitialAttributes()`, because
+  markup that was already parsed never passes through a setter — that is how the callbacks first hear
+  about it. It is idempotent, so reconnecting an element does not repaint it twice.
 - The codec follows the property type: `String`, `Int`, `Double` and `Boolean` (presence, like
   `hidden`) are built in; `kind` passes `enumAttributeCodec(ActionKind.entries)` to show the extension
   point for a custom type. `default = …` is what the getter reports while the attribute is absent — it
@@ -67,9 +67,10 @@ Two consequences:
 - **Do not set an attribute on the element itself in its constructor.** `document.createElement("ktjs-hero")`
   throws `NotSupportedError` if the constructed element already has attributes (the parser and the
   upgrade path do not). The hero's `display: block` is a `:host` rule for that reason.
-- A write from outside is reported on a microtask — the element watches itself with a
-  `MutationObserver`, since the spec's `observedAttributes` list would have to repeat every attribute
-  at `customElements.define`, before the delegates exist. A Kotlin write reports synchronously.
+- A write from outside is reported synchronously as well — inside the `setAttribute` call. The
+  `observedAttributes` list the browser reads at `customElements.define` is generated from the
+  declarations by `ktjs-dom-kit-ksp`, so no attribute is left out and no `MutationObserver` stands in
+  for the list.
 
 ## How the components fit together
 
@@ -82,8 +83,9 @@ upgrades on its own, and the grid is ordinary CSS on the slot's assigned element
 
 The browser module uses the official custom-element API: `class KtjsFeature : CustomElementAdapter()`
 (which extends `HTMLElement`) plus a `CustomElementReference` companion and `customElements.define`.
-`CustomElementAdapter` lives in `ktjs-dom-kit`, which knows nothing about Docusaurus: it declares
-`connectedCallback()` once under its native name — subclasses just override it. Before defining a tag,
+`CustomElementAdapter` lives in `ktjs-dom-kit`, which knows nothing about Docusaurus: it declares the
+lifecycle hooks once under their native names, and its `connectedCallback` runs the attribute catch-up,
+so a subclass overrides a hook only when it has work of its own there. Before defining a tag,
 `defineIfMissing` calls `stripBridgesFrom`, which deletes the self-recursive bridges Kotlin/JS puts on
 every class in the prototype chain; after that the native spelling works directly (`querySelectorAll`,
 `append`, …), with no `…Super` forwarders (see `AGENTS.md`). The official `CustomElement` interface is

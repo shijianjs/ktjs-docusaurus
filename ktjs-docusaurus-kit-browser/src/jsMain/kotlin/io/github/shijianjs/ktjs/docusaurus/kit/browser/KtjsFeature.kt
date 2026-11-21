@@ -123,7 +123,7 @@ class KtjsFeature : CustomElementAdapter() {
 
     override fun connectedCallback() {
         detailsElement.textContent = textContent?.trim().orEmpty()
-        applyInitialAttributes()
+        super.connectedCallback()
     }
 
     companion object : KtjsFeatureDefaultReference() {

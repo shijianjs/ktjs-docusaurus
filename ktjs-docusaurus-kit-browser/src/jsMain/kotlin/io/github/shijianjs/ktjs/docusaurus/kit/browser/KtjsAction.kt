@@ -123,7 +123,7 @@ class KtjsAction : CustomElementAdapter() {
     override fun connectedCallback() {
         // The label is the element's own text, not an attribute; the rest comes from the delegates.
         labelElement.textContent = textContent?.trim().orEmpty()
-        applyInitialAttributes()
+        super.connectedCallback()
     }
 
     private fun applyKind(kind: ActionKind) {

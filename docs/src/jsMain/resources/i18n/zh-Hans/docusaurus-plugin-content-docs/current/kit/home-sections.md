@@ -47,8 +47,8 @@ class KtjsHero : CustomElementAdapter() {
 - getter 读属性、setter 写属性，所以没有第二份状态要同步：`hero.titleText = "x"` 与
   `hero.setAttribute("title", "x")` 落到同一处，外部写入后 getter 立刻能读到。
 - 值确实变了才回调——不管变化来自属性、`setAttribute` 还是 devtools。写回同样的值不算变化，删除属性算。
-- 在 `connectedCallback()` 里调一次 `applyInitialAttributes()`：标签上原本就有的标记解析不会经过 setter，
-  这是回调第一次得知它们的途径。它是幂等的，元素重新连接不会重绘两遍。
+- 连接时什么都不用写：基类 `connectedCallback` 会调 `applyInitialAttributes()`，因为标签上原本就有的标记
+  解析不会经过 setter，这是回调第一次得知它们的途径。它是幂等的，元素重新连接不会重绘两遍。
 - 编解码器跟着属性类型走：`String`、`Int`、`Double`、`Boolean`（存在性语义，和 `hidden` 一样）是内置的；
   `kind` 用 `enumAttributeCodec(ActionKind.entries)` 演示自定义类型的扩展点。`default = …` 是属性缺失时
   getter 报告的值，**不会**写进标记——除非 `applyInitialAttributes(writeDefaults = true)` 明确要求。
@@ -60,8 +60,8 @@ class KtjsHero : CustomElementAdapter() {
 
 - **不要在构造函数里给元素自己设属性。** 构造完就带属性时 `document.createElement("ktjs-hero")` 会抛
   `NotSupportedError`（解析器和升级路径不会）。hero 的 `display: block` 因此写成 `:host` 规则。
-- 外部写入在微任务里上报——元素用 `MutationObserver` 观察自己，因为规范里的 `observedAttributes` 得在
-  `customElements.define` 时重复列出每个属性，那时委托还没创建。Kotlin 侧的写入是同步上报的。
+- 外部写入同样同步上报——就在那次 `setAttribute` 调用内部。浏览器定义标签时读的 `observedAttributes`
+  由 `ktjs-dom-kit-ksp` 从声明生成，所以不会有属性被漏掉，也不需要用 `MutationObserver` 顶替那份名单。
 
 ## 组件之间如何配合
 
@@ -74,8 +74,9 @@ class KtjsHero : CustomElementAdapter() {
 
 浏览器模块用的是官方自定义元素 API：`class KtjsFeature : CustomElementAdapter()`（它继承 `HTMLElement`），
 外加一个 `CustomElementReference` companion 和 `customElements.define`。`CustomElementAdapter` 在
-`ktjs-dom-kit` 里，它完全不知道 Docusaurus：`connectedCallback()` 只按原生名字声明一次——子类直接
-override 它。定义标签之前，`defineIfMissing` 会调用 `stripBridgesFrom`，把 Kotlin/JS 挂在原型链每层上的
+`ktjs-dom-kit` 里，它完全不知道 Docusaurus：生命周期钩子按原生名字声明一次，`connectedCallback` 自己就做
+属性的兜底，子类只在自己真有活儿时才 override 某个钩子。定义标签之前，`defineIfMissing` 会调用
+`stripBridgesFrom`，把 Kotlin/JS 挂在原型链每层上的
 自递归桥删掉；之后原生写法（`querySelectorAll`、`append`……）直接可用，不需要 `…Super` 转发（见
 `AGENTS.md`）。官方的 `CustomElement` 接口是刻意不实现的：它的 `val connectedCallback` 会编译成
 浏览器永远不会调用的 getter。

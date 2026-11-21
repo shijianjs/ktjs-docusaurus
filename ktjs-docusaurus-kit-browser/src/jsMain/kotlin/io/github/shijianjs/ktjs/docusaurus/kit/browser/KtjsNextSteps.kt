@@ -47,9 +47,5 @@ class KtjsNextSteps : CustomElementAdapter() {
         shadow.appendChild(section.root)
     }
 
-    override fun connectedCallback() {
-        applyInitialAttributes()
-    }
-
     companion object : KtjsNextStepsDefaultReference()
 }

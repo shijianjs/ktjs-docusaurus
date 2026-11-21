@@ -213,17 +213,16 @@ class KtjsHero : CustomElementAdapter() {
     }
 
     override fun connectedCallback() {
-        // Markup attributes never reach a property setter, so this is where the three delegates first
-        // hear about them. Later changes arrive on their own.
-        applyInitialAttributes()
+        // The attributes first: the delegates hear the markup the hero was created with, or nothing.
+        super.connectedCallback()
 
         // Route the declarative children into their slots. Reading `children` keeps React's nodes in
         // place; the browser does the actual distribution through `slot`.
         for (index in 0 until children.length) {
             val child = children.item(index) ?: continue
             when (child.tagName.lowercase()) {
-                HomeMarkup.ACTION -> child.setAttribute("slot", "action")
-                HomeMarkup.BADGE -> child.setAttribute("slot", "badge")
+                KtjsAction.tag -> child.setAttribute("slot", "action")
+                KtjsBadge.tag -> child.setAttribute("slot", "badge")
             }
         }
     }

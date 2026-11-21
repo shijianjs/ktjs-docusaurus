@@ -50,9 +50,5 @@ class KtjsFeatures : CustomElementAdapter() {
         shadow.appendChild(section.root)
     }
 
-    override fun connectedCallback() {
-        applyInitialAttributes()
-    }
-
     companion object : KtjsFeaturesDefaultReference()
 }

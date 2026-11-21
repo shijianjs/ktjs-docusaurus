@@ -70,9 +70,5 @@ class KtjsBadge : CustomElementAdapter() {
         shadow.appendChild(anchor)
     }
 
-    override fun connectedCallback() {
-        applyInitialAttributes()
-    }
-
     companion object : KtjsBadgeDefaultReference()
 }
