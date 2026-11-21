@@ -52,8 +52,8 @@ include(":docs")
 
 
 // Runnable copy of kotlin-wrappers' web-components example (verification only, not published).
-include(":probes-web-components")
-project(":probes-web-components").projectDir = file("probes/web-components")
+//include(":probes-web-components")
+//project(":probes-web-components").projectDir = file("probes/web-components")
 
 
 
