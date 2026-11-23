@@ -42,12 +42,12 @@ kotlin {
         jsMain.dependencies {
             // `js.objects.unsafeJso` / `js.objects.Record` live in kotlin-wrappers' `kotlin-js`
             // module; the old standalone `kotlin-js-plain-objects` artifact stops at Kotlin 2.2.
-            api("org.jetbrains.kotlin-wrappers:kotlin-js:2026.11.1")
+            api("org.jetbrains.kotlin-wrappers:kotlin-js:2026.11.2")
 
             // Client APIs and theme components are React: a site that swizzles a component or writes a
             // page uses the official Kotlin binding instead of a hand-written createElement surface.
             api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.2")
-            api("org.jetbrains.kotlin-wrappers:kotlin-react:2026.11.1-19.3.1")
+            api("org.jetbrains.kotlin-wrappers:kotlin-react:2026.11.2-19.3.1")
             implementation(npm("react", npmVersions.getValue("react")))
             implementation(npm("react-dom", npmVersions.getValue("react-dom")))
 
