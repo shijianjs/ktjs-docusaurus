@@ -172,7 +172,7 @@ duckfn 站点一致。
      shadow root 的 `attachShadowRoot` / `attachStyledShadow(vararg CSSStyleSheet)`、`HTMLElement.inlineStyle`
      （`csstype.Properties` 视图）、`loadjs` 加载器的封装（`dom.loadjs` 包）都在
      [`shijianjs/ktjs-dom-kit`](https://github.com/shijianjs/ktjs-dom-kit)，从 Maven Central 依赖：版本写在
-     `gradle.properties` 的 `ktjs-dom-kit.version`，`mavenLocal` 解析 SNAPSHOT。元素包用 `implementation`
+     `gradle/libs.versions.toml` 的 `ktjs-dom-kit`，`mavenLocal` 解析 SNAPSHOT。元素包用 `implementation`
      依赖它，链接时它的 `.mjs` 与本模块产物一起进 `kotlin/`，再被 webpack 内联进
      `ktjs-docusaurus-kit-browser.js`，所以浏览器侧不需要 import map。它的文档也在自己仓库的站点上
      （<https://shijianjs.github.io/ktjs-dom-kit/>），本站导航栏的 DOM kit 是一个外链。改它的 API 时先改那个

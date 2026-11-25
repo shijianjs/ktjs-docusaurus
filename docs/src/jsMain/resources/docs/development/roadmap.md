@@ -141,4 +141,4 @@ dry run 直接拒绝整批。
 - 7.4 dom-kit 首发 —— **改由它自己的仓库完成**（2026-11-13）：模块搬走后，`release-2` 注册的
   `ktjs-dom-kit` / `ktjs-dom-kit-js` 0.1.0 从 hub 的 `registry/` 删掉（那份归档来自一个已不再包含该模块
   的构建），改从 `shijianjs/ktjs-dom-kit` 的 `release-1` 发同一个坐标与版本；本站用
-  `gradle.properties` 的 `ktjs-dom-kit.version` 跟随。
+  `gradle/libs.versions.toml` 的 `ktjs-dom-kit` 跟随。

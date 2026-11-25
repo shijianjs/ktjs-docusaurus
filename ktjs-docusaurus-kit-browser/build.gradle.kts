@@ -48,13 +48,11 @@ kotlin {
     sourceSets {
         jsMain.dependencies {
             // The custom-element base class, the attribute delegate and the typed stylesheets come from
-            // `ktjs-dom-kit`, which has a repository of its own. The version lives in gradle.properties
-            // like the other cross-project coordinates; a SNAPSHOT there is resolved from `mavenLocal`.
-            implementation(
-                "io.github.shijianjs:ktjs-dom-kit:${providers.gradleProperty("ktjs-dom-kit.version").get()}",
-            )
+            // `ktjs-dom-kit`, which has a repository of its own. Its version lives in the catalog like
+            // every other artifact; a SNAPSHOT there is resolved from `mavenLocal`.
+            implementation(libs.ktjs.dom.kit)
             // Wrapper for <iconify-icon>; it also registers the element and ships the npm package.
-            implementation("io.github.shijianjs:ktjs-iconify-icon:3.0.4-kt.6")
+            implementation(libs.ktjs.iconify.icon)
         }
         jsTest.dependencies {
             implementation(kotlin("test"))
@@ -72,5 +70,5 @@ kotlin {
  * arrives through `mavenLocal` when working across the two repositories.
  */
 dependencies {
-    add("kspJs", "io.github.shijianjs:ktjs-dom-kit-ksp:${providers.gradleProperty("ktjs-dom-kit.version").get()}")
+    add("kspJs", libs.ktjs.dom.kit.processor)
 }

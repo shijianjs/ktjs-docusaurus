@@ -1,0 +1,74 @@
+# The single place where Gradle-side versions live. Build scripts reference these through the
+# generated `libs` accessor (`libs.kotlin.browser`, `libs.plugins.detekt`, `libs.versions.kotlin`),
+# so a version is written down exactly once.
+#
+# Neighbouring files deliberately stay outside this catalog, because they are not "a version of
+# something this build declares": `package.json` (the upstream npm packages this repository wraps;
+# Dependabot reads it and each wrapper module derives its own version from it),
+# `wrapper-revisions.properties` (the per-module `-kt.N` revision) and `gradle.properties`
+# (only this build's Gradle/Kotlin user settings).
+
+[versions]
+# Kotlin toolchain and the Gradle plugins that build this repository.
+kotlin = "2.4.21"
+ksp = "2.3.14"
+dokka = "2.3.0"
+detekt = "2.0.0-alpha.6"
+maven-publish = "0.37.0"
+
+# JetBrains Kotlin/JS type wrappers.
+kotlin-wrappers = "2026.11.2"
+
+# The React wrapper carries the upstream npm version after the wrappers version:
+# `{kotlin-wrappers}-{react}`.
+react = "2026.11.2-19.3.1"
+
+# The Playwright end-to-end suite of the docs site (JUnit 5). Its version has to match the npm
+# Playwright bundled with the Kotlin Gradle Plugin, so both browser suites share one download.
+playwright = "1.65.0"
+junit = "6.1.3"
+junit-pioneer = "2.3.0"
+
+# `ktjs-dom-kit` is the custom-element kit the site's elements are built on. A working tree of that
+# repository publishes a SNAPSHOT to `mavenLocal`; the released number comes from Central.
+ktjs-dom-kit = "0.1.0-SNAPSHOT"
+# The wrapper for `<iconify-icon>`, released rather than a SNAPSHOT: the kit-browser bundle only
+# needs the element, not a moving API.
+ktjs-iconify-icon = "3.0.4-kt.6"
+
+# npm versions Gradle has to know about (the npm dependency list itself is `package.json`): the npm
+# workspace shares a single webpack.
+webpack = "5.108.1"
+
+[libraries]
+# The public surface exposes kotlin-browser types, so modules declare it as `api`.
+kotlin-browser = { module = "org.jetbrains.kotlin-wrappers:kotlin-browser", version.ref = "kotlin-wrappers" }
+kotlin-js = { module = "org.jetbrains.kotlin-wrappers:kotlin-js", version.ref = "kotlin-wrappers" }
+
+# The wrapper maps react itself, so the klib and the npm package travel together.
+kotlin-react = { module = "org.jetbrains.kotlin-wrappers:kotlin-react", version.ref = "react" }
+# Only the web-components probe uses it (that module is not part of the build today).
+kotlin-csstype = { module = "org.jetbrains.kotlin-wrappers:kotlin-csstype", version.ref = "kotlin-wrappers" }
+
+playwright = { module = "com.microsoft.playwright:playwright", version.ref = "playwright" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "junit-pioneer" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
+
+ktjs-dom-kit = { module = "io.github.shijianjs:ktjs-dom-kit", version.ref = "ktjs-dom-kit" }
+# The element processor shares the kit's version; `processor` rather than `ksp` so the accessor
+# cannot be confused with the KSP plugin extension.
+ktjs-dom-kit-processor = { module = "io.github.shijianjs:ktjs-dom-kit-ksp", version.ref = "ktjs-dom-kit" }
+ktjs-iconify-icon = { module = "io.github.shijianjs:ktjs-iconify-icon", version.ref = "ktjs-iconify-icon" }
+
+[plugins]
+# The Kotlin Gradle plugin is declared once, in the root build (`apply false`). Modules apply
+# `kotlin("multiplatform")` by id without a version, so no alias is defined for it here.
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+# Same for KSP: applied by id in the modules, declared once in the root build.
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
+# The docs plugin is not aliased: it comes from the included build `ktjs-docusaurus-gradle-plugin`,
+# which supplies its own version, and a catalog alias would demand one here.

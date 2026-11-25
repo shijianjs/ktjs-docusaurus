@@ -43,7 +43,7 @@ kotlin {
 
             // Uncomment for packages whose API exposes DOM types. Public declarations must then use
             // kotlin-browser's web.* types, never org.w3c.dom.* or kotlinx.browser.*.
-            // api("org.jetbrains.kotlin-wrappers:kotlin-browser:2026.11.2")
+            // api(libs.kotlin.browser)
         }
         jsTest.dependencies {
             implementation(kotlin("test"))
