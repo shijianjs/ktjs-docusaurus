@@ -11,7 +11,7 @@ import io.github.shijianjs.ktjs.dom.css.dsl.pseudos
 import io.github.shijianjs.ktjs.dom.css.cssSheet
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
 import web.aria.AriaHidden
-import web.aria.`true` as ariaTrue
+import web.aria.`true`
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.StringOrIconifyIcon
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
@@ -99,7 +99,7 @@ class KtjsStep : CustomElementAdapter() {
                 color = subtleText
             }
             icon = StringOrIconifyIcon("lucide:arrow-right")
-            ariaHidden = AriaHidden.ariaTrue
+            ariaHidden = AriaHidden.`true`
         }
         val body = HtmlTagName.span.createElement {
             inlineStyle.apply {

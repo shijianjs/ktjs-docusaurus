@@ -13,8 +13,8 @@ import js.globals.globalThis
 import js.reflect.Reflect
 import kotlin.js.JsName
 import web.aria.AriaExpanded
-import web.aria.`false` as ariaCollapsed
-import web.aria.`true` as ariaExpanded
+import web.aria.`false`
+import web.aria.`true`
 import web.cssom.AlignItems
 import web.cssom.Border
 import web.cssom.BoxShadow
@@ -196,7 +196,7 @@ class KtjsTocToggle : CustomElementAdapter() {
         button.title = label
         // `aria-expanded` is a union of "true" / "false": the typed property takes the kotlin-browser
         // constant, not a hand-written string.
-        button.ariaExpanded = if (collapsed) AriaExpanded.ariaCollapsed else AriaExpanded.ariaExpanded
+        button.ariaExpanded = if (collapsed) AriaExpanded.`false` else AriaExpanded.`true`
 
         val toc = list ?: return
         val id = toc.getAttribute("id").takeUnless { it.isNullOrEmpty() } ?: TOC_ID.also {
