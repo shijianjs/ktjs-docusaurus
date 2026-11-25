@@ -9,6 +9,8 @@ import io.github.shijianjs.ktjs.dom.css.dsl.invoke
 import io.github.shijianjs.ktjs.dom.css.dsl.pseudos
 import io.github.shijianjs.ktjs.dom.css.cssSheet
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
+import js.globals.globalThis
+import js.reflect.Reflect
 import kotlin.js.JsName
 import web.aria.AriaExpanded
 import web.aria.`false` as ariaCollapsed
@@ -52,6 +54,8 @@ import web.html.HTMLButtonElement
 import web.html.HTMLElement
 import web.html.HtmlTagName
 import web.html.button
+import web.storage.Storage
+import web.storage.localStorage
 
 /**
  * `<ktjs-toc-toggle hide-label="…" show-label="…" storage-key="…">`
@@ -303,14 +307,12 @@ class KtjsTocToggle : CustomElementAdapter() {
         }
     }
 
-/** The Web Storage surface the toggle uses. */
-private external interface WebStorage {
-    fun getItem(key: String): String?
-
-    fun setItem(key: String, value: String)
-}
-
-/** `localStorage`, or `null` where the environment has no Web Storage. */
-@Suppress("UNCHECKED_CAST")
-private fun localStorageOrNull(): WebStorage? =
-    js("typeof localStorage === 'undefined' ? null : localStorage") as WebStorage?
+/**
+ * `localStorage`, or `null` where the environment has no Web Storage.
+ *
+ * The site is also built and prerendered in Node, where the global does not exist and touching it
+ * throws `ReferenceError`; the presence check has to happen before the official `web.storage` value
+ * is read.
+ */
+private fun localStorageOrNull(): Storage? =
+    if (Reflect.has(globalThis, "localStorage")) localStorage else null
