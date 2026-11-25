@@ -10,7 +10,9 @@ import io.github.shijianjs.ktjs.dom.css.cssSheet
 import io.github.shijianjs.ktjs.dom.element.createElement
 import io.github.shijianjs.ktjs.dom.css.dsl.invoke
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
+import io.github.shijianjs.ktjs.dom.attribute.ariaHiddenAttr
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
+import io.github.shijianjs.ktjs.iconify.StringOrIconifyIcon
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import kotlin.js.JsName
 import web.cssom.AlignItems
@@ -61,7 +63,7 @@ class KtjsFeature : CustomElementAdapter() {
     /** `icon`: an Iconify name for the chip above the title. */
     @JsName("iconName")
     @AttributeName("icon")
-    var iconName: String by attr { change -> iconElement.setAttribute("icon", change.newValue) }
+    var iconName: String by attr { change -> iconElement.icon = StringOrIconifyIcon(change.newValue) }
 
     /** `title`: the card's heading; named `titleText` because `HTMLElement.title` is the tooltip. */
     @JsName("titleText")
@@ -73,7 +75,7 @@ class KtjsFeature : CustomElementAdapter() {
 
         iconElement = IconifyIconTagName.iconifyIcon.createElement {
             inlineStyle.fontSize = 1.375.rem
-            setAttribute("aria-hidden", "true")
+            ariaHiddenAttr.value = true
         }
         headingElement = HtmlTagName.h3.createElement {
             inlineStyle.apply {

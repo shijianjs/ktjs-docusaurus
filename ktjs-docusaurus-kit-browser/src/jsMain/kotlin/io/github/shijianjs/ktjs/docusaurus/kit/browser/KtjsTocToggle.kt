@@ -194,7 +194,7 @@ class KtjsTocToggle : CustomElementAdapter() {
         val label = if (collapsed) showLabel else hideLabel
         button.ariaLabel = label
         button.title = label
-        // `aria-expanded` is a union of "true" / "false": the typed attribute takes the kotlin-browser
+        // `aria-expanded` is a union of "true" / "false": the typed property takes the kotlin-browser
         // constant, not a hand-written string.
         button.ariaExpanded = if (collapsed) AriaExpanded.ariaCollapsed else AriaExpanded.ariaExpanded
 
@@ -202,6 +202,8 @@ class KtjsTocToggle : CustomElementAdapter() {
         val id = toc.getAttribute("id").takeUnless { it.isNullOrEmpty() } ?: TOC_ID.also {
             toc.id = ElementId(it)
         }
+        // `aria-controls` has no string property in kotlin-browser (only `ariaControlsElements`),
+        // so the relationship id is the one place here that still has to be written as an attribute.
         button.setAttribute("aria-controls", id)
     }
 

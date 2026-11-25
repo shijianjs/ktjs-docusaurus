@@ -221,8 +221,8 @@ class KtjsHero : CustomElementAdapter() {
         for (index in 0 until children.length) {
             val child = children.item(index) ?: continue
             when (child.tagName.lowercase()) {
-                KTJS_ACTION_TAG -> child.setAttribute("slot", "action")
-                KTJS_BADGE_TAG -> child.setAttribute("slot", "badge")
+                KTJS_ACTION_TAG -> child.slot = "action"
+                KTJS_BADGE_TAG -> child.slot = "badge"
             }
         }
     }

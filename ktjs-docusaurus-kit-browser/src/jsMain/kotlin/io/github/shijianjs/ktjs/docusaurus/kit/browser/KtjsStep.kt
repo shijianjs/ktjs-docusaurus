@@ -10,7 +10,9 @@ import io.github.shijianjs.ktjs.dom.css.dsl.pseudo
 import io.github.shijianjs.ktjs.dom.css.dsl.pseudos
 import io.github.shijianjs.ktjs.dom.css.cssSheet
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
+import io.github.shijianjs.ktjs.dom.attribute.ariaHiddenAttr
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
+import io.github.shijianjs.ktjs.iconify.StringOrIconifyIcon
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
 import kotlin.js.JsName
 import web.cssom.AlignItems
@@ -95,8 +97,8 @@ class KtjsStep : CustomElementAdapter() {
                 fontSize = 1.25.rem
                 color = subtleText
             }
-            setAttribute("icon", "lucide:arrow-right")
-            setAttribute("aria-hidden", "true")
+            icon = StringOrIconifyIcon("lucide:arrow-right")
+            ariaHiddenAttr.value = true
         }
         val body = HtmlTagName.span.createElement {
             inlineStyle.apply {
