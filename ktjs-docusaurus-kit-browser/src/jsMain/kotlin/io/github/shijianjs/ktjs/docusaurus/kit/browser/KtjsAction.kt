@@ -10,7 +10,8 @@ import io.github.shijianjs.ktjs.dom.css.dsl.pseudo
 import io.github.shijianjs.ktjs.dom.css.dsl.pseudos
 import io.github.shijianjs.ktjs.dom.css.cssSheet
 import io.github.shijianjs.ktjs.dom.element.inlineStyle
-import io.github.shijianjs.ktjs.dom.attribute.ariaHiddenAttr
+import web.aria.AriaHidden
+import web.aria.`true` as ariaTrue
 import io.github.shijianjs.ktjs.iconify.IconifyIconElement
 import io.github.shijianjs.ktjs.iconify.StringOrIconifyIcon
 import io.github.shijianjs.ktjs.iconify.IconifyIconTagName
@@ -110,7 +111,7 @@ class KtjsAction : CustomElementAdapter() {
         labelElement = HtmlTagName.span.createElement()
         iconElement = IconifyIconTagName.iconifyIcon.createElement {
             inlineStyle.fontSize = 1.125.rem
-            ariaHiddenAttr.value = true
+            ariaHidden = AriaHidden.ariaTrue
         }
         anchor = HtmlTagName.a.createElement {
             inlineStyle.apply {

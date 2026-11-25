@@ -51,9 +51,6 @@ kotlin {
             // `ktjs-dom-kit`, which has a repository of its own. Its version lives in the catalog like
             // every other artifact; a SNAPSHOT there is resolved from `mavenLocal`.
             implementation(libs.ktjs.dom.kit)
-            // ARIA is text, not presence: `ariaHiddenAttr` spells `"true"` / `"false"` instead of
-            // making a bare attribute mean "on".
-            implementation(libs.ktjs.wrapper.kit)
             // Wrapper for <iconify-icon>; it also registers the element and ships the npm package.
             implementation(libs.ktjs.iconify.icon)
         }

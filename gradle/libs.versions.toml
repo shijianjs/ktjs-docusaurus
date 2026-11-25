@@ -32,9 +32,6 @@ junit-pioneer = "2.3.0"
 # `ktjs-dom-kit` is the custom-element kit the site's elements are built on. A working tree of that
 # repository publishes a SNAPSHOT to `mavenLocal`; the released number comes from Central.
 ktjs-dom-kit = "0.1.0-SNAPSHOT"
-# The attribute-only half of that repository: the typed `Attribute` accessors the elements use for
-# ARIA flags (`ariaHiddenAttr`), without pulling the kit's npm-backed authoring side.
-ktjs-wrapper-kit = "0.1.0-SNAPSHOT"
 # The wrapper for `<iconify-icon>`, released rather than a SNAPSHOT: the kit-browser bundle only
 # needs the element, not a moving API.
 ktjs-iconify-icon = "3.0.4-kt.6"
@@ -59,7 +56,6 @@ junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "jun
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 
 ktjs-dom-kit = { module = "io.github.shijianjs:ktjs-dom-kit", version.ref = "ktjs-dom-kit" }
-ktjs-wrapper-kit = { module = "io.github.shijianjs:ktjs-wrapper-kit", version.ref = "ktjs-wrapper-kit" }
 # The element processor shares the kit's version; `processor` rather than `ksp` so the accessor
 # cannot be confused with the KSP plugin extension.
 ktjs-dom-kit-processor = { module = "io.github.shijianjs:ktjs-dom-kit-ksp", version.ref = "ktjs-dom-kit" }
